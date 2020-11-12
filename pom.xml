@@ -6,7 +6,7 @@
 
     <groupId>com.gitee.search</groupId>
     <artifactId>gitee-search</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1-dev</version>
     <packaging>pom</packaging>
 
     <description>Gitee Search Engine</description>

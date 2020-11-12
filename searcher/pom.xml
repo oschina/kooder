@@ -10,4 +10,12 @@
 
     <description> Gitee Search - searcher </description>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.gitee.search</groupId>
+            <artifactId>gitee-search-core</artifactId>
+            <version>0.1-dev</version>
+        </dependency>
+    </dependencies>
+
 </project>
