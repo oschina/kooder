@@ -15,12 +15,19 @@ import java.io.IOException;
  */
 public class JcsegAnalyzer extends Analyzer {
 
-    private final static SegmenterConfig config = new SegmenterConfig(true);
-    private final static ADictionary dic = DictionaryFactory.createDefaultDictionary(config, false,true);
+    private SegmenterConfig config;
+    private SegmenterConfig configForSearch;
+    private ADictionary dic;
 
     public final static JcsegAnalyzer INSTANCE = new JcsegAnalyzer(); //Singleton
 
-    private JcsegAnalyzer(){}
+    private JcsegAnalyzer(){
+        this.config = new SegmenterConfig(true);
+        this.configForSearch = new SegmenterConfig(true);
+        this.configForSearch.setAppendCJKSyn(false);
+        this.configForSearch.setClearStopwords(true);
+        this.dic = DictionaryFactory.createDefaultDictionary(config, false,true);
+    }
 
     protected TokenStreamComponents createComponents(String fieldName) {
         try {
@@ -30,5 +37,17 @@ public class JcsegAnalyzer extends Analyzer {
             var3.printStackTrace();
             return null;
         }
+    }
+
+    public SegmenterConfig getSegmenterConfig() {
+        return this.config;
+    }
+
+    public SegmenterConfig getSegmenterConfigForSearch() {
+        return this.configForSearch;
+    }
+
+    public ADictionary getDic() {
+        return this.dic;
     }
 }
