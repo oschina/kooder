@@ -53,9 +53,8 @@
 
     <modules>
         <module>core</module>
-        <module>engine</module>
-        <module>runner</module>
-        <module>searcher</module>
+        <module>gateway</module>
+        <module>indexer</module>
     </modules>
 
     <developers>

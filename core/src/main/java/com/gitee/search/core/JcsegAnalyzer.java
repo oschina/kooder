@@ -11,6 +11,7 @@ import java.io.IOException;
 
 /**
  * Using jcseg analyzer
+ * @author lionsoul<chenxin619315@gmail.com>
  * @author Winter Lau (javayou@gmail.com)
  */
 public class JcsegAnalyzer extends Analyzer {

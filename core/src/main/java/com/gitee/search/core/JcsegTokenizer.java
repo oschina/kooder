@@ -14,7 +14,8 @@ import java.io.IOException;
 
 /**
  * Using jcseg tokenizer
- * @author Winter Lau (javayou@gmail.com)
+ * @author lionsoul<chenxin619315@gmail.com>
+ * @author Winter Lau<javayou@gmail.com>
  */
 public class JcsegTokenizer extends Tokenizer {
 

@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Index Manager to add/update/delete object in indexes path
@@ -27,12 +28,12 @@ public class IndexManager {
     private final static Logger log = LoggerFactory.getLogger(IndexManager.class);
 
     private Path indexPath;
-    private IndexWriterConfig config;
+    private IndexWriterConfig writerConfig;
 
     private IndexManager(Path idxPath) {
         this.indexPath = idxPath;
-        this.config = new IndexWriterConfig(JcsegAnalyzer.INSTANCE);
-        config.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        this.writerConfig = new IndexWriterConfig(JcsegAnalyzer.INSTANCE);
+        writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
     }
 
     /**
@@ -51,13 +52,34 @@ public class IndexManager {
     }
 
     /**
+     * add objects to indexes repository
+     * @param objs
+     * @throws IOException
+     */
+    public void add(List<SearchObject> objs) throws IOException {
+        if (objs == null || objs.size() == 0)
+            return ;
+        FSDirectory dir = FSDirectory.open(this.indexPath);
+        IndexWriter writer = new IndexWriter(dir, writerConfig);
+        try {
+            writer.addDocuments(objs.stream().map(o -> SearchHelper.obj2doc(o)).collect(Collectors.toList()));
+            writer.commit();
+        } finally {
+            close(writer);
+            close(dir);
+        }
+    }
+
+    /**
      * Update objects
      * @param objs
      * @throws IOException
      */
     public void update(List<SearchObject> objs) throws IOException {
+        if (objs == null || objs.size() == 0)
+            return ;
         FSDirectory dir = FSDirectory.open(this.indexPath);
-        IndexWriter writer = new IndexWriter(dir, config);
+        IndexWriter writer = new IndexWriter(dir, writerConfig);
         try {
             for (SearchObject obj : objs) {
                 Document doc = SearchHelper.obj2doc(obj);
@@ -76,8 +98,10 @@ public class IndexManager {
      * @throws IOException
      */
     public void delete(List<Long> ids) throws IOException {
+        if (ids == null || ids.size() == 0)
+            return ;
         FSDirectory dir = FSDirectory.open(this.indexPath);
-        IndexWriter writer = new IndexWriter(dir, config);
+        IndexWriter writer = new IndexWriter(dir, writerConfig);
         try {
             int doc_count = 0;
             Term[] terms = ids.stream().map(id -> new Term(SearchObject.FIELD_NAME_ID, String.valueOf(id))).toArray(Term[]::new);
@@ -103,7 +127,7 @@ public class IndexManager {
      */
     public void optimize() throws IOException {
         FSDirectory dir = FSDirectory.open(this.indexPath);
-        IndexWriter writer = new IndexWriter(dir, config);
+        IndexWriter writer = new IndexWriter(dir, writerConfig);
         try {
             writer.forceMerge(1);
             writer.commit();
@@ -113,6 +137,10 @@ public class IndexManager {
         }
     }
 
+    /**
+     * release resource
+     * @param obj
+     */
     private static void close(Closeable obj)  {
         if(obj != null) {
             try {

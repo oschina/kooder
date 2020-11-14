@@ -6,15 +6,13 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.highlight.*;
+import org.lionsoul.jcseg.ISegment;
 import org.lionsoul.jcseg.IWord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.lionsoul.jcseg.segmenter.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -69,7 +67,11 @@ public class SearchHelper {
         List<String> keys = new ArrayList<String>();
         if (StringUtils.isNotBlank(sentence)) {
             StringReader reader = new StringReader(sentence);
-            ComplexSeg ikseg = new ComplexSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
+            ISegment seg = ISegment.COMPLEX.factory.create(
+                    JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(),
+                    JcsegAnalyzer.INSTANCE.getDic()
+            );
+            //ComplexSeg ikseg = new ComplexSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
             //NLPSeg ikseg = new NLPSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
             //DelimiterSeg ikseg = new DelimiterSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
             //MostSeg ikseg = new MostSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
@@ -77,23 +79,16 @@ public class SearchHelper {
             //NGramSeg ikseg = new NGramSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
             //DetectSeg ikseg = new DetectSeg(JcsegAnalyzer.INSTANCE.getSegmenterConfigForSearch(), JcsegAnalyzer.INSTANCE.getDic());
             try {
-                ikseg.reset(reader);
-                do {
-                    IWord word = ikseg.next();
-                    if (word == null)
-                        break;
-                    String term = word.getValue();
-                    //if(term.length() == 1)
-                    //    continue;
-                    //if(StringUtils.isNumeric(StringUtils.remove(term,'.')))
-                    //    continue;
-                    keys.add(term);
-                } while (true);
+                IWord word = null;
+                seg.reset(reader);
+                while((word = seg.next()) != null){
+                    keys.add(word.getValue());
+                }
             } catch (IOException e) {
                 log.error("Unable to split keywords", e);
             }
         }
-
+        //去重
         return keys.stream().distinct().collect(Collectors.toList());
     }
 
