@@ -63,6 +63,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         ctx.flush();
     }
 
+    /**
+     * 提取 HTTP 请求中的 Body 内容
+     * @param httpContent
+     * @return
+     */
     private StringBuilder formatBody(HttpContent httpContent) {
         StringBuilder responseData = new StringBuilder();
         ByteBuf content = httpContent.content();

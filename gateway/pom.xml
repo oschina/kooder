@@ -25,6 +25,12 @@
             <version>4.1.54.Final</version>
         </dependency>
 
+        <dependency>
+            <groupId>commons-daemon</groupId>
+            <artifactId>commons-daemon</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
     </dependencies>
 
 </project>

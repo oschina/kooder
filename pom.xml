@@ -12,13 +12,6 @@
     <description>Gitee Search Engine</description>
     <url>https://gitee.com/oschina/gitee-search</url>
 
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -41,7 +34,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -60,7 +53,7 @@
     <developers>
         <developer>
             <name>Winter Lau</name>
-            <email>liudong@oschina.cn</email>
+            <email>javayou@gmail.com</email>
         </developer>
     </developers>
 
