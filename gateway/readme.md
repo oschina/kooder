@@ -2,6 +2,8 @@
 
 `Gateway` 是 Gitee Search 对外提供服务的接口(HTTP)，通过该接口可以对索引进行管理，以及执行常规的搜索操作。
 
+#### 接口说明
+
 **索引管理接口列表**
 
 * `/index/add`  添加索引
@@ -22,3 +24,9 @@
 
 * `/metrics/keywords`  获取热门关键字
 * `/metrics/storage` Gitee Search 的存储信息
+
+
+#### 源码包说明
+
+`com.gitee.search.action` 处理接口业务逻辑 
+`com.gitee.http.server` HTTP服务  
