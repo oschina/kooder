@@ -21,7 +21,7 @@ public class GatewayConfig {
         try {
             config = Configuration.init(CONFIG_NAME);
         } catch (IOException e) {
-            log.error("Failed to loading gateway.properties", e);
+            log.error("Failed to loading " + CONFIG_NAME, e);
         }
     }
 
