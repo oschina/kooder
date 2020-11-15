@@ -1,4 +1,4 @@
-package com.gitee.http.action;
+package com.gitee.search.action;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

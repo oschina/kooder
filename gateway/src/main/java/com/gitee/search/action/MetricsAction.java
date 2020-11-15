@@ -1,4 +1,4 @@
-package com.gitee.http.action;
+package com.gitee.search.action;
 
 /**
  * 系统管理接口
