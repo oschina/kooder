@@ -7,6 +7,10 @@ Gitee Search 是 Gitee 的搜索引擎服务模块，为 Gitee 提供仓库、Is
 * `gateway` 用来接收来自 HTTP 的索引和搜索的请求
 * `indexer` 构建、更新和删除索引的服务
 
+#### 数据流图
+
+![Gitee Search Flow](docs/gsearch-flow.png)
+
 #### 使用方法
 
 1. 构建

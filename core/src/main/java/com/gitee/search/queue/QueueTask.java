@@ -1,41 +1,76 @@
 package com.gitee.search.queue;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.List;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * 队列中的任务
+ *
+ * {
+ *     ”id“: "2342336",
+ *     ”type“: "repo",
+ *     "action": "add",
+ *     "body": ....
+ * }
+ *
  * @author Winter Lau<javayou@gmail.com>
  */
 public class QueueTask {
 
-    public final static byte TYPE_REPOSITORY    = 0x01; //仓库
-    public final static byte TYPE_ISSUE         = 0x02;
-    public final static byte TYPE_PR            = 0x03;
-    public final static byte TYPE_COMMIT        = 0x04;
-    public final static byte TYPE_WIKI          = 0x05;
-    public final static byte TYPE_CODE          = 0x06;
-    public final static byte TYPE_USER          = 0x07;
+    private final static JsonFactory jackson = new JsonFactory();
 
-    public final static byte OPT_ADD            = 0x01; //添加
-    public final static byte OPT_UPDATE         = 0x02; //修改
-    public final static byte OPT_DELETE         = 0x03; //删除
+    public final static String TYPE_REPOSITORY    = "repo"; //仓库
+    public final static String TYPE_ISSUE         = "issue";
+    public final static String TYPE_PR            = "pr";
+    public final static String TYPE_COMMIT        = "commit";
+    public final static String TYPE_WIKI          = "wiki";
+    public final static String TYPE_CODE          = "code";
+    public final static String TYPE_USER          = "user";
 
-    private byte type;
-    private byte opt;
-    private String body;
+    private final static List<String> types = Arrays.asList(
+            TYPE_REPOSITORY,
+            TYPE_ISSUE,
+            TYPE_PR,
+            TYPE_COMMIT,
+            TYPE_WIKI,
+            TYPE_CODE,
+            TYPE_USER
+    );
 
-    public byte getType() {
+    public final static String ACTION_ADD            = "add"; //添加
+    public final static String ACTION_UPDATE         = "update"; //修改
+    public final static String ACTION_DELETE         = "delete"; //删除
+
+    private String type;    //对象类型
+    private String action;  //动作（添加、删除、修改）
+    private String body;    //操作详情
+
+    public String getType() {
         return type;
     }
 
-    public void setType(byte type) {
+    public void setType(String type) {
         this.type = type;
     }
 
-    public byte getOpt() {
-        return opt;
+    public final static boolean isAvailType(String type) {
+        return types.contains(type.toLowerCase());
     }
 
-    public void setOpt(byte opt) {
-        this.opt = opt;
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
 
     public String getBody() {
@@ -47,11 +82,27 @@ public class QueueTask {
     }
 
     /**
-     * TODO 任务转 JSON
+     * 合并 JSON
      * @return
+     * @exception
      */
     public String json() {
-        return "JSON";
+        StringWriter str = new StringWriter();
+        try {
+            JsonGenerator json = jackson.createGenerator(str);
+            json.writeStartObject();
+            //json.useDefaultPrettyPrinter(); // enable indentation just to make debug/t
+            json.writeStringField("type", this.type);
+            json.writeStringField("action", this.action);
+            json.writeFieldName("body");
+            json.writeRaw(":");
+            json.writeRaw(body);
+            json.writeEndObject();
+            json.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return str.toString();
     }
 
     /**
@@ -60,11 +111,29 @@ public class QueueTask {
      * @return
      */
     public static QueueTask parse(String json) {
-        QueueTask task = new QueueTask();
-        return task;
+        try {
+            QueueTask task = new QueueTask();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(json);
+            task.setType(node.get("type").textValue());
+            task.setAction(node.get("action").textValue());
+            task.setBody(node.get("body").toString());
+            return task;
+        } catch (JsonParseException e) {
+        } catch (IOException e) {
+        }
+        return null;
     }
 
     public static void main(String[] args) {
+        QueueTask task = new QueueTask();
+        task.setType("repo");
+        task.setAction("add");
+        task.setBody("{\"name\":\"Winter Lau\"}");
+        System.out.println(task.json());
+
+        QueueTask t = QueueTask.parse(task.json());
+        System.out.printf("type:%s,action:%s,body:%s\n", t.type, t.action, t.body);
     }
 
 }

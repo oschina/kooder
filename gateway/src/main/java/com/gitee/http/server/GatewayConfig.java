@@ -37,6 +37,6 @@ public class GatewayConfig {
     }
 
     public static int getMaxContentLength() {
-        return config.getIntProperty("http.maxContentLength", 524288);
+        return config.getIntProperty("http.maxContentLength", 512 * 1024);
     }
 }

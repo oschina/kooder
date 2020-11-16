@@ -5,6 +5,7 @@ import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import com.gitee.search.action.ActionException;
 import com.gitee.search.action.ActionExecutor;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -44,10 +45,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     StringBuilder resp = ActionExecutor.execute(uri_decoder.path(), uri_decoder.parameters(), formatBody(trailer));
                     responseData.append(resp);
                     writeResponse(ctx, trailer, responseData);
-                } catch (ClassNotFoundException | NoSuchMethodException e) {
-                    writeErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
-                } catch (IllegalAccessException e) {
-                    writeErrorResponse(ctx, HttpResponseStatus.FORBIDDEN);
+                } catch (ActionException e) {
+                    writeErrorResponse(ctx, e.getErrorCode());
                 } catch (Exception e) {
                     log.error("Failed to call action with '" + uri_decoder.path() + "'", e);
                     writeErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);

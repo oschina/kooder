@@ -15,7 +15,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder repositories(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder repositories(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -25,7 +25,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder codes(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder codes(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -35,7 +35,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder issues(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder issues(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -45,7 +45,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder pullrequests(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder pullrequests(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -55,7 +55,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder wiki(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder wiki(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -65,7 +65,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder commits(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder commits(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -75,7 +75,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder users(Map<String, List<String>> params, StringBuilder body) {
+    public static StringBuilder users(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 

@@ -39,6 +39,16 @@ public class ServerDaemon implements Daemon {
         this.port = GatewayConfig.getPort();
     }
 
+    /**
+     * 命令行启动服务
+     * @param args
+     */
+    public static void main(String[] args) {
+        ServerDaemon daemon = new ServerDaemon();
+        daemon.init(null);
+        daemon.start();
+    }
+
     @Override
     public void init(DaemonContext dc) {
         this.server.group(bossGroup, workerGroup)
@@ -60,8 +70,8 @@ public class ServerDaemon implements Daemon {
     public void start() {
         try {
             ChannelFuture f = (bind!=null)?server.bind(bind,port):server.bind(port).sync();
-            f.channel().closeFuture().sync();
             log.info("Gitee Search Gateway READY !");
+            f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             log.error("Gateway interrupted by controller.", e);
         }
@@ -75,6 +85,7 @@ public class ServerDaemon implements Daemon {
 
     @Override
     public void destroy() {
+        log.info("Gitee Search Gateway exit.");
     }
 
 }

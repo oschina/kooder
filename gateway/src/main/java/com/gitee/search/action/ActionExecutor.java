@@ -1,5 +1,7 @@
 package com.gitee.search.action;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -19,8 +21,7 @@ public class ActionExecutor {
      * @param body
      * @return
      */
-    public final static StringBuilder execute(String path, Map<String, List<String>> params, StringBuilder body)
-            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public final static StringBuilder execute(String path, Map<String, List<String>> params, StringBuilder body) throws ActionException {
 
         String className = null ,methodName = null;
 
@@ -39,13 +40,23 @@ public class ActionExecutor {
                 methodName = paths[1];
         }
 
-        className = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
-        String fullclassName = ActionExecutor.class.getPackage().getName() + "." + className;
-
-        Class actonClass = Class.forName(fullclassName);
-        Method actionMethod = actonClass.getDeclaredMethod(methodName, Map.class, StringBuilder.class);
-
-        return (StringBuilder)actionMethod.invoke(actonClass, params, body);
+        try {
+            className = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
+            String fullclassName = ActionExecutor.class.getPackage().getName() + "." + className;
+            Class actonClass = Class.forName(fullclassName);
+            Method actionMethod = actonClass.getDeclaredMethod(methodName, Map.class, StringBuilder.class);
+            return (StringBuilder) actionMethod.invoke(actonClass, params, body);
+        } catch (InvocationTargetException e) {
+            if(e.getCause() instanceof ActionException)
+                throw (ActionException)e.getCause();
+            throw new ActionException(HttpResponseStatus.INTERNAL_SERVER_ERROR, null, e.getCause());
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            throw new ActionException(HttpResponseStatus.NOT_FOUND, path);
+        } catch (IllegalAccessException e) {
+            throw new ActionException(HttpResponseStatus.FORBIDDEN, path);
+        } catch(Throwable t) {
+            throw new ActionException(HttpResponseStatus.INTERNAL_SERVER_ERROR, null, t);
+        }
     }
 
     private static String[] parsePath(String uri) {
