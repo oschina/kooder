@@ -10,6 +10,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 队列中的任务
@@ -18,12 +20,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *     ”id“: "2342336",
  *     ”type“: "repo",
  *     "action": "add",
- *     "body": ....
+ *     "body": {}
  * }
  *
  * @author Winter Lau<javayou@gmail.com>
  */
 public class QueueTask {
+
+    private final static Logger log = LoggerFactory.getLogger(QueueTask.class);
 
     private final static JsonFactory jackson = new JsonFactory();
 
@@ -100,7 +104,7 @@ public class QueueTask {
             json.writeEndObject();
             json.close();
         } catch(IOException e) {
-            e.printStackTrace();
+            log.error("Failed to generate json", e);
         }
         return str.toString();
     }
@@ -120,7 +124,9 @@ public class QueueTask {
             task.setBody(node.get("body").toString());
             return task;
         } catch (JsonParseException e) {
+            log.error("Failed to parse json:\n"+json, e);
         } catch (IOException e) {
+            log.error("Failed to parse json:\n"+json, e);
         }
         return null;
     }

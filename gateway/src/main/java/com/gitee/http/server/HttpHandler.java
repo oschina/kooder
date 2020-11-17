@@ -43,7 +43,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 QueryStringDecoder uri_decoder = new QueryStringDecoder(request.uri());
                 try {
                     StringBuilder resp = ActionExecutor.execute(uri_decoder.path(), uri_decoder.parameters(), formatBody(trailer));
-                    responseData.append(resp);
+                    if(resp != null && resp.length() > 0)
+                        responseData.append(resp);
                     writeResponse(ctx, trailer, responseData);
                 } catch (ActionException e) {
                     writeErrorResponse(ctx, e.getErrorCode());
