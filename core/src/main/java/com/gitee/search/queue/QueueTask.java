@@ -15,14 +15,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 队列中的任务
- *
- * {
- *     ”id“: "2342336",
- *     ”type“: "repo",
- *     "action": "add",
- *     "body": {}
- * }
- *
  * @author Winter Lau<javayou@gmail.com>
  */
 public class QueueTask {
@@ -92,8 +84,9 @@ public class QueueTask {
      */
     public String json() {
         StringWriter str = new StringWriter();
+        JsonGenerator json = null;
         try {
-            JsonGenerator json = jackson.createGenerator(str);
+            json = jackson.createGenerator(str);
             json.writeStartObject();
             //json.useDefaultPrettyPrinter(); // enable indentation just to make debug/t
             json.writeStringField("type", this.type);
@@ -102,14 +95,18 @@ public class QueueTask {
             json.writeRaw(":");
             json.writeRaw(body);
             json.writeEndObject();
-            json.close();
         } catch(IOException e) {
             log.error("Failed to generate json", e);
+        } finally {
+            try {
+                json.close();
+            } catch (IOException e) {}
         }
         return str.toString();
     }
 
     /**
+     *
      * 解析 JSON 为 Task
      * @param json
      * @return
@@ -129,6 +126,14 @@ public class QueueTask {
             log.error("Failed to parse json:\n"+json, e);
         }
         return null;
+    }
+
+    /**
+     * TODO: 写入索引库
+     * @exception
+     */
+    public void write() throws IOException {
+        System.out.println("task writed to index");
     }
 
     public static void main(String[] args) {

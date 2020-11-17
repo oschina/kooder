@@ -1,11 +1,15 @@
 package com.gitee.search.indexer;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import com.gitee.search.core.IndexManager;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +19,8 @@ import java.util.concurrent.Executors;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class FetchTaskThread extends Thread {
+
+    private final static Logger log = LoggerFactory.getLogger(FetchTaskThread.class);
 
     private QueueProvider provider;
     private int no_task_interval    = 1000; //从队列中获取不到任务时的休眠时间
@@ -35,17 +41,16 @@ public class FetchTaskThread extends Thread {
 
     @Override
     public void run() {
-        while(!this.isInterrupted() ) {
+        while(!this.isInterrupted()) {
             List<String> taskNames = new ArrayList<>();
             List<QueueTask> tasks = provider.pop(batch_fetch_count);
             tasks.forEach( task -> {
                 ExecutorService executor = executors.get(task.getType());
                 executor.submit(()-> {
-                    //TODO: task write to lucene index
                     try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        task.write();
+                    } catch (IOException e) {
+                        log.error("Failed writing task to index repository", e);
                     }
                 });
                 taskNames.add(task.getType());
