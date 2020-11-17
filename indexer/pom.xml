@@ -15,11 +15,19 @@
     <description> Gitee Search - indexer </description>
 
     <dependencies>
+
         <dependency>
             <groupId>com.gitee.search</groupId>
             <artifactId>gitee-search-core</artifactId>
             <version>0.1-dev</version>
         </dependency>
+
+        <dependency>
+            <groupId>commons-daemon</groupId>
+            <artifactId>commons-daemon</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
     </dependencies>
 
 </project>

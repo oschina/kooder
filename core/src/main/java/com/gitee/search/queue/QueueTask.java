@@ -39,7 +39,7 @@ public class QueueTask {
     public final static String TYPE_CODE          = "code";
     public final static String TYPE_USER          = "user";
 
-    private final static List<String> types = Arrays.asList(
+    public final static List<String> types = Arrays.asList(
             TYPE_REPOSITORY,
             TYPE_ISSUE,
             TYPE_PR,

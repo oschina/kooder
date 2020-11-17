@@ -1,5 +1,6 @@
 package com.gitee.http.server;
 
+import com.gitee.search.core.GiteeSearchConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -35,8 +36,8 @@ public class ServerDaemon implements Daemon {
         this.server = new ServerBootstrap();
         this.bossGroup = new NioEventLoopGroup(1);
         this.workerGroup = new NioEventLoopGroup();
-        this.bind = GatewayConfig.getBind();
-        this.port = GatewayConfig.getPort();
+        this.bind = GiteeSearchConfig.getHttpBind();
+        this.port = GiteeSearchConfig.getHttpPort();
     }
 
     /**
@@ -60,7 +61,7 @@ public class ServerDaemon implements Daemon {
                         p.addLast("decoder", new HttpRequestDecoder());
                         p.addLast("encoder", new HttpResponseEncoder());
                         //IMPORTANT!!! Aggregate all partial http content
-                        p.addLast("aggregator", new HttpObjectAggregator(GatewayConfig.getMaxContentLength()));
+                        p.addLast("aggregator", new HttpObjectAggregator(GiteeSearchConfig.getHttpMaxContentLength()));
                         p.addLast("handler", new HttpHandler());
                     }
                 });

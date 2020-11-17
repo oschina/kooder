@@ -25,12 +25,50 @@ public class GiteeSearchConfig {
         }
     }
 
+    /**
+     * 队列配置
+     * @return
+     */
     public static Properties getQueueProperties() {
         return config.properties("queue");
     }
 
+    /**
+     * 存储配置
+     * @return
+     */
     public static Properties getStoragePropertes() {
         return config.properties("storage");
     }
 
+    /**
+     * HTTP 服务配置
+     * @return
+     */
+    public static Properties getHttpProperties() {
+        return config.properties("http");
+    }
+
+    /**
+     * 索引器的配置
+     * @return
+     */
+    public static Properties getIndexerProperties() {
+        return config.properties("indexer");
+    }
+
+    public static String getHttpBind() {
+        String bind =  config.getProperty("http.bind");
+        if(bind != null && bind.trim().length() == 0)
+            bind = null;
+        return bind;
+    }
+
+    public static int getHttpPort() {
+        return config.getIntProperty("http.port", 8080);
+    }
+
+    public static int getHttpMaxContentLength() {
+        return config.getIntProperty("http.maxContentLength", 512 * 1024);
+    }
 }
