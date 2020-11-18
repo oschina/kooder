@@ -29,8 +29,8 @@ public class FetchTaskThread extends Thread {
     public FetchTaskThread() {
         this.provider = QueueFactory.getProvider();
         Properties props = GiteeSearchConfig.getIndexerProperties();
-        no_task_interval = NumberUtils.toInt(props.getProperty("no_task_interval"), 1000);
-        batch_fetch_count = NumberUtils.toInt(props.getProperty("batch_fetch_count"), 10);
+        this.no_task_interval = NumberUtils.toInt(props.getProperty("no_task_interval"), 1000);
+        this.batch_fetch_count = NumberUtils.toInt(props.getProperty("batch_fetch_count"), 10);
     }
 
     /**
@@ -39,6 +39,7 @@ public class FetchTaskThread extends Thread {
     @Override
     public void run() {
         while(!this.isInterrupted()) {
+            long startTime = System.currentTimeMillis();
             Map<String, ExecutorService> executors = new HashMap<>(); //每一个类型的任务使用一个独立的线程来处理
             List<String> taskNames = new ArrayList<>();
             List<QueueTask> tasks = provider.pop(batch_fetch_count);
@@ -63,7 +64,7 @@ public class FetchTaskThread extends Thread {
             });
 
             if(tasks.size() > 0)
-                log.info(tasks.size() + " tasks finished.");
+                log.info(tasks.size() + " tasks finished in " + (System.currentTimeMillis()-startTime) + " ms");
 
             if(tasks.size() == 0) {
                 try {

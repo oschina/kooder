@@ -70,7 +70,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
         StringBuilder responseData = new StringBuilder();
         ByteBuf content = httpContent.content();
         if (content.isReadable()) {
-            responseData.append(content.toString(CharsetUtil.UTF_8).toUpperCase());
+            responseData.append(content.toString(CharsetUtil.UTF_8));
             responseData.append("\r\n");
         }
         return responseData;
