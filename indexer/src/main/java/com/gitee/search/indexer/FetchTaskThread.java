@@ -1,7 +1,6 @@
 package com.gitee.search.indexer;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import com.gitee.search.core.IndexManager;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用于从队列中获取待办任务的线程
@@ -39,6 +39,9 @@ public class FetchTaskThread extends Thread {
         });
     }
 
+    /**
+     * FIXME: 此方法可能导致人工中断进程时候，某些任务还在构建中会有丢失的情况
+     */
     @Override
     public void run() {
         while(!this.isInterrupted()) {
@@ -57,7 +60,15 @@ public class FetchTaskThread extends Thread {
             });
 
             //waiting all threads finished
-            taskNames.forEach(type -> executors.get(type).shutdown());
+            taskNames.forEach(type -> {
+                try {
+                    executors.get(type).awaitTermination(2, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    interrupt();
+                }
+            });
+
+            log.info(tasks.size() + " tasks finished.");
 
             if(tasks.size() < batch_fetch_count) {
                 try {

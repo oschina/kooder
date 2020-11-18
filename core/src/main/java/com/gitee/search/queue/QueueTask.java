@@ -91,9 +91,11 @@ public class QueueTask {
             //json.useDefaultPrettyPrinter(); // enable indentation just to make debug/t
             json.writeStringField("type", this.type);
             json.writeStringField("action", this.action);
-            json.writeFieldName("body");
-            json.writeRaw(":");
-            json.writeRaw(body);
+            if(body != null) {
+                json.writeFieldName("body");
+                json.writeRaw(":");
+                json.writeRaw(body);
+            }
             json.writeEndObject();
         } catch(IOException e) {
             log.error("Failed to generate json", e);
@@ -133,7 +135,10 @@ public class QueueTask {
      * @exception
      */
     public void write() throws IOException {
-        System.out.println("task writed to index");
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e){}
+        log.info("task writed to index:" + json());
     }
 
     public static void main(String[] args) {

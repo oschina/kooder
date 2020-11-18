@@ -14,8 +14,11 @@ public class QueueFactory {
 
     static {
         Properties props = GiteeSearchConfig.getQueueProperties();
-        if("redis".equalsIgnoreCase(props.getProperty("type").trim()))
+        String type = props.getProperty("type").trim();
+        if("redis".equalsIgnoreCase(type))
             provider = new RedisQueueProvider(props);
+        else if("test".equalsIgnoreCase(type))
+            provider = new TestQueueProvider();
     }
 
     public final static QueueProvider getProvider() {

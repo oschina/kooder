@@ -32,7 +32,6 @@ public class ServerDaemon implements Daemon {
     @Override
     public void init(DaemonContext dc) {
         this.fetchTaskThread = new FetchTaskThread();
-        this.fetchTaskThread.setDaemon(true);
     }
 
     @Override
