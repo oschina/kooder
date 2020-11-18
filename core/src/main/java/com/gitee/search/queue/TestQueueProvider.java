@@ -5,7 +5,14 @@ import org.apache.commons.lang.math.RandomUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 用于测试队列中的任务获取
+ * @author Winter Lau<javayou@gmail.com>
+ */
 public class TestQueueProvider implements QueueProvider {
+
+    private List<QueueTask> g_tasks = new ArrayList<>();
+
     /**
      * 队列的唯一名称
      *
@@ -23,7 +30,7 @@ public class TestQueueProvider implements QueueProvider {
      */
     @Override
     public void push(List<QueueTask> tasks) {
-
+        g_tasks.addAll(tasks);
     }
 
     /**
@@ -35,7 +42,10 @@ public class TestQueueProvider implements QueueProvider {
     @Override
     public List<QueueTask> pop(int count) {
         List<QueueTask> tasks = new ArrayList<>();
-        for(int i=0;i< RandomUtils.nextInt(count);i++){
+        while(g_tasks.size()>0 && tasks.size() < count){
+            tasks.add(g_tasks.remove(0));
+        }
+        for(int i=tasks.size();i< RandomUtils.nextInt(count);i++){
             QueueTask task = new QueueTask();
             task.setAction(QueueTask.ACTION_ADD);
             task.setType(QueueTask.types.get(RandomUtils.nextInt(QueueTask.types.size())));

@@ -136,7 +136,7 @@ public class QueueTask {
      */
     public void write() throws IOException {
         try {
-            Thread.sleep(1000);
+            //Thread.sleep(1000);
         } catch (Exception e){}
         log.info("task writed to index:" + json());
     }
