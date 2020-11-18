@@ -8,6 +8,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -78,6 +79,17 @@ public class QueueTask {
     }
 
     /**
+     * 检查参数是否有效
+     * @return
+     */
+    public boolean check() {
+        boolean actionOk = ACTION_ADD.equals(action) || ACTION_UPDATE.equals(action) || ACTION_DELETE.equals(action);
+        if(actionOk && types.contains(type))
+            return isValidJSON(body);
+        return false;
+    }
+
+    /**
      * 合并 JSON
      * @return
      * @exception
@@ -141,15 +153,25 @@ public class QueueTask {
         log.info("task writed to index:" + json());
     }
 
+    public static boolean isValidJSON(final String json) {
+        boolean valid = true;
+        try{
+            new ObjectMapper().readTree(json);
+        } catch(JsonProcessingException e){
+            valid = false;
+        }
+        return valid;
+    }
+
     public static void main(String[] args) {
         QueueTask task = new QueueTask();
         task.setType("repo");
         task.setAction("add");
         task.setBody("{\"name\":\"Winter Lau\"}");
-        System.out.println(task.json());
+        System.out.println(task.check());
 
-        QueueTask t = QueueTask.parse(task.json());
-        System.out.printf("type:%s,action:%s,body:%s\n", t.type, t.action, t.body);
+        //QueueTask t = QueueTask.parse(task.json());
+        //System.out.printf("type:%s,action:%s,body:%s\n", t.type, t.action, t.body);
     }
 
 }

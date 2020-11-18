@@ -55,7 +55,10 @@ public class IndexAction {
         task.setAction(action);
         task.setType(parseType(params));
         task.setBody(body.toString());
-        QueueFactory.getProvider().push(Arrays.asList(task));
+        if(task.check())
+            QueueFactory.getProvider().push(Arrays.asList(task));
+        else
+            throw new ActionException(HttpResponseStatus.NOT_ACCEPTABLE);
     }
 
     /**
