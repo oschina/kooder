@@ -1,0 +1,26 @@
+{
+  "comment": "该文件用来定义 code 的 json 与 lucene 索引之间的映射关系",
+  "settings": {
+    "store": true,
+    "index": false,
+    "type": "text"
+  },
+  "fields": {
+    "repo": {
+      "repository": {
+        "type": "integer"
+      },
+      "path": {
+        "type": "text"
+      },
+      "code": {
+        "type": "text",
+        "index": true,
+        "store": false
+      },
+      "lang": {
+        "type": "text"
+      }
+    }
+  }
+}

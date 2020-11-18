@@ -1,0 +1,68 @@
+{
+  "comment": "该文件用来定义仓库的 json 与 lucene 索引之间的映射关系",
+  "settings": {
+    "store": true,
+    "index": false,
+    "type": "text"
+  },
+  "fields": {
+    "repo": {
+      "id": {
+        "type": "long"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text",
+        "index": true
+      },
+      "type": {
+        "type": "integer",
+        "index": true
+      },
+      "owner.id": {
+        "type": "integer"
+      },
+      "owner.path": {
+        "type": "text",
+        "index": true
+      },
+      "owner.name": {
+        "type": "text",
+        "index": true
+      },
+      "detail": {
+        "type": "text",
+        "index": true,
+        "store": false
+      },
+      "license": {
+        "type": "text",
+        "index": true
+      },
+      "tags": {
+        "type": "text",
+        "index": true
+      },
+      "created_at": {
+        "type": "long"
+      },
+      "updated_at": {
+        "type": "long"
+      },
+      "count.star": {
+        "type": "integer"
+      },
+      "count.fork": {
+        "type": "integer"
+      },
+      "count.watch": {
+        "type": "integer"
+      },
+      "count.gindex": {
+        "type": "integer"
+      }
+    }
+  }
+}
