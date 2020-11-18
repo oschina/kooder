@@ -1,5 +1,6 @@
 package com.gitee.search.queue;
 
+import com.gitee.search.core.GiteeSearchConfig;
 import org.apache.commons.lang.math.RandomUtils;
 
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ public class TestQueueProvider implements QueueProvider {
      */
     @Override
     public void push(List<QueueTask> tasks) {
+        System.out.println("received tasks:");
+        tasks.forEach(t -> System.out.println(t.json()));
         g_tasks.addAll(tasks);
     }
 
@@ -45,7 +48,8 @@ public class TestQueueProvider implements QueueProvider {
         while(g_tasks.size()>0 && tasks.size() < count){
             tasks.add(g_tasks.remove(0));
         }
-        for(int i=tasks.size();i< RandomUtils.nextInt(count);i++){
+        boolean auto_generate_task = Boolean.valueOf(GiteeSearchConfig.getQueueProperties().getProperty("test.auto_generate_task", "false"));
+        for(int i=tasks.size();auto_generate_task && i< RandomUtils.nextInt(count);i++){
             QueueTask task = new QueueTask();
             task.setAction(QueueTask.ACTION_ADD);
             task.setType(QueueTask.types.get(RandomUtils.nextInt(QueueTask.types.size())));
