@@ -1,45 +1,43 @@
 {
   "comment": "该文件用来定义 issue 的 json 与 lucene 索引之间的映射关系",
-  "settings": {
+  "default-settings": {
     "store": true,
     "index": false,
     "type": "text"
   },
   "fields": {
-    "repo": {
-      "id": {
-        "type": "long"
-      },
-      "subject": {
-        "type": "text",
-        "index": true
-      },
-      "user": {
-        "type": "integer"
-      },
-      "repository": {
-        "type": "integer"
-      },
-      "project": {
-        "type": "integer"
-      },
-      "enterprise": {
-        "type": "integer"
-      },
-      "detail": {
-        "type": "text",
-        "index": true,
-        "store": false
-      },
-      "created_at": {
-        "type": "long"
-      },
-      "updated_at": {
-        "type": "long"
-      },
-      "reply_count": {
-        "type": "integer"
-      }
+    "id": {
+      "type": "long"
+    },
+    "subject": {
+      "type": "text",
+      "index": true
+    },
+    "user": {
+      "type": "integer"
+    },
+    "repository": {
+      "type": "integer"
+    },
+    "project": {
+      "type": "integer"
+    },
+    "enterprise": {
+      "type": "integer"
+    },
+    "detail": {
+      "type": "text",
+      "index": true,
+      "store": false
+    },
+    "created_at": {
+      "type": "long"
+    },
+    "updated_at": {
+      "type": "long"
+    },
+    "reply_count": {
+      "type": "integer"
     }
   }
 }
