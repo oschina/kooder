@@ -5,10 +5,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -22,7 +19,7 @@ public class QueueTask {
 
     private final static Logger log = LoggerFactory.getLogger(QueueTask.class);
 
-    private final static JsonFactory jackson = new JsonFactory();
+    private final static JsonFactory jackson = new JsonFactory().enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
 
     public final static String TYPE_REPOSITORY    = "repo"; //仓库
     public final static String TYPE_ISSUE         = "issue";
