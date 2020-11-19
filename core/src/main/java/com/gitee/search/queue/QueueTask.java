@@ -8,6 +8,10 @@ import java.util.List;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.index.ObjectMapping;
+import com.gitee.search.storage.StorageFactory;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,14 +144,15 @@ public class QueueTask {
     }
 
     /**
-     * TODO: 写入索引库
+     * 写入索引库
      * @exception
      */
     public void write() throws IOException {
-        try {
-            //Thread.sleep(1000);
-        } catch (Exception e){}
-        log.info("task writed to index:" + json());
+        try (IndexWriter writer = StorageFactory.getStorage().getWriter(this.type)) {
+            List<Document> docs = ObjectMapping.task2doc(this);
+            writer.addDocuments(docs);
+            log.info(docs.size() + " documents writed to index.");
+        }
     }
 
     public static boolean isValidJSON(final String json) {
