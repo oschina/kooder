@@ -17,7 +17,12 @@ Gitee Search 是 Gitee 的搜索引擎服务模块，为 Gitee 提供仓库、Is
 
 #### 使用方法
 
-1. 构建并运行
+1.依赖
+
+* openjdk > 8
+* maven > 3
+
+2.构建并运行
 
 Windows 系统请使用 indexer.bat 和 gateway.bat
 
@@ -26,11 +31,11 @@ $ git clone https://gitee.com/oschina/gitee-search.git
 $ cd gitee-search
 $ mvn package
 ### 启动 indexer
-$ ./indexer.sh start
+$ bin/indexer.sh start
 ### 启动 gateway
-$ ./gateway.sh start
+$ bin/gateway.sh start
 ### 停止 gateway
-$ ./gateway.sh stop
+$ bin/gateway.sh stop
 ### 停止 indexer
-$ ./indexer.sh stop
+$ bin/indexer.sh stop
 ```
