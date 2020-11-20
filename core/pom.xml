@@ -18,6 +18,7 @@
 
     <properties>
         <lucene.version>8.7.0</lucene.version>
+        <jackson.version>2.11.3</jackson.version>
     </properties>
 
     <dependencies>
@@ -81,12 +82,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.11.3</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.11.3</version>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
