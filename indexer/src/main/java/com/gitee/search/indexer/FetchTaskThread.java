@@ -49,7 +49,7 @@ public class FetchTaskThread extends Thread {
                 executor.submit(()-> {
                     try {
                         task.write();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         log.error("Failed writing task to index repository", e);
                     }
                 });

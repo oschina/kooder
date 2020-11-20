@@ -2,7 +2,7 @@
   "comment": "该文件用来定义仓库的 json 与 lucene 索引之间的映射关系",
   "default-settings": {
     "store": true,
-    "index": false,
+    "index": true,
     "type": "text"
   },
   "fields": {
@@ -10,11 +10,14 @@
       "type": "long"
     },
     "name": {
-      "type": "text"
+      "type": "string"
     },
     "description": {
       "type": "text",
       "index": true
+    },
+    "enterprise": {
+      "type": "long"
     },
     "type": {
       "type": "integer",
@@ -24,11 +27,11 @@
       "type": "integer"
     },
     "owner.path": {
-      "type": "text",
+      "type": "string",
       "index": true
     },
     "owner.name": {
-      "type": "text",
+      "type": "string",
       "index": true
     },
     "detail": {

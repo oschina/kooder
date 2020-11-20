@@ -9,7 +9,6 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Properties;
@@ -20,7 +19,6 @@ import java.util.Properties;
  */
 public class DiskIndexStorage implements IndexStorage {
 
-    private IndexWriterConfig writerConfig;
     private Path indexBasePath;
 
     public static void main(String[] args) throws IOException {
@@ -40,14 +38,13 @@ public class DiskIndexStorage implements IndexStorage {
         this.indexBasePath = Paths.get(idxPath).normalize();
         if(!Files.exists(indexBasePath) || !Files.isDirectory(indexBasePath) || !Files.isReadable(indexBasePath) || !Files.isWritable(indexBasePath))
             throw new FileSystemException("Path:" + idxPath + " isn't available.");
-
-        this.writerConfig = new IndexWriterConfig(JcsegAnalyzer.INSTANCE);
-        writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
     }
 
     @Override
     public IndexWriter getWriter(String type) throws IOException {
         FSDirectory dir = FSDirectory.open(getIndexPath(type));
+        IndexWriterConfig writerConfig = new IndexWriterConfig(JcsegAnalyzer.INSTANCE);
+        writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         return new IndexWriter(dir, writerConfig);
     }
 

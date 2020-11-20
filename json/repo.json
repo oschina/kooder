@@ -7,6 +7,7 @@
         "id": 12793,
         "name": "J2Cache",
         "description": "J2Cache 是一个两级缓存框架",
+        "enterprise": 122,
         "type": 1,
         "owner": {
           "id": 3133,
@@ -16,10 +17,7 @@
         "detail": "",
         "lang": "Java",
         "license": "Apache",
-        "tags": [
-          "缓存",
-          "Redis"
-        ],
+        "tags": "缓存,Redis",
         "created_at": 234345343434,
         "updated_at": 234345389434,
         "count": {

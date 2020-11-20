@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.queue.QueueTask;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,15 +24,20 @@ public class IndexMapping {
     private Settings defaultSetting;
     private Map<String, Settings> fields;
 
-    public static void main(String[] args) throws IOException {
-        System.out.println(repo);
-    }
-
     private IndexMapping(){}
 
-    public final static IndexMapping repo = parseJson("/mapping-repo.json");
-    public final static IndexMapping issue = parseJson("/mapping-issue.json");
-    public final static IndexMapping code = parseJson("/mapping-code.json");
+    public final static IndexMapping get(String type) {
+        return mappings.get(type);
+    }
+
+    private final static IndexMapping repo = parseJson("/mapping-repo.json");
+    private final static IndexMapping issue = parseJson("/mapping-issue.json");
+    private final static IndexMapping code = parseJson("/mapping-code.json");
+    private final static Map<String, IndexMapping> mappings = new HashMap(){{
+        put(QueueTask.TYPE_REPOSITORY, repo);
+        put(QueueTask.TYPE_ISSUE, issue);
+        put(QueueTask.TYPE_CODE, code);
+    }};
 
     public String getComment() {
         return comment;
@@ -56,6 +62,18 @@ public class IndexMapping {
     public void setFields(Map<String, Settings> fields) {
         this.fields = fields;
     }
+
+    public Settings getField(String field) {
+        return fields.computeIfAbsent(field, f -> defaultSetting);
+    }
+
+    public boolean isStore(String field) {
+        return fields.get(field).isStore();
+    }
+
+    public boolean isIndex(String field) { return fields.get(field).isIndex(); }
+
+    public String getType(String field) { return fields.get(field).getType(); }
 
     /**
      * 解析 mapping-xxx.json
@@ -146,6 +164,14 @@ public class IndexMapping {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("type=" + type);
+            sb.append(",store=" + store);
+            sb.append(",index=" + index);
+            return sb.toString();
         }
 
     }
