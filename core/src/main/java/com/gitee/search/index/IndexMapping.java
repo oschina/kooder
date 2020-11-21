@@ -142,6 +142,14 @@ public class IndexMapping {
             this.type = node.get("type").textValue();
         }
 
+        public boolean isNumber() {
+            return "long".equalsIgnoreCase(type) || "integer".equalsIgnoreCase(type);
+        }
+
+        public boolean isText() {
+            return "text".equalsIgnoreCase(type) || "string".equalsIgnoreCase(type);
+        }
+
         public boolean isStore() {
             return store;
         }

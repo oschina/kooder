@@ -5,13 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
 import org.apache.lucene.document.*;
+import org.apache.lucene.index.IndexableField;
+import sun.jvm.hotspot.oops.IndexableFieldIdentifier;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * body -> document
@@ -19,7 +20,51 @@ import java.util.List;
  */
 public class ObjectMapping {
 
-    public final static String FIELD_ID = "id";
+    public final static String FIELD_ID = "id"; //文档的唯一标识
+
+    /**
+     * Lucene 文档转 json
+     * @param type
+     * @param doc
+     * @return
+     * @throws IOException
+     */
+    public final static String doc2json(String type, Document doc) throws IOException {
+        Map<String, Object> map = new HashMap<>();
+        IndexMapping mapping = IndexMapping.get(type);
+        doc.forEach( field -> saveFieldToMap(field, map, mapping));
+        return new ObjectMapper().writeValueAsString(map);
+    }
+
+    /**
+     * 读取 field 信息并保存到 Map
+     * @param field
+     * @param map
+     * @param mapping
+     */
+    private static void saveFieldToMap(IndexableField field, Map<String, Object> map, IndexMapping mapping) {
+        String fname = field.name();
+        IndexMapping.Settings setting = mapping.getField(fname);
+        Object fvalue = readFieldValue(field, setting);
+        String[] names = fname.split(",");
+        if(names.length == 2) {
+            Map<String, Object> subMap = (Map<String, Object>)map.computeIfAbsent(names[0], m -> new HashMap<String, Object>());
+            subMap.put(names[1], fvalue);
+        }
+        else {
+            map.put(fname, fvalue);
+        }
+    }
+
+    /**
+     * 根据 json mapping 来解析文档字段值
+     * @param field
+     * @param settings
+     * @return
+     */
+    private static Object readFieldValue(IndexableField field, IndexMapping.Settings settings) {
+        return settings.isNumber()?field.numericValue().longValue():field.stringValue();
+    }
 
     /**
      * 将 task 转成 lucene 文档
