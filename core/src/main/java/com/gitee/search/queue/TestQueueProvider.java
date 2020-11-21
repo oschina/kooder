@@ -28,7 +28,7 @@ public class TestQueueProvider implements QueueProvider {
         types.addAll(Arrays.asList(props.getProperty("test.types").split(",")));
 
         try {
-            this.body = new String(Files.readAllBytes(Paths.get("D:\\WORKDIR\\Gitee Search\\json\\test-repo-body.json")));
+            this.body = new String(Files.readAllBytes(Paths.get("D:\\WORKDIR\\Gitee Search\\json\\repo.json")));
         } catch(IOException e) {
             e.printStackTrace();
         }

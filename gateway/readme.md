@@ -10,6 +10,9 @@
 * `/index/update`   更新索引
 * `/index/delete`   删除索引
 
+需要参数: type=repo|issue|code  
+请求体格式请看 json/*.json
+
 **搜索接口列表**
 
 * `/search/repositories`   仓库搜索

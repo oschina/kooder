@@ -1,20 +1,16 @@
 {
-  "type": "issue",
-  "action": "add",
-  "body": {
-    "objects": [
-      {
-        "id": 12793,
-        "subject": "springboot 环境，并发读取的时候返回null",
-        "detail": "配置sync=true 不返回null了 但是直接查库了",
-        "user": 31337,
-        "repository": 23438,
-        "project": 83473,
-        "enterprise": 23243,
-        "created_at": 234345343434,
-        "updated_at": 234345389434,
-        "reply_count": 23
-      }
-    ]
-  }
+  "objects": [
+    {
+      "id": 12793,
+      "subject": "springboot 环境，并发读取的时候返回null",
+      "detail": "配置sync=true 不返回null了 但是直接查库了",
+      "user": 31337,
+      "repository": 23438,
+      "project": 83473,
+      "enterprise": 23243,
+      "created_at": 234345343434,
+      "updated_at": 234345389434,
+      "reply_count": 23
+    }
+  ]
 }

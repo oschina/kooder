@@ -1,14 +1,10 @@
 {
-  "type": "code",
-  "action": "add",
-  "body": {
-    "objects": [
-      {
-        "repository": 345347,
-        "path": "src/main/java/com/gitee/search/http/ServerDaemon.java",
-        "code": "",
-        "lang": "Java"
-      }
-    ]
-  }
+  "objects": [
+    {
+      "repository": 345347,
+      "path": "src/main/java/com/gitee/search/http/ServerDaemon.java",
+      "code": "",
+      "lang": "Java"
+    }
+  ]
 }
