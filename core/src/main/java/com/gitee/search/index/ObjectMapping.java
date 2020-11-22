@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
-import sun.jvm.hotspot.oops.IndexableFieldIdentifier;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * body -> document
@@ -21,6 +20,18 @@ import java.util.*;
 public class ObjectMapping {
 
     public final static String FIELD_ID = "id"; //文档的唯一标识
+    public final static String FIELD_objects = "objects";
+
+    /**
+     * 文档结果返回json
+     * @param type
+     * @param docs
+     * @return
+     * @throws IOException
+     */
+    public final static List<Map<String, Object>> doc2json(String type, List<Document> docs) throws IOException {
+        return docs.stream().map(d -> doc2json(type, d)).collect(Collectors.toList());
+    }
 
     /**
      * Lucene 文档转 json
@@ -29,11 +40,11 @@ public class ObjectMapping {
      * @return
      * @throws IOException
      */
-    public final static String doc2json(String type, Document doc) throws IOException {
+    public final static Map<String, Object> doc2json(String type, Document doc) {
         Map<String, Object> map = new HashMap<>();
         IndexMapping mapping = IndexMapping.get(type);
         doc.forEach( field -> saveFieldToMap(field, map, mapping));
-        return new ObjectMapper().writeValueAsString(map);
+        return map;
     }
 
     /**
@@ -76,7 +87,7 @@ public class ObjectMapping {
         List<Document> docs = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
         IndexMapping mapping = IndexMapping.get(task.getType());
-        Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray("objects").elements();
+        Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(FIELD_objects).elements();
         while(objects.hasNext()) {
             JsonNode obj = objects.next();
             docs.add(parseObjectJson(mapping, obj));

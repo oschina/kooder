@@ -13,39 +13,41 @@
       "type": "string"
     },
     "description": {
-      "type": "text",
-      "index": true
+      "type": "text"
     },
     "enterprise": {
       "type": "long"
     },
     "type": {
-      "type": "integer",
-      "index": true
+      "type": "integer"
+    },
+    "recomm": {
+      "type": "integer"
     },
     "owner.id": {
       "type": "integer"
     },
     "owner.path": {
-      "type": "string",
-      "index": true
+      "type": "string"
     },
     "owner.name": {
-      "type": "string",
-      "index": true
+      "type": "string"
     },
     "detail": {
-      "type": "text",
-      "index": true,
+      "type": "text"
       "store": false
     },
+    "fork": {
+      "type": "integer"
+    },
     "license": {
-      "type": "text",
-      "index": true
+      "type": "text"
     },
     "tags": {
-      "type": "text",
-      "index": true
+      "type": "text"
+    },
+    "catalogs" : {
+      "type": "text"
     },
     "created_at": {
       "type": "long"

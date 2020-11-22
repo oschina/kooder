@@ -3,7 +3,6 @@ package com.gitee.search.storage;
 import com.gitee.search.queue.QueueTask;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.search.IndexSearcher;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,13 +48,5 @@ public interface IndexStorage {
      * @exception
      */
     IndexReader getReader(String type) throws IOException;
-
-    /**
-     * 获取索引的检索器
-     * @param type
-     * @return
-     * @throws IOException
-     */
-    IndexSearcher getSearcher(String type) throws IOException;
 
 }

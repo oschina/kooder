@@ -1,12 +1,11 @@
 package com.gitee.search.storage;
 
+import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.GiteeSearchConfig;
-import com.gitee.search.core.JcsegAnalyzer;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class DiskIndexStorage implements IndexStorage {
     @Override
     public IndexWriter getWriter(String type) throws IOException {
         FSDirectory dir = FSDirectory.open(getIndexPath(type));
-        IndexWriterConfig writerConfig = new IndexWriterConfig(JcsegAnalyzer.INSTANCE);
+        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         return new IndexWriter(dir, writerConfig);
     }
@@ -52,11 +51,6 @@ public class DiskIndexStorage implements IndexStorage {
     public IndexReader getReader(String type) throws IOException {
         FSDirectory dir = FSDirectory.open(getIndexPath(type));
         return DirectoryReader.open(dir);
-    }
-
-    @Override
-    public IndexSearcher getSearcher(String type) throws IOException {
-        return new IndexSearcher(getReader(type));
     }
 
     /**

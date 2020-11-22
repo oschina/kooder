@@ -2,19 +2,14 @@ package com.gitee.search.queue;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitee.search.index.ObjectMapping;
-import com.gitee.search.storage.StorageFactory;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
+import com.gitee.search.index.IndexManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,24 +146,7 @@ public class QueueTask {
      * @exception
      */
     public void write() throws IOException {
-        List<Document> docs = ObjectMapping.task2doc(this);
-        if(docs.size() > 0)
-        try (IndexWriter writer = StorageFactory.getStorage().getWriter(this.type)) {
-            switch(this.action) {
-                case ACTION_ADD:
-                    writer.addDocuments(docs);
-                    break;
-                case ACTION_UPDATE:
-                    for(Document doc : docs) {
-                        writer.updateDocument(new Term(ObjectMapping.FIELD_ID, doc.get(ObjectMapping.FIELD_ID)), doc);
-                    }
-                    break;
-                case ACTION_DELETE:
-                    Term[] terms = docs.stream().map(d -> new Term(ObjectMapping.FIELD_ID, d.get(ObjectMapping.FIELD_ID))).toArray(Term[]::new);
-                    writer.deleteDocuments(terms);
-            }
-            log.info(docs.size() + " documents writed to index.");
-        }
+        IndexManager.write(this);
     }
 
     public static boolean isValidJSON(final String json) {
