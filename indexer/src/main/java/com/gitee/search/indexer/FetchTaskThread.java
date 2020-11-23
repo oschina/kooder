@@ -73,6 +73,7 @@ public class FetchTaskThread extends Thread {
                     break;
                 }
             }
+            break;
         }
     }
 

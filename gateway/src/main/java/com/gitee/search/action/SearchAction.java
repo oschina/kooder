@@ -9,10 +9,13 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.spell.NGramDistance;
 
 import static com.gitee.search.action.ActionUtils.getParam;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,15 +28,22 @@ public class SearchAction {
     public final static int PAGE_SIZE = 20; //结果集每页显示的记录数
 
     public static void main(String[] args) throws Exception {
-        String q = "log4j j2cache is redis我是中国人的儿子 c#";
 
-        System.out.println(makeRepoQuery(q, null, null));
+        StringBuilder json = repositories(new HashMap<String, List<String>>(){{
+            put("q", Arrays.asList("j2cache"));
+        }}, null);
+        System.out.println(json);
 
-        QueryParser parser = new QueryParser("name", AnalyzerFactory.INSTANCE);
-        parser.setAutoGeneratePhraseQueries(false);
-        Query query = parser.parse(q);
-        System.out.println(query.toString());
 
+        /**
+        NGramDistance ng = new NGramDistance();
+        float score1 = ng.getDistance("Gorbachev", "Gorbechyov");
+        System.out.println(score1);
+        float score2 = ng.getDistance("girl", "girlfriend");
+        System.out.println(score2);
+
+        System.out.println(ng.getDistance("中华人民共和国","中华人民共和国"));
+         */
     }
 
     /**
@@ -75,7 +85,7 @@ public class SearchAction {
      */
     private static Query makeRepoQuery(String q, String lang, String scope) throws ParseException {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        builder.setMinimumNumberShouldMatch(1);
+        //builder.setMinimumNumberShouldMatch(1);
         if(StringUtils.isNotBlank(lang))//编程语言
             builder.add(new TermQuery(new Term("lang", lang)), BooleanClause.Occur.MUST);
 

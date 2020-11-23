@@ -29,6 +29,7 @@ Windows 系统请使用 indexer.bat 和 gateway.bat
 ```
 $ git clone https://gitee.com/oschina/gitee-search.git
 $ cd gitee-search
+$ 修改 core/src/main/resource/gitee-search.properties 的 storage.disk.path 配置
 $ mvn package
 ### 启动 indexer
 $ bin/indexer.sh start
