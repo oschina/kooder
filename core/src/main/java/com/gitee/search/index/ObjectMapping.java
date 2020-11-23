@@ -90,6 +90,7 @@ public class ObjectMapping {
         Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(FIELD_objects).elements();
         while(objects.hasNext()) {
             JsonNode obj = objects.next();
+            System.out.println(obj.toString());
             docs.add(parseObjectJson(mapping, obj));
         }
         return docs;
@@ -132,14 +133,10 @@ public class ObjectMapping {
     private static void addSimpleField(Document doc, String fn, JsonNode field, IndexMapping.Settings setting) {
         switch(setting.getType()){
             case "long":
-                doc.add(new SortedNumericDocValuesField(fn, field.longValue()));
-                if(setting.isStore())
-                    doc.add(new StoredField(fn, field.longValue()));
+                doc.add(new NumericDocValuesField(fn, field.longValue()));
                 break;
             case "integer":
-                doc.add(new SortedNumericDocValuesField(fn, field.intValue()));
-                if(setting.isStore())
-                    doc.add(new StoredField(fn, field.intValue()));
+                doc.add(new NumericDocValuesField(fn, field.intValue()));
                 break;
             case "text":
                 doc.add(new TextField(fn, field.textValue(), setting.isStore()?Field.Store.YES:Field.Store.NO));
@@ -147,8 +144,6 @@ public class ObjectMapping {
             default:
                 doc.add(new StringField(fn, field.textValue(), setting.isStore()?Field.Store.YES:Field.Store.NO));
         }
-
-        //System.out.printf("%s -> %s {%s}\n", fn, field.toString(), setting.toString());
     }
 
     public static void main(String[] args) throws IOException {
