@@ -34,7 +34,7 @@
       "type": "string"
     },
     "detail": {
-      "type": "text"
+      "type": "text",
       "store": false
     },
     "fork": {

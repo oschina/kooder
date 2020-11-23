@@ -1,10 +1,11 @@
 package com.gitee.search.index;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.queue.QueueTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,21 @@ import java.util.Map;
  */
 public class IndexMapping {
 
-    private final static JsonFactory jackson = new JsonFactory();
+    private final static Logger log = LoggerFactory.getLogger(IndexMapping.class);
+
+    private static Map<String, IndexMapping> mappings ;
+
+    static {
+        try {
+            mappings = new HashMap() {{
+                put(QueueTask.TYPE_REPOSITORY, parseJson("/mapping-repo.json"));
+                put(QueueTask.TYPE_ISSUE, parseJson("/mapping-issue.json"));
+                put(QueueTask.TYPE_CODE, parseJson("/mapping-code.json"));
+            }};
+        }catch (Exception e) {
+            log.error("Failed to load mapping json", e);
+        }
+    }
 
     private String comment;
     private Settings defaultSetting;
@@ -29,15 +44,6 @@ public class IndexMapping {
     public final static IndexMapping get(String type) {
         return mappings.get(type);
     }
-
-    private final static IndexMapping repo = parseJson("/mapping-repo.json");
-    private final static IndexMapping issue = parseJson("/mapping-issue.json");
-    private final static IndexMapping code = parseJson("/mapping-code.json");
-    private final static Map<String, IndexMapping> mappings = new HashMap(){{
-        put(QueueTask.TYPE_REPOSITORY, repo);
-        put(QueueTask.TYPE_ISSUE, issue);
-        put(QueueTask.TYPE_CODE, code);
-    }};
 
     public String getComment() {
         return comment;
@@ -81,7 +87,7 @@ public class IndexMapping {
      * @return
      * @throws IOException
      */
-    private static IndexMapping parseJson(String jsonRes) {
+    private static IndexMapping parseJson(String jsonRes) throws IOException {
         IndexMapping im = new IndexMapping();
         try (InputStream stream = IndexMapping.class.getResourceAsStream(jsonRes)) {
             JsonNode json = new ObjectMapper().readTree(stream);
@@ -94,8 +100,6 @@ public class IndexMapping {
             fieldMapping.fields().forEachRemaining(e -> {
                 im.fields.put(e.getKey(), new Settings(e.getValue()));
             });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return im;
     }
