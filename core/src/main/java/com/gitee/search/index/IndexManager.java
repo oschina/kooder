@@ -51,7 +51,7 @@ public class IndexManager {
                 Document doc = searcher.doc(docs.scoreDocs[i].doc);
                 objects.addPOJO(ObjectMapping.doc2json(type, doc));
             }
-            return result.toString();
+            return result.toPrettyString();//.toString();
         }
     }
 
