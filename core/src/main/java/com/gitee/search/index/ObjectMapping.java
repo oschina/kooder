@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
 
@@ -58,13 +57,19 @@ public class ObjectMapping {
         String fname = field.name();
         IndexMapping.Settings setting = mapping.getField(fname);
         Object fvalue = readFieldValue(field, setting);
-        String[] names = StringUtils.split(fname, '.');//fname.split(".");
-        if(names.length == 2) {
-            Map<String, Object> subMap = (Map<String, Object>)map.computeIfAbsent(names[0], m -> new HashMap<String, Object>());
-            subMap.put(names[1], fvalue);
-        }
+        String[] names = fname.split("\\.");
+        saveFieldToMap(names, fvalue, map);
+    }
+
+    private static void saveFieldToMap(String[] names, Object value, Map<String, Object> map) {
+        if(names.length == 1)
+            map.put(names[0], value);
         else {
-            map.put(fname, fvalue);
+            Map<String, Object> subMap = (Map<String, Object>)map.computeIfAbsent(names[0], m -> new HashMap<String, Object>());
+            String[] sub_names = new String[names.length - 1];
+            System.arraycopy(names, 1, sub_names, 0, names.length - 1);
+            saveFieldToMap(sub_names, value, subMap);
+            //subMap.put(names[1], value);
         }
     }
 
@@ -91,7 +96,6 @@ public class ObjectMapping {
         Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(FIELD_objects).elements();
         while(objects.hasNext()) {
             JsonNode obj = objects.next();
-            System.out.println(obj.toString());
             docs.add(parseObjectJson(mapping, obj));
         }
         return docs;
