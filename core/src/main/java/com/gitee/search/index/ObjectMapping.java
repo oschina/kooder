@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
 
@@ -57,7 +58,7 @@ public class ObjectMapping {
         String fname = field.name();
         IndexMapping.Settings setting = mapping.getField(fname);
         Object fvalue = readFieldValue(field, setting);
-        String[] names = fname.split(",");
+        String[] names = StringUtils.split(fname, '.');//fname.split(".");
         if(names.length == 2) {
             Map<String, Object> subMap = (Map<String, Object>)map.computeIfAbsent(names[0], m -> new HashMap<String, Object>());
             subMap.put(names[1], fvalue);
@@ -134,9 +135,13 @@ public class ObjectMapping {
         switch(setting.getType()){
             case "long":
                 doc.add(new NumericDocValuesField(fn, field.longValue()));
+                if(setting.isStore())
+                    doc.add(new StoredField(fn, field.longValue()));
                 break;
             case "integer":
                 doc.add(new NumericDocValuesField(fn, field.intValue()));
+                if(setting.isStore())
+                    doc.add(new StoredField(fn, field.intValue()));
                 break;
             case "text":
                 doc.add(new TextField(fn, field.textValue(), setting.isStore()?Field.Store.YES:Field.Store.NO));
