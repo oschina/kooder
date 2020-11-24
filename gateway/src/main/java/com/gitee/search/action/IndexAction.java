@@ -1,11 +1,10 @@
 package com.gitee.search.action;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static com.gitee.search.action.ActionUtils.getParam;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,10 +15,6 @@ import java.util.Map;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class IndexAction {
-
-    private final static Logger log = LoggerFactory.getLogger(IndexAction.class);
-
-    private final static JsonFactory jackson = new JsonFactory();
 
     /**
      * 添加索引
@@ -73,7 +68,7 @@ public class IndexAction {
      */
     private static String parseType(Map<String, List<String>> params) throws ActionException {
         try {
-            String type = params.get("type").get(0);
+            String type = getParam(params, "type");
             if(!QueueTask.isAvailType(type))
                 throw new IllegalArgumentException(type);
             return type.toLowerCase();
