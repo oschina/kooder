@@ -17,6 +17,8 @@ public class QueueFactory {
         String type = props.getProperty("type").trim();
         if("redis".equalsIgnoreCase(type))
             provider = new RedisQueueProvider(props);
+        else if("embed".equalsIgnoreCase(type))
+            provider = new EmbedQueueProvider(props);
         else if("test".equalsIgnoreCase(type))
             provider = new TestQueueProvider();
     }

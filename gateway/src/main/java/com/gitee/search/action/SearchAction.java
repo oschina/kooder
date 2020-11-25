@@ -9,7 +9,6 @@ import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
-import org.apache.lucene.search.spell.NGramDistance;
 
 import static com.gitee.search.action.ActionUtils.getParam;
 
@@ -30,10 +29,9 @@ public class SearchAction {
     public static void main(String[] args) throws Exception {
 
         StringBuilder json = repositories(new HashMap<String, List<String>>(){{
-            put("q", Arrays.asList("j2cache"));
+            put("q", Arrays.asList("红薯"));
         }}, null);
         System.out.println(json);
-
 
         /**
         NGramDistance ng = new NGramDistance();

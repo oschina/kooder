@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * body -> document
+ * TODO 如何在没有定义 mapping 的情况下实现文档的影身
  * @author Winter Lau<javayou@gmail.com>
  */
 public class ObjectMapping {
@@ -44,6 +45,7 @@ public class ObjectMapping {
         Map<String, Object> map = new HashMap<>();
         IndexMapping mapping = IndexMapping.get(type);
         doc.forEach( field -> saveFieldToMap(field, map, mapping));
+        //TODO 增加 gitee search 评分信息
         return map;
     }
 
@@ -69,7 +71,6 @@ public class ObjectMapping {
             String[] sub_names = new String[names.length - 1];
             System.arraycopy(names, 1, sub_names, 0, names.length - 1);
             saveFieldToMap(sub_names, value, subMap);
-            //subMap.put(names[1], value);
         }
     }
 

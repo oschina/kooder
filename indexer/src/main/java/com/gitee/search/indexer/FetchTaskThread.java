@@ -43,37 +43,37 @@ public class FetchTaskThread extends Thread {
             Map<String, ExecutorService> executors = new HashMap<>(); //每一个类型的任务使用一个独立的线程来处理
             List<String> taskNames = new ArrayList<>();
             List<QueueTask> tasks = provider.pop(batch_fetch_count);
-            tasks.forEach( task -> {
-                taskNames.add(task.getType());
-                ExecutorService executor = executors.computeIfAbsent(task.getType(), v -> Executors.newSingleThreadExecutor());
-                executor.submit(()-> {
+            if(tasks != null && tasks.size() > 0) {
+                tasks.forEach(task -> {
+                    taskNames.add(task.getType());
+                    ExecutorService executor = executors.computeIfAbsent(task.getType(), v -> Executors.newSingleThreadExecutor());
+                    executor.submit(() -> {
+                        try {
+                            task.write();
+                        } catch (Exception e) {
+                            log.error("Failed writing task to index repository", e);
+                        }
+                    });
+                });
+
+                //waiting all threads finished
+                taskNames.forEach(type -> {
                     try {
-                        task.write();
-                    } catch (Exception e) {
-                        log.error("Failed writing task to index repository", e);
+                        executors.get(type).shutdown();
+                        executors.get(type).awaitTermination(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
                     }
                 });
-            });
 
-            //waiting all threads finished
-            taskNames.forEach(type -> {
-                try {
-                    executors.get(type).shutdown();
-                    executors.get(type).awaitTermination(10, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {}
-            });
-
-            if(tasks.size() > 0)
-                log.info(tasks.size() + " tasks finished in " + (System.currentTimeMillis()-startTime) + " ms");
-
-            if(tasks.size() == 0) {
+                log.info(tasks.size() + " tasks finished in " + (System.currentTimeMillis() - startTime) + " ms");
+            }
+            else {
                 try {
                     Thread.sleep(no_task_interval);
                 } catch (InterruptedException e) {
                     break;
                 }
             }
-            break;
         }
     }
 
