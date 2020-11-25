@@ -1,8 +1,6 @@
 package com.gitee.http.server;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import com.gitee.search.action.ActionException;
@@ -17,15 +15,25 @@ import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Properties;
+
 /**
  * Http requeset handler
  * @author Winter Lau<javayou@gmail.com>
  */
-public class HttpHandler extends SimpleChannelInboundHandler<Object> {
+class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private final static Logger log = LoggerFactory.getLogger(HttpHandler.class);
+
     private HttpRequest request;
-    StringBuilder responseData = new StringBuilder();
+    private StringBuilder responseData = new StringBuilder();
+    private AccessLogger logger;
+
+    HttpHandler(AccessLogger logger) {
+        this.logger = logger;
+    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
@@ -39,6 +47,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
         if (msg instanceof HttpContent) {
             if (msg instanceof LastHttpContent) {
+                long len = 0;
+                int errcode = OK.code();
                 LastHttpContent trailer = (LastHttpContent) msg;
                 QueryStringDecoder uri_decoder = new QueryStringDecoder(request.uri());
                 try {
@@ -46,14 +56,34 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     if(resp != null && resp.length() > 0)
                         responseData.append(resp);
                     writeResponse(ctx, trailer, responseData);
+                    len = responseData.length();
                 } catch (ActionException e) {
                     writeErrorResponse(ctx, e.getErrorCode());
+                    errcode = e.getErrorCode().code();
                 } catch (Exception e) {
                     log.error("Failed to call action with '" + uri_decoder.path() + "'", e);
-                    writeErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    writeErrorResponse(ctx, INTERNAL_SERVER_ERROR);
+                    errcode = INTERNAL_SERVER_ERROR.code();
                 }
+                this.showAccessLog(ctx, errcode, len);
             }
         }
+    }
+
+    /**
+     * 显示 access log
+     * //61.150.12.23 - - [25/Nov/2020:18:06:08 +0800] "GET /robots.txt HTTP/1.1" 404 34 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36" "-"
+     * @param ctx
+     * @param errcode
+     * @param len
+     */
+    private void showAccessLog(ChannelHandlerContext ctx, int errcode, long len) {
+        String ua = request.headers().get("user-agent");
+        if(ua == null)
+            ua = "-";
+        InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
+        String ip = insocket.getAddress().getHostAddress();
+        logger.writeAccessLog(request.uri(), String.format("%s - \"%s %s\" %d %d - \"%s\"", ip, request.method().name(), request.uri(), errcode, len, ua));
     }
 
     @Override

@@ -14,14 +14,21 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Make gateway as a daemon
  * @author Winter Lau<javayou@gmail.com>
  */
-public class ServerDaemon implements Daemon {
+public class ServerDaemon implements Daemon , AccessLogger {
 
     private final static Logger log = LoggerFactory.getLogger(ServerDaemon.class);
 
@@ -31,6 +38,7 @@ public class ServerDaemon implements Daemon {
 
     private String bind;
     private int port;
+    private List<MessageFormat> log_patterns = new ArrayList<>();
 
     public ServerDaemon() {
         this.server = new ServerBootstrap();
@@ -38,6 +46,23 @@ public class ServerDaemon implements Daemon {
         this.workerGroup = new NioEventLoopGroup();
         this.bind = GiteeSearchConfig.getHttpBind();
         this.port = GiteeSearchConfig.getHttpPort();
+        String logs_pattern = GiteeSearchConfig.getProperty("http.log.pattern");
+        if(logs_pattern != null) {
+            Arrays.stream(logs_pattern.split(",")).forEach(pattern -> {
+                log_patterns.add(new MessageFormat(StringUtils.replace(pattern, "*", "{0}")));
+            });
+        }
+    }
+
+    @Override
+    public void writeAccessLog(String uri, String msg) {
+        for(MessageFormat fmt : log_patterns) {
+            try {
+                fmt.parse(uri);
+                log.info(msg);
+                break;
+            } catch(ParseException e) {}
+        }
     }
 
     /**
@@ -52,6 +77,7 @@ public class ServerDaemon implements Daemon {
 
     @Override
     public void init(DaemonContext dc) {
+        final AccessLogger logger = this;
         this.server.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
@@ -62,7 +88,7 @@ public class ServerDaemon implements Daemon {
                         p.addLast("encoder", new HttpResponseEncoder());
                         //IMPORTANT!!! Aggregate all partial http content
                         p.addLast("aggregator", new HttpObjectAggregator(GiteeSearchConfig.getHttpMaxContentLength()));
-                        p.addLast("handler", new HttpHandler());
+                        p.addLast("handler", new HttpHandler(logger));
                     }
                 });
     }
