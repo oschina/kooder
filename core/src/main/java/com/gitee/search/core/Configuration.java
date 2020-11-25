@@ -43,6 +43,10 @@ public class Configuration {
         return this.props.getProperty(key);
     }
 
+    public String getProperty(String key, String defValue) {
+        return this.props.getProperty(key, defValue);
+    }
+
     public int getIntProperty(String key, int defaultValue) {
         return NumberUtils.toInt(getProperty(key), defaultValue);
     }
