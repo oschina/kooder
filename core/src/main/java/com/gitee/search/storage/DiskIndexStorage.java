@@ -7,6 +7,8 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.store.FSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -17,6 +19,8 @@ import java.util.Properties;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class DiskIndexStorage implements IndexStorage {
+
+    private final static Logger log = LoggerFactory.getLogger(DiskIndexStorage.class);
 
     private Path indexBasePath;
 
@@ -29,15 +33,20 @@ public class DiskIndexStorage implements IndexStorage {
 
     /**
      * 初始化磁盘索引存储
-     * TODO 支持相对路径
      * @param props
      * @throws IOException
      */
     public DiskIndexStorage(Properties props) throws IOException {
         String idxPath = props.getProperty("disk.path");
-        this.indexBasePath = Paths.get(idxPath).normalize();
-        if(!Files.exists(indexBasePath) || !Files.isDirectory(indexBasePath) || !Files.isReadable(indexBasePath) || !Files.isWritable(indexBasePath))
+        this.indexBasePath = GiteeSearchConfig.getPath(idxPath);
+        //路径已存在，但是不是一个目录，不可读写则报错
+        if(Files.exists(indexBasePath) && (!Files.isDirectory(indexBasePath) || !Files.isReadable(indexBasePath) || !Files.isWritable(indexBasePath)))
             throw new FileSystemException("Path:" + idxPath + " isn't available.");
+        //路径不存在，或者不是一个目录，则创建目录
+        if(!Files.exists(indexBasePath) || !Files.isDirectory(indexBasePath)) {
+            log.warn("Path '" + this.indexBasePath.toString()+"' for indexes not exists, created it!");
+            Files.createDirectory(indexBasePath);
+        }
     }
 
     @Override

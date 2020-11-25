@@ -6,13 +6,12 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.infobip.lib.popout.FileQueue;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -37,10 +36,17 @@ public class EmbedQueueProvider implements QueueProvider {
             int port = GiteeSearchConfig.getHttpPort();
             this.fetchUrl = String.format("http://%s:%d/queue/fetch", host, port);
         }
-        Path path = Paths.get(props.getProperty("embed.path")).normalize();
         int batch_size = NumberUtils.toInt(props.getProperty("embed.batch_size", "10000"), 10000);
 
-        //TODO 支持相对路径
+        Path path = GiteeSearchConfig.getPath(props.getProperty("embed.path"));
+        if(!Files.exists(path) || !Files.isDirectory(path)) {
+            log.warn("Path '" + path.toString()+"' for queue storage not exists, created it!");
+            try {
+                Files.createDirectories(path);
+            } catch(IOException e) {
+                log.error("Failed to create directory '" + path.toString()+"'", e);
+            }
+        }
         this.fileQueue = FileQueue.<QueueTask>batched().name("gitee")
                 .folder(path)
                 .restoreFromDisk(true)
