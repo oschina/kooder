@@ -7,7 +7,6 @@ import org.lionsoul.jcseg.ISegment;
 import org.lionsoul.jcseg.IWord;
 import org.lionsoul.jcseg.dic.ADictionary;
 import org.lionsoul.jcseg.dic.DictionaryFactory;
-import org.lionsoul.jcseg.segmenter.NLPSeg;
 import org.lionsoul.jcseg.segmenter.SegmenterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +43,8 @@ public class JcsegAnalyzer extends Analyzer {
             //MOST ?
             Tokenizer tokenizer = new JcsegTokenizer(ISegment.Type.MOST, this.config, this.dic);
             return new TokenStreamComponents(tokenizer);
-        } catch (IOException var3) {
-            var3.printStackTrace();
+        } catch (IOException e) {
+            log.error("Failed to createComponents({})", fieldName, e);
             return null;
         }
     }

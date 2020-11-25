@@ -50,7 +50,7 @@ public class RedisQueueProvider implements QueueProvider {
 
         this.client = RedisClient.create(uri);
 
-        log.info(String.format("Connected to %s at %s:%d\n", getRedisVersion(), this.host, this.port));
+        log.info("Connected to {} at {}}:{}}\n", getRedisVersion(), this.host, this.port);
 
     }
 
@@ -87,7 +87,7 @@ public class RedisQueueProvider implements QueueProvider {
                 if(task != null)
                     tasks.add(task);
                 else
-                    log.error("Parse queue task failed.\n"+json);
+                    log.error("Parse queue task failed.\n{}", json);
             }while(tasks.size() < fetchCount);
             return tasks;
         }

@@ -133,8 +133,6 @@ public class QueueTask {
             task.setAction(node.get("action").textValue());
             task.setBody(node.get("body").toString());
             return task;
-        } catch (JsonParseException e) {
-            log.error("Failed to parse json:\n"+json, e);
         } catch (IOException e) {
             log.error("Failed to parse json:\n"+json, e);
         }
@@ -158,17 +156,6 @@ public class QueueTask {
             valid = false;
         }
         return valid;
-    }
-
-    public static void main(String[] args) {
-        QueueTask task = new QueueTask();
-        task.setType("repo");
-        task.setAction("add");
-        task.setBody("{\"name\":\"Winter Lau\"}");
-        System.out.println(task.check());
-
-        //QueueTask t = QueueTask.parse(task.json());
-        //System.out.printf("type:%s,action:%s,body:%s\n", t.type, t.action, t.body);
     }
 
 }

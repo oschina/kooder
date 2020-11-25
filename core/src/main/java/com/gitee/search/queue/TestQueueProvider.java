@@ -2,9 +2,12 @@ package com.gitee.search.queue;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import org.apache.commons.lang.math.RandomUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +20,8 @@ import java.util.Properties;
  */
 public class TestQueueProvider implements QueueProvider {
 
+    private final static Logger log = LoggerFactory.getLogger(TestQueueProvider.class);
+
     private List<QueueTask> g_tasks = new ArrayList<>();
     private String body;
     private boolean auto_generate_task;
@@ -28,9 +33,10 @@ public class TestQueueProvider implements QueueProvider {
         types.addAll(Arrays.asList(props.getProperty("test.types").split(",")));
 
         try {
-            this.body = new String(Files.readAllBytes(Paths.get("D:\\WORKDIR\\Gitee Search\\json\\repo-example.json")));
+            Path path = Paths.get("json/repo-example.json").toAbsolutePath().normalize();
+            this.body = new String(Files.readAllBytes(path));
         } catch(IOException e) {
-            e.printStackTrace();
+            log.error("Failed to loading example json", e);
         }
     }
 
@@ -51,7 +57,7 @@ public class TestQueueProvider implements QueueProvider {
      */
     @Override
     public void push(List<QueueTask> tasks) {
-        System.out.println("received tasks:");
+        log.info("{} tasks received :", tasks.size());
         tasks.forEach(t -> System.out.println(t.json()));
         g_tasks.addAll(tasks);
     }

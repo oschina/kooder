@@ -78,7 +78,7 @@ public class IndexManager {
                         writer.deleteDocuments(terms);
                 }
             }
-            log.info(docs.size() + " documents writed to index.");
+            log.info("{} documents writed to index.", docs.size());
         }
         return (docs!=null)?docs.size():0;
     }

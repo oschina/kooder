@@ -110,7 +110,7 @@ public class SearchHelper {
         try {
             return PropertyUtils.getProperty(obj, field);
         } catch (Exception e) {
-            log.error("Unabled to get property '" + field + "' of " + obj.getClass().getName(), e);
+            log.error("Failed to get property '{}' of {}", field, obj.getClass().getName(), e);
             return null;
         }
 

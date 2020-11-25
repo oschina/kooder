@@ -61,7 +61,7 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
                     writeErrorResponse(ctx, e.getErrorCode());
                     errcode = e.getErrorCode().code();
                 } catch (Exception e) {
-                    log.error("Failed to call action with '" + uri_decoder.path() + "'", e);
+                    log.error("Failed to call action with '{}'", uri_decoder.path(), e);
                     writeErrorResponse(ctx, INTERNAL_SERVER_ERROR);
                     errcode = INTERNAL_SERVER_ERROR.code();
                 }

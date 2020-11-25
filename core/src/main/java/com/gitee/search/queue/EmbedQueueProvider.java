@@ -40,11 +40,11 @@ public class EmbedQueueProvider implements QueueProvider {
 
         Path path = GiteeSearchConfig.getPath(props.getProperty("embed.path"));
         if(!Files.exists(path) || !Files.isDirectory(path)) {
-            log.warn("Path '" + path.toString()+"' for queue storage not exists, created it!");
+            log.warn("Path '{}' for queue storage not exists, created it!", path);
             try {
                 Files.createDirectories(path);
             } catch(IOException e) {
-                log.error("Failed to create directory '" + path.toString()+"'", e);
+                log.error("Failed to create directory '{}'", path, e);
             }
         }
         this.fileQueue = FileQueue.<QueueTask>batched().name("gitee")
@@ -89,7 +89,7 @@ public class EmbedQueueProvider implements QueueProvider {
             if(StringUtils.isNotBlank(body))
                 return Arrays.asList(QueueTask.parse(body));
         } catch (IOException e) {
-            log.error("Failed to fetch tasks from '" + this.fetchUrl + "'", e);
+            log.error("Failed to fetch tasks from '{}'", this.fetchUrl, e);
         }
         return null;
     }

@@ -64,7 +64,7 @@ public class FetchTaskThread extends Thread {
                     }
                 });
 
-                log.info(tasks.size() + " tasks finished in " + (System.currentTimeMillis() - startTime) + " ms");
+                log.info("{} tasks finished in {} ms", tasks.size(), System.currentTimeMillis() - startTime);
             }
             else {
                 try {

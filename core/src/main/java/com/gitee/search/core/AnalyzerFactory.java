@@ -6,8 +6,6 @@ import org.lionsoul.jcseg.ISegment;
 import org.lionsoul.jcseg.dic.ADictionary;
 import org.lionsoul.jcseg.dic.DictionaryFactory;
 import org.lionsoul.jcseg.segmenter.SegmenterConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -27,8 +25,6 @@ public class AnalyzerFactory {
 }
 
 class JcsegForSearchAnalyzer extends Analyzer {
-
-    private final static Logger log = LoggerFactory.getLogger(JcsegForSearchAnalyzer.class);
 
     private SegmenterConfig config;
 

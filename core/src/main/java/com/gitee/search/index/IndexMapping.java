@@ -123,7 +123,7 @@ public class IndexMapping {
         try {
             return this.toJson();
         } catch( IOException e ) {
-            e.printStackTrace();
+            log.error("Failed turn mapping object to json.", e);
             return null;
         }
     }

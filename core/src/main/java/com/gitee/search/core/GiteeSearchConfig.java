@@ -23,7 +23,7 @@ public class GiteeSearchConfig {
         try {
             config = Configuration.init(CONFIG_NAME);
         } catch (IOException e) {
-            log.error("Failed to loading " + CONFIG_NAME, e);
+            log.error("Failed to loading {}", CONFIG_NAME, e);
         }
     }
 
