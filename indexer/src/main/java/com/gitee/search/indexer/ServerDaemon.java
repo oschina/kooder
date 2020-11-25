@@ -1,7 +1,5 @@
 package com.gitee.search.indexer;
 
-import com.gitee.search.queue.QueueFactory;
-import com.gitee.search.queue.QueueProvider;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.slf4j.Logger;
@@ -27,6 +25,7 @@ public class ServerDaemon implements Daemon {
         ServerDaemon daemon = new ServerDaemon();
         daemon.init(null);
         daemon.start();
+        log.info("Gitee Search Indexer started !");
     }
 
     @Override

@@ -143,10 +143,11 @@ public class QueueTask {
 
     /**
      * 写入索引库
+     * @return
      * @exception
      */
-    public void write() throws IOException {
-        IndexManager.write(this);
+    public int write() throws IOException {
+        return IndexManager.write(this);
     }
 
     public static boolean isValidJSON(final String json) {

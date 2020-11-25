@@ -57,11 +57,12 @@ public class IndexManager {
 
     /**
      * 写入索引库
+     * @return
      * @exception
      */
-    public static void write(QueueTask task) throws IOException {
+    public static int write(QueueTask task) throws IOException {
         List<Document> docs = ObjectMapping.task2doc(task);
-        if(docs.size() > 0) {
+        if(docs != null && docs.size() > 0) {
             try (IndexWriter writer = StorageFactory.getStorage().getWriter(task.getType())) {
                 switch (task.getAction()) {
                     case QueueTask.ACTION_ADD:
@@ -79,6 +80,7 @@ public class IndexManager {
             }
             log.info(docs.size() + " documents writed to index.");
         }
+        return (docs!=null)?docs.size():0;
     }
 
 }

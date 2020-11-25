@@ -1,16 +1,15 @@
 package com.gitee.search.action;
 
+import com.gitee.search.queue.EmbedQueueProvider;
 import com.gitee.search.queue.QueueFactory;
-import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
-
-import static com.gitee.search.action.ActionUtils.getParam;
 
 import java.util.List;
 import java.util.Map;
 
 /**
  * 内嵌式队列服务提供的 HTTP 接口
+ * 使用该接口要求指定配置 queue.type = embed
  * @author Winter Lau<javayou@gmail.com>
  */
 public class QueueAction {
@@ -23,9 +22,9 @@ public class QueueAction {
      * @throws ActionException
      */
     public static StringBuilder fetch(Map<String, List<String>> params, StringBuilder body) throws ActionException {
-        QueueProvider queue = QueueFactory.getProvider();
-        List<QueueTask> tasks = queue.pop(1);
-        return (tasks.size() > 0) ? new StringBuilder(tasks.get(0).json()) : null;
+        EmbedQueueProvider queue = (EmbedQueueProvider)QueueFactory.getProvider();
+        QueueTask task = queue.innerPop();
+        return (task != null) ? new StringBuilder(task.json()) : null;
     }
 
 }

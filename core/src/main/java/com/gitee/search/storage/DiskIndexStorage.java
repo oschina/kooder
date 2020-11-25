@@ -29,6 +29,7 @@ public class DiskIndexStorage implements IndexStorage {
 
     /**
      * 初始化磁盘索引存储
+     * TODO 支持相对路径
      * @param props
      * @throws IOException
      */

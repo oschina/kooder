@@ -4,6 +4,7 @@ import com.gitee.search.core.GiteeSearchConfig;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.infobip.lib.popout.FileQueue;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class EmbedQueueProvider implements QueueProvider {
         Path path = Paths.get(props.getProperty("embed.path")).normalize();
         int batch_size = NumberUtils.toInt(props.getProperty("embed.batch_size", "10000"), 10000);
 
+        //TODO 支持相对路径
         this.fileQueue = FileQueue.<QueueTask>batched().name("gitee")
                 .folder(path)
                 .restoreFromDisk(true)
@@ -63,7 +65,8 @@ public class EmbedQueueProvider implements QueueProvider {
      */
     @Override
     public void push(List<QueueTask> tasks) {
-        this.fileQueue.addAll(tasks);
+        if(tasks != null)
+            this.fileQueue.addAll(tasks);
     }
 
     /**
@@ -75,14 +78,18 @@ public class EmbedQueueProvider implements QueueProvider {
     @Override
     public List<QueueTask> pop(int count) {
         try {
-            Document doc = Jsoup.connect(this.fetchUrl).get();
-            String data = doc.data();
-            if(StringUtils.isNotBlank(data))
-                return Arrays.asList(QueueTask.parse(data));
+            Connection.Response resp = Jsoup.connect(this.fetchUrl).ignoreContentType(true).execute();
+            String body = resp.body();
+            if(StringUtils.isNotBlank(body))
+                return Arrays.asList(QueueTask.parse(body));
         } catch (IOException e) {
             log.error("Failed to fetch tasks from '" + this.fetchUrl + "'", e);
         }
         return null;
+    }
+
+    public QueueTask innerPop() {
+        return this.fileQueue.poll();
     }
 
     /**
