@@ -41,7 +41,7 @@ public class IndexManager {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode result = mapper.createObjectNode();
             IndexSearcher searcher = new IndexSearcher(reader);
-            TopFieldDocs docs = searcher.search(query, MAX_RESULT_COUNT, sort);
+            TopFieldDocs docs = searcher.search(query, MAX_RESULT_COUNT, sort, true);
             result.put("type", type);
             result.put("totalHits", docs.totalHits.value);
             result.put("pageIndex", page);
@@ -50,6 +50,7 @@ public class IndexManager {
             for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
                 Document doc = searcher.doc(docs.scoreDocs[i].doc);
                 objects.addPOJO(ObjectMapping.doc2json(type, doc));
+                log.info("id:{},score:{},name:{},desc:{}",doc.get("id"), docs.scoreDocs[i].score, doc.get("name"),doc.get("description"));
             }
             return result.toPrettyString();//.toString();
         }

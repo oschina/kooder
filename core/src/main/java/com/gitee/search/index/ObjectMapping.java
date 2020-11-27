@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 /**
  * body -> document
- * TODO 如何在没有定义 mapping 的情况下实现文档的影身
+ * TODO 如何在没有定义 mapping 的情况下实现文档的映射
  * @author Winter Lau<javayou@gmail.com>
  */
 public class ObjectMapping {
