@@ -68,18 +68,21 @@ public class IndexManager {
                 switch (task.getAction()) {
                     case QueueTask.ACTION_ADD:
                         writer.addDocuments(docs);
+                        log.info("{} documents writed to index.", docs.size());
                         break;
                     case QueueTask.ACTION_UPDATE:
                         for (Document doc : docs) {
                             writer.updateDocument(new Term(ObjectMapping.FIELD_ID, doc.get(ObjectMapping.FIELD_ID)), doc);
                         }
+                        log.info("{} documents updated to index.", docs.size());
                         break;
                     case QueueTask.ACTION_DELETE:
                         Term[] terms = docs.stream().map(d -> new Term(ObjectMapping.FIELD_ID, d.get(ObjectMapping.FIELD_ID))).toArray(Term[]::new);
                         writer.deleteDocuments(terms);
+                        log.info("{} documents deleted from index.", docs.size());
                 }
             }
-            log.info("{} documents writed to index.", docs.size());
+
         }
         return (docs!=null)?docs.size():0;
     }
