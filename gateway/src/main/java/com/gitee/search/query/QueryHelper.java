@@ -27,20 +27,17 @@ public class QueryHelper {
 
     static {
         try {
+            scoreMethods.putAll(JavascriptCompiler.DEFAULT_FUNCTIONS);
             scoreMethods.put("repo_sort", ScoreHelper.class.getDeclaredMethod("repoSort", double.class, double.class, double.class, double.class));
-        } catch(NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        try {
-            //仓库排序
             repoScoreExpr = JavascriptCompiler.compile("repo_sort($score,$recomm,$stars,$gindex)", scoreMethods, ScoreHelper.class.getClassLoader());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
         } catch (java.text.ParseException e) {
             e.printStackTrace();
         }
     }
 
     public static void main(String[] args ) {
-
     }
 
     /**
