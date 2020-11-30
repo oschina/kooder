@@ -3,4 +3,5 @@ bin
 .DS_Store
 *.iml
 .idea
-/data/
+data
+lib
