@@ -1,7 +1,6 @@
 /*/target/
-bin
 data
-lib
+lib/*.jar
 .DS_Store
 *.iml
 .idea
