@@ -30,10 +30,12 @@ public class JcsegAnalyzer extends Analyzer {
     private SegmenterConfig configForSplit;
     private ADictionary dic;
 
-    public JcsegAnalyzer(){
+    public JcsegAnalyzer() {
         long ct = System.currentTimeMillis();
         this.config = new SegmenterConfig(true);
-        this.configForSplit = new SegmenterConfig(true);
+        try {
+            this.configForSplit = this.config.clone();//new SegmenterConfig(true);
+        } catch (CloneNotSupportedException e) {}
         this.configForSplit.setAppendCJKSyn(false);
         this.dic = DictionaryFactory.createDefaultDictionary(config, false,true);
     }
