@@ -1,7 +1,7 @@
 /*/target/
 bin
+data
+lib
 .DS_Store
 *.iml
 .idea
-data
-lib
