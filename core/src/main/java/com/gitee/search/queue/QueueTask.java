@@ -57,8 +57,12 @@ public class QueueTask {
         this.type = type;
     }
 
-    public final static boolean isAvailType(String type) {
-        return types.contains(type.toLowerCase());
+    public final static boolean isAvailType(String p_type) {
+        return types.contains(p_type.toLowerCase());
+    }
+
+    public final static boolean isAvailAction(String p_action) {
+        return ACTION_ADD.equalsIgnoreCase(p_action) || ACTION_DELETE.equalsIgnoreCase(p_action) || ACTION_UPDATE.equalsIgnoreCase(p_action);
     }
 
     public String getAction() {
@@ -82,8 +86,7 @@ public class QueueTask {
      * @return
      */
     public boolean check() {
-        boolean actionOk = ACTION_ADD.equals(action) || ACTION_UPDATE.equals(action) || ACTION_DELETE.equals(action);
-        if(actionOk && types.contains(type))
+        if(isAvailAction(action) && isAvailType(type))
             return isValidJSON(body);
         return false;
     }
