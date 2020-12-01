@@ -137,6 +137,8 @@ public class ObjectMapping {
      * @return
      */
     private static void addSimpleField(Document doc, String fn, JsonNode field, IndexMapping.Settings setting) {
+        if(field == null || field.isNull())
+            return ;
         switch(setting.getType()){
             case "long":
                 doc.add(new NumericDocValuesField(fn, field.longValue()));
@@ -149,11 +151,25 @@ public class ObjectMapping {
                     doc.add(new StoredField(fn, field.intValue()));
                 break;
             case "text":
-                doc.add(new TextField(fn, field.textValue(), setting.isStore()?Field.Store.YES:Field.Store.NO));
+                doc.add(new TextField(fn, getTextValue(field), setting.isStore()?Field.Store.YES:Field.Store.NO));
                 break;
             default:
-                doc.add(new StringField(fn, field.textValue(), setting.isStore()?Field.Store.YES:Field.Store.NO));
+                doc.add(new StringField(fn, getTextValue(field), setting.isStore()?Field.Store.YES:Field.Store.NO));
         }
+    }
+
+    private static String getTextValue(JsonNode field) {
+        StringBuilder val = new StringBuilder();
+        if(field.isArray()){
+            field.elements().forEachRemaining(e -> {
+                if(val.length() > 0)
+                    val.append(",");
+                val.append(e.asText());
+            });
+        }
+        else
+            val.append(field.textValue());
+        return val.toString();
     }
 
     public static void main(String[] args) throws IOException {
