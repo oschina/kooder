@@ -54,8 +54,9 @@ public class PathImporter {
                 printHelp();
                 return;
             }
-
+            long ct = System.currentTimeMillis();
             importPath(type, action, jsonPath);
+            log.info("{} imported,time:{}ms", jsonPath.toString(), (System.currentTimeMillis()-ct));
         } catch (IOException e) {
             log.error("Failed to import path:" + jsonPath.toString(), e);
         } catch (ParseException e) {
@@ -71,7 +72,6 @@ public class PathImporter {
      */
     private static void importPath(String type, String action, Path path) throws IOException {
         try(Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p))){
-            log.info("begin to import {} json files.", files.count());
             files.forEach(jsonFile -> {
                 importFile(type, action, jsonFile);
             });
@@ -92,6 +92,7 @@ public class PathImporter {
             task.setAction(action);
             task.setBody(json);
             task.write();
+            log.info("{} imported.", file.toString());
         } catch (IOException e) {
             log.error("Failed to import file: " + file.toString(), e);
         }
