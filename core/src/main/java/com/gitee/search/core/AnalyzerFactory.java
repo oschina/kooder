@@ -38,7 +38,7 @@ class JcsegForSearchAnalyzer extends Analyzer {
 
     protected TokenStreamComponents createComponents(String fieldName) {
         try {
-            Tokenizer tokenizer = new JcsegTokenizer(ISegment.Type.COMPLEX, this.config, AnalyzerFactory.dic);
+            Tokenizer tokenizer = new JcsegTokenizer(ISegment.Type.NLP, this.config, AnalyzerFactory.dic);
             return new TokenStreamComponents(tokenizer);
         } catch (IOException var3) {
             var3.printStackTrace();

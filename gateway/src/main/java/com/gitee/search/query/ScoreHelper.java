@@ -16,8 +16,17 @@ public class ScoreHelper {
      * @return
      */
     public static double repoSort(double score, double recomm, double stars, double gindex) {
-        //TODO 对 score 进行分等级处理
-        System.out.printf("score:%.2f, recomm: %f, stars: %f, gindex: %f\n", score, recomm, stars, gindex);
+        //System.out.printf("score:%.2f, recomm: %f, stars: %f, gindex: %f", score, recomm, stars, gindex);
+        if(score >= 40) {
+            score += (recomm * 100);
+            if(stars >= 100)
+                score += (stars/100) * 10;
+            if(gindex > 80)
+                score += 100;
+            else if(gindex > 50)
+                score += 20;
+        }
+        //System.out.println(" new score: " + score);
         return score;
     }
 

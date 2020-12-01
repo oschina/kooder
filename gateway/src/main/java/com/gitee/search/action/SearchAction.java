@@ -11,8 +11,6 @@ import org.apache.lucene.search.Sort;
 import static com.gitee.search.action.ActionUtils.getParam;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,29 +21,6 @@ import java.util.Map;
 public class SearchAction {
 
     public final static int PAGE_SIZE = 20; //结果集每页显示的记录数
-
-    public static void main(String[] args) throws Exception {
-
-        for(int i=0;i<10;i++) {
-            long ct = System.currentTimeMillis();
-
-            StringBuilder json = repositories(new HashMap<String, List<String>>() {{
-                put("q", Arrays.asList("红薯"));
-            }}, null);
-            //System.out.println(json);
-
-            System.out.println("total time: " + (System.currentTimeMillis() - ct) + " ms");
-        }
-        /**
-        NGramDistance ng = new NGramDistance();
-        float score1 = ng.getDistance("Gorbachev", "Gorbechyov");
-        System.out.println(score1);
-        float score2 = ng.getDistance("girl", "girlfriend");
-        System.out.println(score2);
-
-        System.out.println(ng.getDistance("中华人民共和国","中华人民共和国"));
-         */
-    }
 
     /**
      * 仓库搜索
@@ -65,8 +40,10 @@ public class SearchAction {
         long ct = System.currentTimeMillis();
         q = SearchHelper.cleanupKey(q);
 
+        System.out.println("q=" + q);
+
         Query query = QueryHelper.buildRepoQuery(q, lang, 0);
-        System.out.println((System.currentTimeMillis() - ct) + "ms:"+query);
+        System.out.println(query);
 
         String resultJson = IndexManager.search(QueueTask.TYPE_REPOSITORY, query, Sort.RELEVANCE, page, PAGE_SIZE);
 

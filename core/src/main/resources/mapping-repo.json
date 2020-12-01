@@ -10,7 +10,7 @@
       "type": "long"
     },
     "name": {
-      "type": "string"
+      "type": "text"
     },
     "description": {
       "type": "text"
@@ -28,10 +28,10 @@
       "type": "integer"
     },
     "owner.path": {
-      "type": "string"
+      "type": "text"
     },
     "owner.name": {
-      "type": "string"
+      "type": "text"
     },
     "detail": {
       "type": "text",
