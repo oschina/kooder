@@ -1,4 +1,4 @@
-package com.gitee.http.server;
+package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import io.netty.bootstrap.ServerBootstrap;

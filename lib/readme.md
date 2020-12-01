@@ -1,1 +1,0 @@
-使用 mvn package 将依赖的 jar 包拷贝到此目录

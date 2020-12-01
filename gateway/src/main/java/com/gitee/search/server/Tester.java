@@ -1,4 +1,4 @@
-package com.gitee.http.server;
+package com.gitee.search.server;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;

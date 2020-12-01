@@ -30,13 +30,9 @@ Windows 系统请使用 indexer.bat 和 gateway.bat
 $ git clone https://gitee.com/oschina/gitee-search.git
 $ cd gitee-search
 $ 修改 core/src/main/resource/gitee-search.properties 的 storage.disk.path 配置
-$ mvn package
+$ mvn install
 ### 启动 indexer
-$ bin/indexer.sh start
+$ bin/indexer.sh
 ### 启动 gateway
-$ bin/gateway.sh start
-### 停止 gateway
-$ bin/gateway.sh stop
-### 停止 indexer
-$ bin/indexer.sh stop
+$ bin/gateway.sh
 ```

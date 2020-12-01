@@ -55,6 +55,8 @@ public class QueryHelper {
         builder.add(NumericDocValuesField.newSlowExactQuery("type", 2), BooleanClause.Occur.MUST);
         //不搜索fork仓库
         builder.add(NumericDocValuesField.newSlowExactQuery("fork", 0), BooleanClause.Occur.MUST);
+        //todo 不搜索被屏蔽的仓库
+        //builder.add(NumericDocValuesField.newSlowExactQuery("block", 0), BooleanClause.Occur.MUST);
         if(StringUtils.isNotBlank(lang))//编程语言
             builder.add(new TermQuery(new Term("lang", lang)), BooleanClause.Occur.MUST);
         if(recomm >= SearchObject.RECOMM_GVP)//搜索范围

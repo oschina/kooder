@@ -24,13 +24,6 @@ public class DiskIndexStorage implements IndexStorage {
 
     private Path indexBasePath;
 
-    public static void main(String[] args) throws IOException {
-        DiskIndexStorage dis = new DiskIndexStorage(GiteeSearchConfig.getStoragePropertes());
-        System.out.println(dis.indexBasePath);
-        System.out.println(dis.indexBasePath.resolve("../hello").normalize());
-        System.exit(0);
-    }
-
     /**
      * 初始化磁盘索引存储
      * @param props
