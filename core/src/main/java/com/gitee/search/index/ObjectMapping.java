@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexableField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class ObjectMapping {
+
+    private final static Logger log = LoggerFactory.getLogger(ObjectMapping.class);
 
     public final static String FIELD_ID = "id"; //文档的唯一标识
     public final static String FIELD_objects = "objects";
@@ -139,22 +143,26 @@ public class ObjectMapping {
     private static void addSimpleField(Document doc, String fn, JsonNode field, IndexMapping.Settings setting) {
         if(field == null || field.isNull())
             return ;
-        switch(setting.getType()){
-            case "long":
-                doc.add(new NumericDocValuesField(fn, field.longValue()));
-                if(setting.isStore())
-                    doc.add(new StoredField(fn, field.longValue()));
-                break;
-            case "integer":
-                doc.add(new NumericDocValuesField(fn, field.intValue()));
-                if(setting.isStore())
-                    doc.add(new StoredField(fn, field.intValue()));
-                break;
-            case "text":
-                doc.add(new TextField(fn, getTextValue(field), setting.isStore()?Field.Store.YES:Field.Store.NO));
-                break;
-            default:
-                doc.add(new StringField(fn, getTextValue(field), setting.isStore()?Field.Store.YES:Field.Store.NO));
+        try {
+            switch (setting.getType()) {
+                case "long":
+                    doc.add(new NumericDocValuesField(fn, field.longValue()));
+                    if (setting.isStore())
+                        doc.add(new StoredField(fn, field.longValue()));
+                    break;
+                case "integer":
+                    doc.add(new NumericDocValuesField(fn, field.intValue()));
+                    if (setting.isStore())
+                        doc.add(new StoredField(fn, field.intValue()));
+                    break;
+                case "text":
+                    doc.add(new TextField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+                    break;
+                default:
+                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+            }
+        } catch (Exception e) {
+            log.error("Failed to add field("+fn+") to document.", e);
         }
     }
 
