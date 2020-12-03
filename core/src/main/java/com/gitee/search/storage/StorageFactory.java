@@ -1,6 +1,8 @@
 package com.gitee.search.storage;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,4 +33,25 @@ public class StorageFactory {
     public final static IndexStorage getStorage() {
         return storage;
     }
+
+    /**
+     * 获取索引更新的入口
+     * @param type
+     * @return
+     * @exception
+     */
+    public static IndexWriter getWriter(String type) throws IOException {
+        return storage.getWriter(type);
+    }
+
+    /**
+     * 获取读索引的入口
+     * @param type
+     * @return
+     * @exception
+     */
+    public static IndexReader getReader(String type) throws IOException {
+        return storage.getReader(type);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.gitee.search.storage;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.GiteeSearchConfig;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -24,6 +25,8 @@ public class DiskIndexStorage implements IndexStorage {
 
     private Path indexBasePath;
 
+    private IndexWriterConfig writerConfig ;
+
     /**
      * 初始化磁盘索引存储
      * @param props
@@ -40,12 +43,15 @@ public class DiskIndexStorage implements IndexStorage {
             log.warn("Path '" + this.indexBasePath.toString()+"' for indexes not exists, created it!");
             Files.createDirectory(indexBasePath);
         }
+        this.writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
+        this.writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
+        this.writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
+        this.writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));
     }
 
     @Override
     public IndexWriter getWriter(String type) throws IOException {
-        FSDirectory dir = FSDirectory.open(getIndexPath(type));
-        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
+        FSDirectory dir = FSDirectory.open(getIndexPath(type));;
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
         return new IndexWriter(dir, writerConfig);
     }
