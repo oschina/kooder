@@ -14,4 +14,7 @@ public class SearchObject {
     public final static byte REPO_TYPE_PRIVATE  = 0x02; //私有仓库
     public final static byte REPO_TYPE_INNER    = 0x03; //企业内源仓库
 
+    public final static byte REPO_IS_BLOCK = 0x01;
+    public final static byte REPO_NOT_BLOCK = 0x00;
+
 }
