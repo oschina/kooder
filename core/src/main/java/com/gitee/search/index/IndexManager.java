@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.gitee.search.index.ObjectMapping.FIELD_ID;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +40,7 @@ public class IndexManager {
      * @throws IOException
      */
     public static String search(String type, Query query, Sort sort, int page, int pageSize) throws IOException {
-        try (IndexReader reader = StorageFactory.getStorage().getReader(type)) {
+        try (IndexReader reader = StorageFactory.getReader(type)) {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode result = mapper.createObjectNode();
             IndexSearcher searcher = new IndexSearcher(reader);
@@ -76,27 +79,41 @@ public class IndexManager {
     public static int write(QueueTask task) throws IOException {
         List<Document> docs = ObjectMapping.task2doc(task);
         if(docs != null && docs.size() > 0) {
-            try (IndexWriter writer = StorageFactory.getStorage().getWriter(task.getType())) {
+            try (IndexWriter writer = StorageFactory.getWriter(task.getType())) {
                 switch (task.getAction()) {
                     case QueueTask.ACTION_ADD:
                         writer.addDocuments(docs);
                         log.info("{} documents writed to index.", docs.size());
                         break;
                     case QueueTask.ACTION_UPDATE:
-                        for (Document doc : docs) {
-                            writer.updateDocument(new Term(ObjectMapping.FIELD_ID, doc.get(ObjectMapping.FIELD_ID)), doc);
-                        }
+                        //delete documents
+                        Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+                        writer.deleteDocuments(queries);
+                        //re-add documents
+                        writer.addDocuments(docs);
                         log.info("{} documents updated to index.", docs.size());
                         break;
                     case QueueTask.ACTION_DELETE:
-                        Term[] terms = docs.stream().map(d -> new Term(ObjectMapping.FIELD_ID, d.get(ObjectMapping.FIELD_ID))).toArray(Term[]::new);
-                        writer.deleteDocuments(terms);
+                        queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+                        writer.deleteDocuments(queries);
                         log.info("{} documents deleted from index.", docs.size());
                 }
             }
 
         }
         return (docs!=null)?docs.size():0;
+    }
+
+    public static void main(String[] args) throws IOException {
+        QueueTask task = new QueueTask();
+        task.setType(QueueTask.TYPE_REPOSITORY);
+        //test delete
+        //task.setAction(QueueTask.ACTION_DELETE);
+        //task.setBody("{\"objects\":[{\"id\":1016657},{\"id\":1495600}]}");
+        //test update
+        task.setAction(QueueTask.ACTION_UPDATE);
+        task.setBody("{\"objects\":[{\"id\":91902,\"recomm\":333}]}");
+        write(task);
     }
 
 }
