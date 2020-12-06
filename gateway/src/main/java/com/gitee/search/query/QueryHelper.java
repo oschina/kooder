@@ -1,7 +1,6 @@
 package com.gitee.search.query;
 
 import com.gitee.search.action.SearchObject;
-import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.SearchHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.NumericDocValuesField;
@@ -11,7 +10,6 @@ import org.apache.lucene.expressions.js.JavascriptCompiler;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
 import java.lang.reflect.Method;
@@ -39,11 +37,9 @@ public class QueryHelper {
         }
     }
 
-    public static void main(String[] args ) {
-    }
-
     /**
      * 仓库搜索的条件
+     * TODO 从搜索关键字中提取编程语言，进行单独的过滤
      * @param q
      * @param lang
      * @param recomm
@@ -52,17 +48,17 @@ public class QueryHelper {
     public static Query buildRepoQuery(String q, String lang, int recomm) throws ParseException {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //只搜索公开仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("type", 2), BooleanClause.Occur.MUST);
+        builder.add(NumericDocValuesField.newSlowExactQuery("type", 2), BooleanClause.Occur.FILTER);
         //不搜索fork仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("fork", 0), BooleanClause.Occur.MUST);
+        builder.add(NumericDocValuesField.newSlowExactQuery("fork", 0), BooleanClause.Occur.FILTER);
         //todo 不搜索被屏蔽的仓库
-        //builder.add(NumericDocValuesField.newSlowExactQuery("block", 0), BooleanClause.Occur.MUST);
+        //builder.add(NumericDocValuesField.newSlowExactQuery("block", 0), BooleanClause.Occur.FILTER);
         if(StringUtils.isNotBlank(lang))//编程语言
-            builder.add(new TermQuery(new Term("lang", lang)), BooleanClause.Occur.MUST);
+            builder.add(new TermQuery(new Term("lang", lang)), BooleanClause.Occur.FILTER);
         if(recomm >= SearchObject.RECOMM_GVP)//搜索范围
-            builder.add(NumericDocValuesField.newSlowExactQuery("recomm", SearchObject.RECOMM_GVP), BooleanClause.Occur.MUST);
+            builder.add(NumericDocValuesField.newSlowExactQuery("recomm", SearchObject.RECOMM_GVP), BooleanClause.Occur.FILTER);
         else if(recomm > SearchObject.RECOMM_NONE)
-            builder.add(NumericDocValuesField.newSlowRangeQuery("recomm", SearchObject.RECOMM, SearchObject.RECOMM_GVP), BooleanClause.Occur.MUST);
+            builder.add(NumericDocValuesField.newSlowRangeQuery("recomm", SearchObject.RECOMM, SearchObject.RECOMM_GVP), BooleanClause.Occur.FILTER);
 
         //BoostQuery
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
