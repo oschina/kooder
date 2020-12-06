@@ -22,7 +22,7 @@ public class IndexAction {
      * @param body
      * @return
      */
-    public static StringBuilder add(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String add(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         pushTask(QueueTask.ACTION_ADD, params, body);
         return null;
     }
@@ -33,7 +33,7 @@ public class IndexAction {
      * @param body
      * @return
      */
-    public static StringBuilder update(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String update(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         pushTask(QueueTask.ACTION_UPDATE, params, body);
         return null;
     }
@@ -44,7 +44,7 @@ public class IndexAction {
      * @param body
      * @return
      */
-    public static StringBuilder delete(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String delete(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         pushTask(QueueTask.ACTION_DELETE, params, body);
         return null;
     }

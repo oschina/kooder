@@ -50,7 +50,7 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 LastHttpContent trailer = (LastHttpContent) msg;
                 QueryStringDecoder uri_decoder = new QueryStringDecoder(request.uri());
                 try {
-                    StringBuilder resp = ActionExecutor.execute(uri_decoder.path(), uri_decoder.parameters(), formatBody(trailer));
+                    String resp = ActionExecutor.execute(uri_decoder.path(), uri_decoder.parameters(), formatBody(trailer));
                     if(resp != null && resp.length() > 0)
                         responseData.append(resp);
                     writeResponse(ctx, trailer, responseData);
@@ -81,7 +81,9 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
             ua = "-";
         InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
         String ip = insocket.getAddress().getHostAddress();
-        logger.writeAccessLog(request.uri(), String.format("%s - \"%s %s\" %d %d - \"%s\"", ip, request.method().name(), request.uri(), errcode, len, ua));
+        logger.writeAccessLog(request.uri(),
+                String.format("%s - \"%s %s\" %d %d - \"%s\"",
+                        ip, request.method().name(), request.uri(), errcode, len, ua));
     }
 
     @Override

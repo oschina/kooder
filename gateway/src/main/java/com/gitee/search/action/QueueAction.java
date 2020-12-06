@@ -21,10 +21,10 @@ public class QueueAction {
      * @return
      * @throws ActionException
      */
-    public static StringBuilder fetch(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String fetch(Map<String, List<String>> params, StringBuilder body) {
         EmbedQueueProvider queue = (EmbedQueueProvider)QueueFactory.getProvider();
         QueueTask task = queue.innerPop();
-        return (task != null) ? new StringBuilder(task.json()) : null;
+        return (task != null) ? task.json() : null;
     }
 
 }

@@ -27,7 +27,7 @@ public class SearchCmd {
 
             long ct = System.currentTimeMillis();
 
-            StringBuilder json = SearchAction.repositories(new HashMap<String, List<String>>() {{
+            String json = SearchAction.repositories(new HashMap<String, List<String>>() {{
                 put("q", Arrays.asList(line));
             }}, null);
 

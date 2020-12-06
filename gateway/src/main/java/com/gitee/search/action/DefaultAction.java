@@ -12,11 +12,11 @@ public class DefaultAction {
      * @return
      * @throws ActionException
      */
-    public static StringBuilder index(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String index(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         StringBuilder resp = new StringBuilder();
         params.forEach((k,v) -> resp.append("\r\n" + k + "="+String.join(",", v)));
         resp.append("\r\nBODY:" + body);
-        return resp;
+        return resp.toString();
     }
 
 }

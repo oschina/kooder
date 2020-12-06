@@ -29,7 +29,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder repositories(Map<String, List<String>> params, StringBuilder body) throws IOException, ParseException
+    public static String repositories(Map<String, List<String>> params, StringBuilder body) throws IOException, ParseException
     {
         String q = getParam(params, "q");
         String sort = getParam(params, "sort");
@@ -45,9 +45,7 @@ public class SearchAction {
         Query query = QueryHelper.buildRepoQuery(q, lang, 0);
         System.out.println(query);
 
-        String resultJson = IndexManager.search(QueueTask.TYPE_REPOSITORY, query, Sort.RELEVANCE, page, PAGE_SIZE);
-
-        return new StringBuilder(resultJson);
+        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, Sort.RELEVANCE, page, PAGE_SIZE);
     }
 
     /**
@@ -56,7 +54,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder codes(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String codes(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -66,7 +64,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder issues(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String issues(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -76,7 +74,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder pullrequests(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String pullrequests(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -86,7 +84,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder wiki(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String wiki(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -96,7 +94,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder commits(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String commits(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
@@ -106,7 +104,7 @@ public class SearchAction {
      * @param body
      * @return
      */
-    public static StringBuilder users(Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    public static String users(Map<String, List<String>> params, StringBuilder body) throws ActionException {
         return null;
     }
 
