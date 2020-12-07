@@ -1,6 +1,6 @@
 package com.gitee.search.query;
 
-import com.gitee.search.action.SearchObject;
+import com.gitee.search.action.Constants;
 import com.gitee.search.core.SearchHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.NumericDocValuesField;
@@ -48,17 +48,18 @@ public class QueryHelper {
     public static Query buildRepoQuery(String q, String lang, int recomm) throws ParseException {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //只搜索公开仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("type", 2), BooleanClause.Occur.FILTER);
+        builder.add(NumericDocValuesField.newSlowExactQuery("type", Constants.REPO_TYPE_PUBLIC), BooleanClause.Occur.FILTER);
         //不搜索fork仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("fork", 0), BooleanClause.Occur.FILTER);
-        //todo 不搜索被屏蔽的仓库
-        //builder.add(NumericDocValuesField.newSlowExactQuery("block", 0), BooleanClause.Occur.FILTER);
+        builder.add(NumericDocValuesField.newSlowExactQuery("fork", Constants.REPO_FORK_NO), BooleanClause.Occur.FILTER);
+        //不搜索被屏蔽的仓库
+        builder.add(NumericDocValuesField.newSlowExactQuery("block", Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
+
         if(StringUtils.isNotBlank(lang))//编程语言
             builder.add(new TermQuery(new Term("lang", lang)), BooleanClause.Occur.FILTER);
-        if(recomm >= SearchObject.RECOMM_GVP)//搜索范围
-            builder.add(NumericDocValuesField.newSlowExactQuery("recomm", SearchObject.RECOMM_GVP), BooleanClause.Occur.FILTER);
-        else if(recomm > SearchObject.RECOMM_NONE)
-            builder.add(NumericDocValuesField.newSlowRangeQuery("recomm", SearchObject.RECOMM, SearchObject.RECOMM_GVP), BooleanClause.Occur.FILTER);
+        if(recomm >= Constants.RECOMM_GVP)//搜索范围
+            builder.add(NumericDocValuesField.newSlowExactQuery("recomm", Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
+        else if(recomm > Constants.RECOMM_NONE)
+            builder.add(NumericDocValuesField.newSlowRangeQuery("recomm", Constants.RECOMM, Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
 
         //BoostQuery
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
