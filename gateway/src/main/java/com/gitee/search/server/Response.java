@@ -1,6 +1,6 @@
 package com.gitee.search.server;
 
-import io.netty.handler.codec.http.HttpHeaderNames;
+import java.util.Map;
 
 /**
  * HTTP Response
@@ -41,11 +41,31 @@ public class Response {
         return (body != null) ? body.length() : 0;
     }
 
+    /**
+     * Make a html response
+     * @param html
+     * @return
+     */
     public final static Response html(String html) {
         return new Response(CONTENT_TYPE_HTML, html);
     }
 
+    /**
+     * Make a json response
+     * @param json
+     * @return
+     */
     public final static Response json(String json) {
         return new Response(CONTENT_TYPE_JSON, json);
+    }
+
+    /**
+     * Execute velocity template
+     * @param vm
+     * @param params
+     * @return
+     */
+    public final static Response vm(String vm, Map params) {
+        return Response.html(TemplateEngine.render(vm, params));
     }
 }

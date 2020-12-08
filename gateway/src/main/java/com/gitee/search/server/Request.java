@@ -5,9 +5,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.lang.math.NumberUtils;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +14,7 @@ import java.util.Map;
  */
 public class Request {
 
-    private Map<String, List<String>> params = new HashMap<>();
+    private Map<String, Object> params = new HashMap<>();
     private String body;
     private HttpMethod method;
     private String path;
@@ -32,7 +30,12 @@ public class Request {
         Request request = new Request();
         QueryStringDecoder uri_decoder = new QueryStringDecoder(req.uri());
         LastHttpContent trailer = (LastHttpContent) req;
-        request.params.putAll(uri_decoder.parameters());
+        uri_decoder.parameters().forEach((k,l) -> {
+            if(l.size() == 1)
+                request.params.put(k, l.get(0));
+            else if (l.size() > 1)
+                request.params.put(k, l.stream().toArray(String[]::new));
+        });
         request.body = formatBody(trailer).toString();
         request.method = req.method();
         request.path = uri_decoder.path();
@@ -47,6 +50,14 @@ public class Request {
 
     public HttpMethod getMethod() {
         return method;
+    }
+
+    public boolean isPost() {
+        return HttpMethod.POST.equals(this.method);
+    }
+
+    public boolean isGet() {
+        return HttpMethod.GET.equals(this.method);
     }
 
     public String getPath() {
@@ -72,7 +83,7 @@ public class Request {
      * @return
      */
     public int param(String name, int defValue) {
-        String value = params.getOrDefault(name, Arrays.asList(String.valueOf(defValue))).get(0);
+        String value = param(name);
         return NumberUtils.toInt(value, defValue);
     }
 
@@ -83,16 +94,26 @@ public class Request {
      * @return
      */
     public String param(String name, String defValue) {
-        return params.getOrDefault(name, Arrays.asList(defValue)).get(0);
+        String v = param(name);
+        return (v!=null)?v:defValue;
     }
 
     public String param(String name) {
-        List<String> values = params.get(name);
-        return (values != null && values.size() > 0)?values.get(0):null;
+        Object values = params.get(name);
+        if(values instanceof String[])
+            return ((String[])values)[0];
+        return params.get(name).toString();
     }
 
-    public List<String> params(String name) {
-        return params.get(name);
+    public String[] params(String name) {
+        Object values = params.get(name);
+        if(values instanceof String[])
+            return (String[])values;
+        return new String[]{values.toString()};
+    }
+
+    public Map<String, Object> params() {
+        return params;
     }
 
     /**

@@ -3,8 +3,11 @@ package com.gitee.search.server;
 import com.gitee.search.core.GiteeSearchConfig;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Map;
@@ -16,15 +19,23 @@ import java.util.Properties;
  */
 public class TemplateEngine {
 
+    private final static Logger log = LoggerFactory.getLogger(TemplateEngine.class);
+
     public final static String ENCODING = "utf-8";
 
     static {
-        String sWebappPath = GiteeSearchConfig.getProperty("http.webapp_path");
-        Path webappPath = GiteeSearchConfig.getPath(sWebappPath);
-
-        Properties p = new Properties();
-        p.setProperty("resource.loader.file.path", webappPath.toString());
-        Velocity.init(p);
+        try (InputStream stream = TemplateEngine.class.getResourceAsStream("/velocity.properties")) {
+            Properties p = new Properties();
+            p.load(stream);
+            String sWebappPath = p.getProperty("resource.loader.file.path");
+            if(sWebappPath != null) {
+                Path webappPath = GiteeSearchConfig.getPath(sWebappPath);
+                p.setProperty("resource.loader.file.path", webappPath.toString());
+            }
+            Velocity.init(p);
+        } catch(IOException e) {
+            log.error("Failed to loading velocity.properties", e);
+        }
     }
 
     /**

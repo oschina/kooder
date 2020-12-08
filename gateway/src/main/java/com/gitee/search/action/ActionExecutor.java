@@ -3,9 +3,12 @@ package com.gitee.search.action;
 import com.gitee.search.server.Request;
 import com.gitee.search.server.Response;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.stream.Stream;
 
 /**
@@ -14,76 +17,99 @@ import java.util.stream.Stream;
  */
 public class ActionExecutor {
 
+    private final static Logger log = LoggerFactory.getLogger(ActionExecutor.class);
+
+    private final static String DEFAULT_ACTION_CLASS = "Index"; //默认的Action类名
+    private final static String DEFAULT_ACTION_METHOD = "index";//Action默认的方法名
+
+    public static void main(String[] args) throws Exception {
+
+        Request req = new Request(){
+            @Override
+            public String getPath() {
+                return "/search/asdfasd";
+            }
+
+            {
+
+            }};
+
+        execute(req);
+    }
+
     /**
      * 根据请求的 URL 进行相应处理，并返回执行结果
      * @param request
      * @return
      */
-    public final static Response execute(Request request)
-            throws ActionException
-    {
-
-        String className = null ,methodName = null;
-
-        String[] paths = parsePath(request.getPath());
+    public final static Response execute(Request request) throws ActionException {
+        String[] paths = Stream.of(request.getPath().split("/")).filter(p -> p.length() > 0).toArray(String[]::new);
+        Method actionMethod = null;
         switch (paths.length) {
             case 0:
-                className = "Default";
-                methodName = "index";
+                actionMethod = findActionMethod(DEFAULT_ACTION_CLASS, DEFAULT_ACTION_METHOD);
                 break;
             case 1:
-                className = paths[0];
-                methodName = "index";
+                actionMethod = findActionMethod(paths[0], DEFAULT_ACTION_METHOD);
+                if(actionMethod == null) {
+                    actionMethod = findActionMethod(DEFAULT_ACTION_CLASS, paths[0]);
+                }
                 break;
-            case 2:
-                className = paths[0];
-                methodName = paths[1];
+            default:
+                actionMethod = findActionMethod(paths[0], paths[1]);
+                if(actionMethod == null) {
+                    actionMethod = findActionMethod(paths[0], DEFAULT_ACTION_METHOD);
+                    if(actionMethod == null) {
+                        actionMethod = findActionMethod(DEFAULT_ACTION_CLASS, paths[0]);
+                    }
+                }
         }
 
-        try {
-            className = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
-            String fullclassName = ActionExecutor.class.getPackage().getName() + "." + className;
-            Class actionClass = Class.forName(fullclassName);
-            return callActionMethod(actionClass, methodName, request);
+        if(actionMethod == null) {
+            //actionMethod = findActionMethod(DEFAULT_ACTION_CLASS, DEFAULT_ACTION_METHOD);
+            //if(actionMethod == null)
+                throw new ActionException(HttpResponseStatus.NOT_FOUND, request.getPath());
+        }
 
+        log.debug(actionMethod.toString());
+
+        try {
+            return invokeActionMethod(actionMethod, request);
         } catch (InvocationTargetException e) {
             if(e.getCause() instanceof ActionException)
                 throw (ActionException)e.getCause();
             throw new ActionException(HttpResponseStatus.INTERNAL_SERVER_ERROR, null, e.getCause());
-        } catch (ClassNotFoundException | NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw new ActionException(HttpResponseStatus.NOT_FOUND, request.getPath());
         } catch (IllegalAccessException e) {
             throw new ActionException(HttpResponseStatus.FORBIDDEN, request.getPath());
-        } catch(Throwable t) {
+        } catch(Exception t) {
             throw new ActionException(HttpResponseStatus.INTERNAL_SERVER_ERROR, null, t);
         }
     }
 
     /**
      * 调用 action 方法
-     * @param actionClass
-     * @param methodName
+     * @param actionMethod
      * @param request
      * @return
-     * @throws NoSuchMethodException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
      */
-    private static Response callActionMethod(Class actionClass, String methodName, Request request)
-            throws NoSuchMethodException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
+    private static Response invokeActionMethod(Method actionMethod, Request request)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException
     {
         Object result = null;
-        Method actionMethod = getActionMethod(actionClass, methodName);
+        boolean isStatic = Modifier.isStatic(actionMethod.getModifiers());
+        Class actionClass = actionMethod.getDeclaringClass();
+        Object targetObject = isStatic?actionClass:actionClass.getDeclaredConstructor().newInstance();
         switch(actionMethod.getParameterCount()){
             case 0:
-                result = actionMethod.invoke(actionClass);
+                result = actionMethod.invoke(targetObject);
                 break;
             case 1:
-                result = actionMethod.invoke(actionClass, request);
+                result = actionMethod.invoke(targetObject, request);
                 break;
             default:
-                throw new NoSuchMethodException(methodName);
+                throw new IllegalArgumentException(actionMethod.getName());
         }
         if(result == null)
             return null;
@@ -96,20 +122,22 @@ public class ActionExecutor {
 
     /**
      * 获取action的方法实例
-     * @param actionClass
+     * @param className
      * @param methodName
      * @return
-     * @throws NoSuchMethodException
      */
-    private static Method getActionMethod(Class actionClass, String methodName) throws NoSuchMethodException {
-        for(Method actionMethod : actionClass.getDeclaredMethods()){
-            if(actionMethod.getName().equals(methodName))
-                return actionMethod;
-        }
-        throw new NoSuchMethodException(methodName);
+    private static Method findActionMethod(String className, String methodName) {
+        String newClassName = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
+        String fullClassName = ActionExecutor.class.getPackage().getName() + "." + newClassName;
+        Class actionClass = null;
+        try {
+            actionClass = Class.forName(fullClassName);
+            for(Method actionMethod : actionClass.getDeclaredMethods()){
+                if(actionMethod.getName().equals(methodName) && Modifier.isPublic(actionMethod.getModifiers()))
+                    return actionMethod;
+            }
+        } catch (ClassNotFoundException e) {}
+        return null;
     }
 
-    private static String[] parsePath(String uri) {
-        return Stream.of(uri.split("/")).filter(p -> p.length() > 0).toArray(String[]::new);
-    }
 }

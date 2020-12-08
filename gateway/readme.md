@@ -6,9 +6,9 @@
 
 **索引管理接口列表**
 
-* `/index/add`  添加索引
-* `/index/update`   更新索引
-* `/index/delete`   删除索引
+* `/task/add`  添加索引
+* `/task/update`   更新索引
+* `/task/delete`   删除索引
 
 需要参数: type=repo|issue|code  
 请求体格式请看 json/*.json

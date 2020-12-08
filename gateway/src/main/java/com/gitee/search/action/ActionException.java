@@ -16,12 +16,12 @@ public class ActionException extends Exception {
         this.errorCode = code;
     }
     public ActionException(HttpResponseStatus code, String message) {
-        super(message);
+        super("code:"+code.code()+", msg:"+message);
         this.errorCode = code;
     }
 
     public ActionException(HttpResponseStatus code, String message, Throwable t) {
-        super(message, t);
+        super("code:"+code.code()+", msg:"+message, t);
         this.errorCode = code;
     }
 

@@ -3,9 +3,13 @@
     <title>Gitee Search</title>
 </head>
 <body>
-<form action="/search">
-    <input type="text" name="q">
+<form method="POST">
+    搜索: <input type="text" name="q" value="$!q">
     <input type="submit" value="Search"/>
 </form>
+#if($q)
+<hr/>
+$q
+#end
 </body>
 </html>
