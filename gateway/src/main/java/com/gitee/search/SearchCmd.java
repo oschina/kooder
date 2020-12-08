@@ -1,12 +1,9 @@
 package com.gitee.search;
 
 import com.gitee.search.action.SearchAction;
+import com.gitee.search.server.Request;
 import jline.TerminalFactory;
 import jline.console.ConsoleReader;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * 测试搜索的控制台程序
@@ -27,9 +24,17 @@ public class SearchCmd {
 
             long ct = System.currentTimeMillis();
 
-            String json = SearchAction.repositories(new HashMap<String, List<String>>() {{
-                put("q", Arrays.asList(line));
-            }}, null);
+            Request req = new Request(){
+                @Override
+                public String param(String name) {
+                    return "q".equals(name)?line:super.param(name);
+                }
+
+                {
+
+            }};
+
+            String json = SearchAction.repositories(req);
 
             System.out.println("total time: " + (System.currentTimeMillis() - ct) + " ms");
 

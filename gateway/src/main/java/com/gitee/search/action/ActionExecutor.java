@@ -1,11 +1,11 @@
 package com.gitee.search.action;
 
+import com.gitee.search.server.Request;
+import com.gitee.search.server.Response;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -16,18 +16,16 @@ public class ActionExecutor {
 
     /**
      * 根据请求的 URL 进行相应处理，并返回执行结果
-     * @param path
-     * @param params
-     * @param body
+     * @param request
      * @return
      */
-    public final static String execute(String path, Map<String, List<String>> params, StringBuilder body)
+    public final static Response execute(Request request)
             throws ActionException
     {
 
         String className = null ,methodName = null;
 
-        String[] paths = parsePath(path);
+        String[] paths = parsePath(request.getPath());
         switch (paths.length) {
             case 0:
                 className = "Default";
@@ -46,16 +44,16 @@ public class ActionExecutor {
             className = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
             String fullclassName = ActionExecutor.class.getPackage().getName() + "." + className;
             Class actionClass = Class.forName(fullclassName);
-            return callActionMethod(actionClass, methodName, params, body);
+            return callActionMethod(actionClass, methodName, request);
 
         } catch (InvocationTargetException e) {
             if(e.getCause() instanceof ActionException)
                 throw (ActionException)e.getCause();
             throw new ActionException(HttpResponseStatus.INTERNAL_SERVER_ERROR, null, e.getCause());
         } catch (ClassNotFoundException | NoSuchMethodException e) {
-            throw new ActionException(HttpResponseStatus.NOT_FOUND, path);
+            throw new ActionException(HttpResponseStatus.NOT_FOUND, request.getPath());
         } catch (IllegalAccessException e) {
-            throw new ActionException(HttpResponseStatus.FORBIDDEN, path);
+            throw new ActionException(HttpResponseStatus.FORBIDDEN, request.getPath());
         } catch(Throwable t) {
             throw new ActionException(HttpResponseStatus.INTERNAL_SERVER_ERROR, null, t);
         }
@@ -65,15 +63,14 @@ public class ActionExecutor {
      * 调用 action 方法
      * @param actionClass
      * @param methodName
-     * @param params
-     * @param body
+     * @param request
      * @return
      * @throws NoSuchMethodException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws InvocationTargetException
      */
-    private static String callActionMethod(Class actionClass, String methodName, Map<String, List<String>> params, StringBuilder body)
+    private static Response callActionMethod(Class actionClass, String methodName, Request request)
             throws NoSuchMethodException,IllegalAccessException, IllegalArgumentException, InvocationTargetException
     {
         Object result = null;
@@ -83,17 +80,18 @@ public class ActionExecutor {
                 result = actionMethod.invoke(actionClass);
                 break;
             case 1:
-                result = actionMethod.invoke(actionClass, params);
+                result = actionMethod.invoke(actionClass, request);
                 break;
-            case 2:
-                result = actionMethod.invoke(actionClass, params, body);
+            default:
+                throw new NoSuchMethodException(methodName);
         }
         if(result == null)
             return null;
-        if(result instanceof String)
-            return (String)result;
 
-        return result.toString();
+        if(result instanceof Response)
+            return (Response) result;
+
+        return Response.json((String)result);
     }
 
     /**

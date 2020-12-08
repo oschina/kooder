@@ -1,22 +1,22 @@
 package com.gitee.search.action;
 
-import java.util.List;
-import java.util.Map;
+import com.gitee.search.server.Request;
+import com.gitee.search.server.Response;
+import com.gitee.search.server.TemplateEngine;
 
+/**
+ * Default action
+ * @author Winter Lau<javayou@gmail.com>
+ */
 public class DefaultAction {
 
     /**
      * 测试输出
-     * @param params
-     * @param body
+     * @param request
      * @return
-     * @throws ActionException
      */
-    public static String index(Map<String, List<String>> params, StringBuilder body) throws ActionException {
-        StringBuilder resp = new StringBuilder();
-        params.forEach((k,v) -> resp.append("\r\n" + k + "="+String.join(",", v)));
-        resp.append("\r\nBODY:" + body);
-        return resp.toString();
+    public static Response index(Request request) {
+        return Response.html(TemplateEngine.render("index.vm", null));
     }
 
 }

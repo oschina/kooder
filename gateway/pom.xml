@@ -50,6 +50,12 @@
             <version>2.14.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>2.2</version>
+        </dependency>
+
     </dependencies>
 
 </project>

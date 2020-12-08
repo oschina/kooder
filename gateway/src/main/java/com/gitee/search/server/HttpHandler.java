@@ -48,18 +48,19 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 long len = 0;
                 int errcode = OK.code();
                 LastHttpContent trailer = (LastHttpContent) msg;
-                QueryStringDecoder uri_decoder = new QueryStringDecoder(request.uri());
+                Request httpRequest = Request.fromNettyHttpRequest(request);
                 try {
-                    String resp = ActionExecutor.execute(uri_decoder.path(), uri_decoder.parameters(), formatBody(trailer));
-                    if(resp != null && resp.length() > 0)
-                        responseData.append(resp);
-                    writeResponse(ctx, trailer, responseData);
+                    Response resp = ActionExecutor.execute(httpRequest);
+                    if(resp.getBody() != null)
+                        responseData.append(resp.getBody());
+                    writeResponse(ctx, trailer, responseData, resp.getContentType());
                     len = responseData.length();
                 } catch (ActionException e) {
+                    log.error("Failed to call action with '{}'", httpRequest.getUri(), e);
                     writeErrorResponse(ctx, e.getErrorCode());
                     errcode = e.getErrorCode().code();
                 } catch (Exception e) {
-                    log.error("Failed to call action with '{}'", uri_decoder.path(), e);
+                    log.error("Failed to call action with '{}'", httpRequest.getUri(), e);
                     writeErrorResponse(ctx, INTERNAL_SERVER_ERROR);
                     errcode = INTERNAL_SERVER_ERROR.code();
                 }
@@ -106,24 +107,24 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
         return responseData;
     }
 
-    private void writeResponse(ChannelHandlerContext ctx, LastHttpContent trailer, StringBuilder responseData) {
+    private void writeResponse(ChannelHandlerContext ctx, LastHttpContent trailer, StringBuilder responseData, String contentType) {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(
                 HTTP_1_1,
                 ((HttpObject) trailer).decoderResult().isSuccess() ? OK : BAD_REQUEST,
                 Unpooled.copiedBuffer(responseData.toString(), CharsetUtil.UTF_8)
         );
-        writeGlobalHeaders(ctx, httpResponse);
+        writeGlobalHeaders(ctx, httpResponse, contentType);
     }
 
     private void writeErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus errorCode) {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(HTTP_1_1, errorCode, Unpooled.EMPTY_BUFFER);
-        writeGlobalHeaders(ctx, httpResponse);
+        writeGlobalHeaders(ctx, httpResponse, Response.CONTENT_TYPE_HTML);
     }
 
-    private void writeGlobalHeaders(ChannelHandlerContext ctx, FullHttpResponse httpResponse) {
+    private void writeGlobalHeaders(ChannelHandlerContext ctx, FullHttpResponse httpResponse, String contentType) {
         boolean keepAlive = HttpUtil.isKeepAlive(request);
-        httpResponse.headers().set(HttpHeaderNames.SERVER, "Gitee Search Gateway 1.0");
-        httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");
+        httpResponse.headers().set(HttpHeaderNames.SERVER, "GSearch Gateway 1.0");
+        httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
         if (keepAlive) {
             httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
             httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

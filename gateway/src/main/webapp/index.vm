@@ -1,0 +1,11 @@
+<html>
+<head>
+    <title>Gitee Search</title>
+</head>
+<body>
+<form action="/search">
+    <input type="text" name="q">
+    <input type="submit" value="Search"/>
+</form>
+</body>
+</html>

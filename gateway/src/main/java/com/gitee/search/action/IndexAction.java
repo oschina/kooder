@@ -2,13 +2,10 @@ package com.gitee.search.action;
 
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
+import com.gitee.search.server.Request;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-import static com.gitee.search.action.ActionUtils.getParam;
-
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 索引的维护
@@ -18,42 +15,33 @@ public class IndexAction {
 
     /**
      * 添加索引
-     * @param params
-     * @param body
-     * @return
+     * @param request
      */
-    public static String add(Map<String, List<String>> params, StringBuilder body) throws ActionException {
-        pushTask(QueueTask.ACTION_ADD, params, body);
-        return null;
+    public static void add(Request request) throws ActionException {
+        pushTask(QueueTask.ACTION_ADD, request);
     }
 
     /**
      * 修改索引
-     * @param params
-     * @param body
-     * @return
+     * @param request
      */
-    public static String update(Map<String, List<String>> params, StringBuilder body) throws ActionException {
-        pushTask(QueueTask.ACTION_UPDATE, params, body);
-        return null;
+    public static void update(Request request) throws ActionException {
+        pushTask(QueueTask.ACTION_UPDATE, request);
     }
 
     /**
      * 删除索引
-     * @param params
-     * @param body
-     * @return
+     * @param request
      */
-    public static String delete(Map<String, List<String>> params, StringBuilder body) throws ActionException {
-        pushTask(QueueTask.ACTION_DELETE, params, body);
-        return null;
+    public static void delete(Request request) throws ActionException {
+        pushTask(QueueTask.ACTION_DELETE, request);
     }
 
-    private static void pushTask(String action, Map<String, List<String>> params, StringBuilder body) throws ActionException {
+    private static void pushTask(String action, Request request) throws ActionException {
         QueueTask task = new QueueTask();
         task.setAction(action);
-        task.setType(parseType(params));
-        task.setBody(body.toString());
+        task.setType(parseType(request));
+        task.setBody(request.getBody());
         if(task.check())
             QueueFactory.getProvider().push(Arrays.asList(task));
         else
@@ -62,13 +50,13 @@ public class IndexAction {
 
     /**
      * 从参数中解析对象类型字段，并判断值是否有效
-     * @param params
+     * @param request
      * @return
      * @throws ActionException
      */
-    private static String parseType(Map<String, List<String>> params) throws ActionException {
+    private static String parseType(Request request) throws ActionException {
         try {
-            String type = getParam(params, "type");
+            String type = request.param("type");
             if(!QueueTask.isAvailType(type))
                 throw new IllegalArgumentException(type);
             return type.toLowerCase();
