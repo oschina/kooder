@@ -48,7 +48,8 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
                 try {
                     httpResponse = ActionExecutor.execute(httpRequest);
                 } catch (ActionException e) {
-                    //log.error("Failed to call action with '{}'", httpRequest.getUri(), e);
+                    if (e.getErrorCode() == INTERNAL_SERVER_ERROR)
+                        log.error("Failed to call action with '{}'", httpRequest.getUri(), e);
                     httpResponse = Response.error(e.getErrorCode());
                 } catch (Exception e) {
                     log.error("Failed to call action with '{}'", httpRequest.getUri(), e);

@@ -117,9 +117,8 @@ public class ActionExecutor {
     private final static Method findActionMethod(String className, String methodName) {
         String newClassName = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
         String fullClassName = ActionExecutor.class.getPackage().getName() + "." + newClassName;
-        Class actionClass = null;
         try {
-            actionClass = Class.forName(fullClassName);
+            Class actionClass = Class.forName(fullClassName);
             for(Method actionMethod : actionClass.getDeclaredMethods()){
                 if(actionMethod.getName().equals(methodName) && Modifier.isPublic(actionMethod.getModifiers()))
                     return actionMethod;
