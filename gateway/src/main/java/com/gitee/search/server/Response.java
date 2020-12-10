@@ -2,6 +2,7 @@ package com.gitee.search.server;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.EmptyHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -26,7 +27,7 @@ public class Response {
     private HttpResponseStatus status = HttpResponseStatus.OK;
     private String contentType = CONTENT_TYPE_HTML;
     private ByteBuf body = Unpooled.EMPTY_BUFFER;
-    private HttpHeaders headers = EmptyHttpHeaders.INSTANCE;
+    private HttpHeaders headers = new DefaultHttpHeaders();
 
     public Response(){}
 
