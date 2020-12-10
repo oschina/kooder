@@ -58,7 +58,7 @@ public class IndexManager {
                 log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
                         doc.get("id"),
                         docs.scoreDocs[i].score,
-                        doc.get("owner.path"),
+                        doc.get("namespace.path"),
                         doc.get("path"),
                         doc.get("name"),
                         doc.get("type"),
@@ -82,21 +82,24 @@ public class IndexManager {
             try (IndexWriter writer = StorageFactory.getWriter(task.getType())) {
                 switch (task.getAction()) {
                     case QueueTask.ACTION_ADD:
+                        long ct = System.currentTimeMillis();
                         writer.addDocuments(docs);
-                        log.info("{} documents writed to index.", docs.size());
+                        log.info("{} documents writed to index. {}ms", docs.size(), (System.currentTimeMillis()-ct));
                         break;
                     case QueueTask.ACTION_UPDATE:
-                        //delete documents
+                        //update documents
+                        ct = System.currentTimeMillis();
                         Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
                         writer.deleteDocuments(queries);
                         //re-add documents
                         writer.addDocuments(docs);
-                        log.info("{} documents updated to index.", docs.size());
+                        log.info("{} documents updated to index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
                         break;
                     case QueueTask.ACTION_DELETE:
+                        ct = System.currentTimeMillis();
                         queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
                         writer.deleteDocuments(queries);
-                        log.info("{} documents deleted from index.", docs.size());
+                        log.info("{} documents deleted from index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
                 }
             }
 
