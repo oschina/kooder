@@ -61,8 +61,6 @@ public class ActionExecutor {
                 throw new ActionException(HttpResponseStatus.NOT_FOUND, request.getPath());
         }
 
-        log.debug(actionMethod.toString());
-
         try {
             return invokeActionMethod(actionMethod, request);
         } catch (InvocationTargetException e) {

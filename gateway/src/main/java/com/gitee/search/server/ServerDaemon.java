@@ -97,7 +97,7 @@ public class ServerDaemon implements Daemon , AccessLogger {
     public void start() {
         try {
             ChannelFuture f = (bind!=null)?server.bind(bind,port):server.bind(port).sync();
-            log.info("Gitee Search Gateway READY !");
+            log.info("Gitee Search Gateway READY ({}:{})!", (bind!=null)?bind:"", this.port);
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             log.error("Gateway interrupted by controller.", e);

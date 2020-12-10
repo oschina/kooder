@@ -22,4 +22,13 @@ public class IndexAction {
         return Response.vm("index.vm", params);
     }
 
+    /**
+     * test redirect
+     * @param req
+     * @return
+     */
+    public static Response test(Request req) {
+        return Response.redirect("/", false);
+    }
+
 }

@@ -2,6 +2,8 @@ package com.gitee.search.server;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.EmptyHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
@@ -22,8 +24,9 @@ public class Response {
     public final static String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
 
     private HttpResponseStatus status = HttpResponseStatus.OK;
-    private String contentType;
+    private String contentType = CONTENT_TYPE_HTML;
     private ByteBuf body = Unpooled.EMPTY_BUFFER;
+    private HttpHeaders headers = EmptyHttpHeaders.INSTANCE;
 
     public Response(){}
 
@@ -58,6 +61,14 @@ public class Response {
 
     public void setStatus(HttpResponseStatus status) {
         this.status = status;
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(HttpHeaders headers) {
+        this.headers = headers;
     }
 
     /**
@@ -116,6 +127,19 @@ public class Response {
             response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
             log.error("Failed to read static file: " + path, e);
         }
+        return response;
+    }
+
+    /**
+     * redirect to new url
+     * @param newUrl
+     * @param permanently
+     * @return
+     */
+    public final static Response redirect(String newUrl, boolean permanently) {
+        Response response = new Response();
+        response.setStatus(permanently?HttpResponseStatus.MOVED_PERMANENTLY:HttpResponseStatus.FOUND);
+        response.headers.set("Location", newUrl);
         return response;
     }
 

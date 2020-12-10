@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 
 /**
  * Http requeset handler
@@ -61,17 +62,29 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
-    public int writeResponse(ChannelHandlerContext ctx, Request req, Response resp) {
+    /**
+     * write result to http response
+     * @param ctx
+     * @param req
+     * @param resp
+     * @return
+     */
+    private int writeResponse(ChannelHandlerContext ctx, Request req, Response resp) {
         int len = 0;
         boolean keepAlive = req.isKeepAlive();
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(HTTP_1_1, resp.getStatus(), resp.getBody());
-        httpResponse.headers().set(HttpHeaderNames.SERVER, "GSearch Gateway 1.0");
+        httpResponse.headers().set(HttpHeaderNames.SERVER, "Gitee Search Gateway/1.0");
         httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, resp.getContentType());
+        httpResponse.headers().set(HttpHeaderNames.DATE, new Date());
+
         if (keepAlive) {
             len = httpResponse.content().readableBytes();
             httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, len);
             httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         }
+
+        httpResponse.headers().add(resp.getHeaders());
+
         ctx.write(httpResponse);
 
         if (!keepAlive)
