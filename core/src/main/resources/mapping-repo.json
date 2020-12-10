@@ -12,6 +12,9 @@
     "name": {
       "type": "text"
     },
+    "path": {
+      "type": "text"
+    },
     "description": {
       "type": "text"
     },
@@ -24,6 +27,9 @@
     "recomm": {
       "type": "integer"
     },
+    "block": {
+      "type": "integer"
+    },
     "owner.id": {
       "type": "integer"
     },
@@ -33,12 +39,21 @@
     "owner.name": {
       "type": "text"
     },
+    "namespace.id": {
+      "type": "long"
+    },
+    "namespace.path": {
+      "type": "text"
+    },
     "detail": {
       "type": "text",
       "store": false
     },
     "fork": {
       "type": "integer"
+    },
+    "lang": {
+      "type": "string"
     },
     "license": {
       "type": "text"
@@ -53,6 +68,12 @@
       "type": "long"
     },
     "updated_at": {
+      "type": "long"
+    },
+    "last_activity_at": {
+      "type": "long"
+    },
+    "last_push_at": {
       "type": "long"
     },
     "count.star": {
