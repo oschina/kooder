@@ -20,6 +20,7 @@ public class Request {
     private String path;
     private String uri;
     private HttpHeaders headers;
+    private boolean keepAlive;
 
     /**
      * Turn netty request to gitee search request
@@ -41,6 +42,7 @@ public class Request {
         request.path = uri_decoder.path();
         request.uri = req.uri();
         request.headers = ((LastHttpContent) req).trailingHeaders();
+        request.keepAlive = HttpUtil.isKeepAlive(req);
         return request;
     }
 
@@ -66,6 +68,10 @@ public class Request {
 
     public String getUri() {
         return uri;
+    }
+
+    public boolean isKeepAlive() {
+        return keepAlive;
     }
 
     /**
@@ -102,7 +108,7 @@ public class Request {
         Object values = params.get(name);
         if(values instanceof String[])
             return ((String[])values)[0];
-        return params.get(name).toString();
+        return (String)params.get(name);
     }
 
     public String[] params(String name) {

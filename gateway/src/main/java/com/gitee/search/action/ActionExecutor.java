@@ -2,6 +2,7 @@ package com.gitee.search.action;
 
 import com.gitee.search.server.Request;
 import com.gitee.search.server.Response;
+import com.gitee.search.server.StaticFileService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,27 +23,16 @@ public class ActionExecutor {
     private final static String DEFAULT_ACTION_CLASS = "Index"; //默认的Action类名
     private final static String DEFAULT_ACTION_METHOD = "index";//Action默认的方法名
 
-    public static void main(String[] args) throws Exception {
-
-        Request req = new Request(){
-            @Override
-            public String getPath() {
-                return "/search/asdfasd";
-            }
-
-            {
-
-            }};
-
-        execute(req);
-    }
-
     /**
      * 根据请求的 URL 进行相应处理，并返回执行结果
      * @param request
      * @return
      */
     public final static Response execute(Request request) throws ActionException {
+
+        if(StaticFileService.isStatic(request)) //处理静态文件
+            return Response.file(request.getPath());
+
         String[] paths = Stream.of(request.getPath().split("/")).filter(p -> p.length() > 0).toArray(String[]::new);
         Method actionMethod = null;
         switch (paths.length) {
@@ -126,7 +116,7 @@ public class ActionExecutor {
      * @param methodName
      * @return
      */
-    private static Method findActionMethod(String className, String methodName) {
+    private final static Method findActionMethod(String className, String methodName) {
         String newClassName = Character.toUpperCase(className.charAt(0)) + className.substring(1) + "Action";
         String fullClassName = ActionExecutor.class.getPackage().getName() + "." + newClassName;
         Class actionClass = null;
