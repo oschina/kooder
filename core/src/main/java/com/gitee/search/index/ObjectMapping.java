@@ -144,7 +144,6 @@ public class ObjectMapping {
         if(field == null || field.isNull())
             return ;
         try {
-            /*
             if(field.isIntegralNumber()){ //整数值
                 doc.add(new NumericDocValuesField(fn, field.longValue()));
                 if (setting.isStore())
@@ -156,29 +155,12 @@ public class ObjectMapping {
                     doc.add(new StoredField(fn, field.floatValue()));
             }
             else if(field.isTextual()) {//文本内容
-                if("text".equalsIgnoreCase(setting.getType())){
-                    doc.add(new TextField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+                if("string".equalsIgnoreCase(setting.getType())){
+                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
                 else {
-                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
-                }
-            }*/
-            switch (setting.getType()) {
-                case "long":
-                    doc.add(new NumericDocValuesField(fn, field.longValue()));
-                    if (setting.isStore())
-                        doc.add(new StoredField(fn, field.longValue()));
-                    break;
-                case "integer":
-                    doc.add(new NumericDocValuesField(fn, field.intValue()));
-                    if (setting.isStore())
-                        doc.add(new StoredField(fn, field.intValue()));
-                    break;
-                case "text":
                     doc.add(new TextField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
-                    break;
-                default:
-                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+                }
             }
         } catch (Exception e) {
             log.error("Failed to add field("+fn+") to document.", e);
