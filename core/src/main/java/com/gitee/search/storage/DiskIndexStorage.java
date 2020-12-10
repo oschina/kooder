@@ -24,8 +24,7 @@ public class DiskIndexStorage implements IndexStorage {
     private final static Logger log = LoggerFactory.getLogger(DiskIndexStorage.class);
 
     private Path indexBasePath;
-
-    private IndexWriterConfig writerConfig ;
+    private Properties props;
 
     /**
      * 初始化磁盘索引存储
@@ -33,6 +32,7 @@ public class DiskIndexStorage implements IndexStorage {
      * @throws IOException
      */
     public DiskIndexStorage(Properties props) throws IOException {
+        this.props = props;
         String idxPath = props.getProperty("disk.path");
         this.indexBasePath = GiteeSearchConfig.getPath(idxPath);
         //路径已存在，但是不是一个目录，不可读写则报错
@@ -43,23 +43,23 @@ public class DiskIndexStorage implements IndexStorage {
             log.warn("Path '" + this.indexBasePath.toString()+"' for indexes not exists, created it!");
             Files.createDirectory(indexBasePath);
         }
-        this.writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
-        this.writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
-        this.writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
-        this.writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));
     }
 
     @Override
     public IndexWriter getWriter(String type) throws IOException {
-        FSDirectory dir = FSDirectory.open(getIndexPath(type));;
+        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
+
+        writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
+        writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
+        writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-        return new IndexWriter(dir, writerConfig);
+
+        return new IndexWriter(FSDirectory.open(getIndexPath(type)), writerConfig);
     }
 
     @Override
     public IndexReader getReader(String type) throws IOException {
-        FSDirectory dir = FSDirectory.open(getIndexPath(type));
-        return DirectoryReader.open(dir);
+        return DirectoryReader.open(FSDirectory.open(getIndexPath(type)));
     }
 
     /**
