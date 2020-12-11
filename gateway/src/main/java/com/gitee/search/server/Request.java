@@ -3,8 +3,12 @@ package com.gitee.search.server;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +18,7 @@ import java.util.Map;
  */
 public class Request {
 
-    private Map<String, Object> params = new HashMap<>();
+    private Map<String, Object> params;
     private String body;
     private HttpMethod method;
     private String path;
@@ -31,12 +35,14 @@ public class Request {
         Request request = new Request();
         QueryStringDecoder uri_decoder = new QueryStringDecoder(req.uri());
         LastHttpContent trailer = (LastHttpContent) req;
+        Map<String, Object> tmpParams = new HashMap<>();
         uri_decoder.parameters().forEach((k,l) -> {
             if(l.size() == 1)
-                request.params.put(k, l.get(0));
+                tmpParams.put(k, l.get(0));
             else if (l.size() > 1)
-                request.params.put(k, l.stream().toArray(String[]::new));
+                tmpParams.put(k, l.stream().toArray(String[]::new));
         });
+        request.params = Collections.unmodifiableMap(tmpParams);
         request.body = formatBody(trailer).toString();
         request.method = req.method();
         request.path = uri_decoder.path();
@@ -70,13 +76,21 @@ public class Request {
         return uri;
     }
 
-    public String uri(String param) {
-        StringBuilder newUri = new StringBuilder(uri);
-        if(uri.indexOf("?") >=0)
-            newUri.append("&");
-        else
-            newUri.append("?");
-        newUri.append(param);
+    public String uri(String name, Object value) {
+        StringBuilder newUri = new StringBuilder();
+        newUri.append(this.path);
+        params.forEach((k,v) -> {
+            if(!"p".equals(k)) {
+                newUri.append((newUri.length()==this.path.length())?'?':'&');
+                newUri.append(encodeURL(k));
+                newUri.append('=');
+                newUri.append(encodeURL(v.toString()));
+            }
+        });
+        newUri.append((newUri.length()==this.path.length())?'?':'&');
+        newUri.append(encodeURL(name));
+        newUri.append('=');
+        newUri.append(encodeURL(value.toString()));
         return newUri.toString();
     }
 
@@ -147,4 +161,12 @@ public class Request {
         return responseData;
     }
 
+    private static String encodeURL(String url) {
+        if (StringUtils.isEmpty(url))
+            return "";
+        try {
+            return URLEncoder.encode(url, "utf-8");
+        } catch (UnsupportedEncodingException e) {}
+        return url;
+    }
 }

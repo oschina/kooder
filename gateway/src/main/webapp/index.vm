@@ -26,7 +26,7 @@
 </form>
 #if($result)
 totalHits: <em>$result.get("totalHits")</em><br/>
-    totalPages: <em>$result.get("totalPages")</em><br/>
+totalPages: <em>$result.get("totalPages")</em><br/>
 timeUsed: <em>$result.get("timeUsed")ms</em><br/>
 query: <code>$result.get("query").textValue()</code>
 <table class="pure-table pure-table-striped">
@@ -43,8 +43,9 @@ query: <code>$result.get("query").textValue()</code>
     <tbody>
     #foreach($obj in $result.get("objects"))
     #set($recomm = $obj.get('recomm').intValue())
+    #set($pi = (($request.param('p', 1) - 1) * 20) + ${foreach.count})
     <tr>
-        <td>${foreach.count}</td>
+        <td>$pi</td>
         <td nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
         <td>$obj.get('description').textValue()</td>
         <td align="right">$obj.get('count').get('star').intValue()</td>
@@ -54,9 +55,11 @@ query: <code>$result.get("query").textValue()</code>
     #end
     </tbody>
 </table>
+<div class="pager">
     #foreach($page in [1..$result.get("totalPages").intValue()])
-    <a href="$request.uri("p=$page")">${page}</a>
+    <a href="$request.uri('p',$page)">$page</a>
     #end
+</div>
 #end
 </div>
 </body>

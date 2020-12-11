@@ -8,6 +8,7 @@ import com.gitee.search.server.Response;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -24,7 +25,8 @@ public class IndexAction {
     public static Response index(Request request) throws IOException {
         String q = request.param("q");
         String type = request.param("type", "repo");
-        Map params = request.params();
+        Map<String, Object> params = new HashMap();
+        params.putAll(request.params());
         params.put("request", request);
 
         if(StringUtils.isNotBlank(q)) {
