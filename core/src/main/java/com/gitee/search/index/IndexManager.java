@@ -17,6 +17,7 @@ import static com.gitee.search.index.ObjectMapping.FIELD_ID;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,12 +32,69 @@ public class IndexManager {
     public final static int MAX_RESULT_COUNT = 1000;
     public final static int SEARCH_THREAD_COUNT = 10; //并发搜索线程数
 
+    public final static String KEY_SCORE = "_score_"; //在 json 中存放文档的score值
+    public final static String KEY_DOC_ID = "_id_"; //在 json 中存放文档的 id
+
     final static int maxNumberOfCachedQueries = 256;
     final static long maxRamBytesUsed = 50 * 1024L * 1024L; // 50MB
     // these cache and policy instances can be shared across several queries and readers
     // it is fine to eg. store them into static variables
     final static QueryCache queryCache = new LRUQueryCache(maxNumberOfCachedQueries, maxRamBytesUsed);
     final static QueryCachingPolicy defaultCachingPolicy = new UsageTrackingQueryCachingPolicy();
+
+    /**
+     * search after document
+     * @param type
+     * @param after
+     * @param query
+     * @param numHits
+     * @return
+     * @throws IOException
+     */
+    public static String searchAfter(String type, ScoreDoc after, Query query, int numHits) throws IOException {
+
+        long ct = System.currentTimeMillis();
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode result = mapper.createObjectNode();
+
+        try (IndexReader reader = StorageFactory.getReader(type)) {
+            ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
+            IndexSearcher searcher = new IndexSearcher(reader, pool);
+            searcher.setQueryCache(queryCache);
+            searcher.setQueryCachingPolicy(defaultCachingPolicy);
+
+            TopDocs docs = searcher.searchAfter(after, query, numHits);
+
+            //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
+            result.put("type", type);
+            result.put("totalHits", docs.totalHits.value);
+            result.put("totalPages", (docs.totalHits.value + numHits - 1) / numHits);
+            result.put("timeUsed", (System.currentTimeMillis() - ct));
+            result.put("query", query.toString());
+            ArrayNode objects = result.putArray("objects");
+            for(ScoreDoc sdoc : docs.scoreDocs) {
+                Document doc = searcher.doc(sdoc.doc);
+                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
+                pojo.put(KEY_DOC_ID, sdoc.doc);
+                pojo.put(KEY_SCORE, sdoc.score);
+                objects.addPOJO(pojo);
+
+                log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
+                        doc.get("id"),
+                        sdoc.score,
+                        doc.get("namespace.path"),
+                        doc.get("path"),
+                        doc.get("name"),
+                        doc.get("type"),
+                        doc.get("count.star"),
+                        doc.get("recomm"),
+                        doc.get("fork")
+                );
+            }
+            return result.toString();
+        }
+    }
 
     /**
      * 执行搜索
@@ -56,7 +114,6 @@ public class IndexManager {
         ObjectNode result = mapper.createObjectNode();
 
         try (IndexReader reader = StorageFactory.getReader(type)) {
-
             ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
             IndexSearcher searcher = new IndexSearcher(reader, pool);
             searcher.setQueryCache(queryCache);
@@ -75,7 +132,10 @@ public class IndexManager {
             ArrayNode objects = result.putArray("objects");
             for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
                 Document doc = searcher.doc(docs.scoreDocs[i].doc);
-                objects.addPOJO(ObjectMapping.doc2json(type, doc));
+                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
+                pojo.put(KEY_DOC_ID, docs.scoreDocs[i].doc);
+                pojo.put(KEY_SCORE, docs.scoreDocs[i].score);
+                objects.addPOJO(pojo);
                 /*
                 log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
                         doc.get("id"),
