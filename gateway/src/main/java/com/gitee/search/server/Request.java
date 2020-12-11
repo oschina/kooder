@@ -47,7 +47,7 @@ public class Request {
         request.method = req.method();
         request.path = uri_decoder.path();
         request.uri = req.uri();
-        request.headers = ((LastHttpContent) req).trailingHeaders();
+        request.headers = req.headers();
         request.keepAlive = HttpUtil.isKeepAlive(req);
         return request;
     }
