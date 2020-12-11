@@ -1,8 +1,12 @@
 package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.event.EventCartridge;
+import org.apache.velocity.app.event.ReferenceInsertionEventHandler;
+import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +26,7 @@ public class TemplateEngine {
     private final static Logger log = LoggerFactory.getLogger(TemplateEngine.class);
 
     public final static String ENCODING = "utf-8";
+    private final static EventCartridge eventCartridge = new EventCartridge();
 
     static {
         try (InputStream stream = TemplateEngine.class.getResourceAsStream("/velocity.properties")) {
@@ -33,6 +38,16 @@ public class TemplateEngine {
                 p.setProperty("resource.loader.file.path", webappPath.toString());
             }
             Velocity.init(p);
+
+            eventCartridge.addReferenceInsertionEventHandler(new ReferenceInsertionEventHandler() {
+                @Override
+                public Object referenceInsert(Context context, String reference, Object value) {
+                    if(value instanceof String)
+                        return html((String)value);
+                    return value;
+                }
+
+            });
         } catch(IOException e) {
             log.error("Failed to loading velocity.properties", e);
         }
@@ -46,11 +61,23 @@ public class TemplateEngine {
      */
     public static String render(String vm, Map params) {
         VelocityContext context = new VelocityContext();
+        context.attachEventCartridge(eventCartridge);
         if(params != null && params.size() > 0)
             params.forEach((k,v) -> context.put(k.toString(), v));
         StringWriter w = new StringWriter();
         Velocity.mergeTemplate(vm, ENCODING, context, w);
         return w.toString();
+    }
+
+    private final static String html(String content) {
+        if (content == null) return "";
+        String html = content;
+        html = StringUtils.replace(html, "'", "&apos;");
+        html = StringUtils.replace(html, "\"", "&quot;");
+        html = StringUtils.replace(html, "\t", "&nbsp;&nbsp;");// 替换跳格
+        html = StringUtils.replace(html, "<", "&lt;");
+        html = StringUtils.replace(html, ">", "&gt;");
+        return html;
     }
 
     /**
@@ -60,6 +87,8 @@ public class TemplateEngine {
      */
     public static void main(String[] args) throws IOException {
         VelocityContext context = new VelocityContext();
+        context.attachEventCartridge(eventCartridge);
+
         context.put("name", "Velocity");
         context.put("project", "Jakarta");
         /* lets render a template */

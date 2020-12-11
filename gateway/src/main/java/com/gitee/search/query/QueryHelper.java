@@ -9,7 +9,6 @@ import org.apache.lucene.expressions.SimpleBindings;
 import org.apache.lucene.expressions.js.JavascriptCompiler;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.*;
 
 import java.lang.reflect.Method;
@@ -45,7 +44,7 @@ public class QueryHelper {
      * @param recomm
      * @return
      */
-    public static Query buildRepoQuery(String q, String lang, int recomm) throws ParseException {
+    public static Query buildRepoQuery(String q, String lang, int recomm) {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //只搜索公开仓库
         builder.add(NumericDocValuesField.newSlowExactQuery("type", Constants.REPO_TYPE_PUBLIC), BooleanClause.Occur.FILTER);
@@ -90,9 +89,8 @@ public class QueryHelper {
      * @param q
      * @param boost
      * @return
-     * @throws ParseException
      */
-    private static BoostQuery makeBoostQuery(String field, String q, float boost) throws ParseException {
+    private static BoostQuery makeBoostQuery(String field, String q, float boost) {
         List<String> keys = SearchHelper.splitKeywords(q);
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
         for(int i=0;i<keys.size();i++) {
@@ -101,6 +99,5 @@ public class QueryHelper {
         }
         return new BoostQuery(qbuilder.build(), boost);
     }
-
 
 }

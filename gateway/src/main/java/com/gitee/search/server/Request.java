@@ -70,6 +70,16 @@ public class Request {
         return uri;
     }
 
+    public String uri(String param) {
+        StringBuilder newUri = new StringBuilder(uri);
+        if(uri.indexOf("?") >=0)
+            newUri.append("&");
+        else
+            newUri.append("?");
+        newUri.append(param);
+        return newUri.toString();
+    }
+
     public boolean isKeepAlive() {
         return keepAlive;
     }

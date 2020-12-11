@@ -5,7 +5,6 @@ import com.gitee.search.index.IndexManager;
 import com.gitee.search.query.QueryHelper;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.server.Request;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 
@@ -25,21 +24,15 @@ public class SearchAction {
      * @param request
      * @return
      */
-    public static String repositories(Request request) throws IOException, ParseException
-    {
+    public static String repositories(Request request) throws IOException {
         String q = request.param("q");
         String sort = request.param("sort");
-        int page = request.param("page", 1);
+        int page = request.param("p", 1);
         String lang = request.param("lang");
         String scope = request.param("scope");
 
-        long ct = System.currentTimeMillis();
         q = SearchHelper.cleanupKey(q);
-
-        System.out.println("q=" + q);
-
         Query query = QueryHelper.buildRepoQuery(q, lang, 0);
-        System.out.println(query);
 
         return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, Sort.RELEVANCE, page, PAGE_SIZE);
     }

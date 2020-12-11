@@ -11,14 +11,14 @@ import jline.console.ConsoleReader;
  */
 public class SearchCmd {
 
-    public static void main(String[] args) throws Exception {
-
+    static {
         jline.TerminalFactory.registerFlavor(TerminalFactory.Flavor.WINDOWS, jline.UnsupportedTerminal.class);
+    }
 
+    public static void main(String[] args) throws Exception {
         ConsoleReader reader = new ConsoleReader();
         do {
             String line = reader.readLine("> ");
-
             if (line == null || "quit".equalsIgnoreCase(line) || "exit".equalsIgnoreCase(line))
                 break;
 
@@ -29,12 +29,12 @@ public class SearchCmd {
                 public String param(String name) {
                     return "q".equals(name)?line:super.param(name);
                 }
-
-                {
-
-            }};
+                {}
+            };
 
             String json = SearchAction.repositories(req);
+
+            System.out.println(json);
 
             System.out.println("total time: " + (System.currentTimeMillis() - ct) + " ms");
 

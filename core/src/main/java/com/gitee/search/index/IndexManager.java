@@ -39,21 +39,27 @@ public class IndexManager {
      * @throws IOException
      */
     public static String search(String type, Query query, Sort sort, int page, int pageSize) throws IOException {
+
+        long ct = System.currentTimeMillis();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode result = mapper.createObjectNode();
+
         try (IndexReader reader = StorageFactory.getReader(type)) {
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode result = mapper.createObjectNode();
             IndexSearcher searcher = new IndexSearcher(reader);
-            long ct = System.currentTimeMillis();
             TopFieldDocs docs = searcher.search(query, MAX_RESULT_COUNT, sort, true);
-            log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
+            //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
             result.put("type", type);
             result.put("totalHits", docs.totalHits.value);
+            result.put("totalPages", (docs.totalHits.value + pageSize - 1) / pageSize);
             result.put("pageIndex", page);
             result.put("pageSize", pageSize);
+            result.put("timeUsed", (System.currentTimeMillis() - ct));
+            result.put("query", query.toString());
             ArrayNode objects = result.putArray("objects");
             for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
                 Document doc = searcher.doc(docs.scoreDocs[i].doc);
                 objects.addPOJO(ObjectMapping.doc2json(type, doc));
+                /*
                 log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
                         doc.get("id"),
                         docs.scoreDocs[i].score,
@@ -64,9 +70,9 @@ public class IndexManager {
                         doc.get("count.star"),
                         doc.get("recomm"),
                         doc.get("fork")
-                );
+                );*/
             }
-            return result.toPrettyString();//.toString();
+            return result.toString();
         }
     }
 

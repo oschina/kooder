@@ -1,15 +1,63 @@
 <html>
 <head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gitee Search</title>
+    <link href="/css/main.css" media="all" rel="stylesheet" />
+    <link href="/css/pure-min.css" media="all" rel="stylesheet" />
+    <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 </head>
 <body>
-<form method="POST">
-    搜索: <input type="text" name="q" value="$!q">
-    <input type="submit" value="Search"/>
+<div class="main">
+<form class="pure-form pure-form-aligned">
+    <fieldset>
+        <label for="i_query">搜索 :</label>
+        <input type="text" name="q" value="$!q" id="i_query">
+        <select name="type">
+            <option value="repo">Repository</option>
+            <option value="issue">Issue</option>
+            <option value="commit">Commit</option>
+            <option value="pr">PR</option>
+            <option value="user">User</option>
+            <option value="code">Code</option>
+        </select>
+        <button type="submit" class="pure-button pure-button-primary">Search</button>
+    </fieldset>
 </form>
-#if($q)
-<hr/>
-$q
+#if($result)
+totalHits: <em>$result.get("totalHits")</em><br/>
+    totalPages: <em>$result.get("totalPages")</em><br/>
+timeUsed: <em>$result.get("timeUsed")ms</em><br/>
+query: <code>$result.get("query").textValue()</code>
+<table class="pure-table pure-table-striped">
+    <thead>
+    <tr>
+        <th>No</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Star</th>
+        <th>Fork</th>
+        <th>Gindex</th>
+    </tr>
+    </thead>
+    <tbody>
+    #foreach($obj in $result.get("objects"))
+    #set($recomm = $obj.get('recomm').intValue())
+    <tr>
+        <td>${foreach.count}</td>
+        <td nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
+        <td>$obj.get('description').textValue()</td>
+        <td align="right">$obj.get('count').get('star').intValue()</td>
+        <td align="right">$obj.get('count').get('fork').intValue()</td>
+        <td align="right">$obj.get('count').get('gindex').intValue()</td>
+    </tr>
+    #end
+    </tbody>
+</table>
+    #foreach($page in [1..$result.get("totalPages").intValue()])
+    <a href="$request.uri("p=$page")">${page}</a>
+    #end
 #end
+</div>
 </body>
 </html>

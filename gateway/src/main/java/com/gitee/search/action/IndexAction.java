@@ -1,8 +1,13 @@
 package com.gitee.search.action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.queue.QueueTask;
 import com.gitee.search.server.Request;
 import com.gitee.search.server.Response;
+import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -12,13 +17,26 @@ import java.util.Map;
 public class IndexAction {
 
     /**
-     * 测试输出
+     * web searcher
      * @param request
      * @return
      */
-    public static Response index(Request request) {
+    public static Response index(Request request) throws IOException {
         String q = request.param("q");
-        Map params = (q!=null&&q.trim().length()>0)?request.params():null;
+        String type = request.param("type", "repo");
+        Map params = request.params();
+        params.put("request", request);
+
+        if(StringUtils.isNotBlank(q)) {
+            String json = null;
+            switch (type) {
+                case QueueTask.TYPE_REPOSITORY:
+                    json = SearchAction.repositories(request);
+            }
+
+            JsonNode node = new ObjectMapper().readTree(json);
+            params.put("result", node);
+        }
         return Response.vm("index.vm", params);
     }
 
