@@ -17,6 +17,8 @@ import static com.gitee.search.index.ObjectMapping.FIELD_ID;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 索引管理器
@@ -24,9 +26,17 @@ import java.util.List;
  */
 public class IndexManager {
 
-    public final static int MAX_RESULT_COUNT = 1000;
-
     private final static Logger log = LoggerFactory.getLogger(IndexManager.class);
+
+    public final static int MAX_RESULT_COUNT = 1000;
+    public final static int SEARCH_THREAD_COUNT = 10; //并发搜索线程数
+
+    final static int maxNumberOfCachedQueries = 256;
+    final static long maxRamBytesUsed = 50 * 1024L * 1024L; // 50MB
+    // these cache and policy instances can be shared across several queries and readers
+    // it is fine to eg. store them into static variables
+    final static QueryCache queryCache = new LRUQueryCache(maxNumberOfCachedQueries, maxRamBytesUsed);
+    final static QueryCachingPolicy defaultCachingPolicy = new UsageTrackingQueryCachingPolicy();
 
     /**
      * 执行搜索
@@ -41,12 +51,19 @@ public class IndexManager {
     public static String search(String type, Query query, Sort sort, int page, int pageSize) throws IOException {
 
         long ct = System.currentTimeMillis();
+
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
 
         try (IndexReader reader = StorageFactory.getReader(type)) {
-            IndexSearcher searcher = new IndexSearcher(reader);
+
+            ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
+            IndexSearcher searcher = new IndexSearcher(reader, pool);
+            searcher.setQueryCache(queryCache);
+            searcher.setQueryCachingPolicy(defaultCachingPolicy);
+
             TopFieldDocs docs = searcher.search(query, MAX_RESULT_COUNT, sort, true);
+
             //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
             result.put("type", type);
             result.put("totalHits", docs.totalHits.value);
