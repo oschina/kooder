@@ -20,7 +20,7 @@ import java.util.Date;
  * Http requeset handler
  * @author Winter Lau<javayou@gmail.com>
  */
-class HttpHandler extends SimpleChannelInboundHandler<Object> {
+public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private final static Logger log = LoggerFactory.getLogger(HttpHandler.class);
 
@@ -28,7 +28,7 @@ class HttpHandler extends SimpleChannelInboundHandler<Object> {
     private StringBuilder responseData = new StringBuilder();
     private AccessLogger logger;
 
-    HttpHandler(AccessLogger logger) {
+    public HttpHandler(AccessLogger logger) {
         this.logger = logger;
     }
 

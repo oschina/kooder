@@ -1,6 +1,8 @@
-package com.gitee.search.server;
+package com.gitee.search;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import com.gitee.search.server.AccessLogger;
+import com.gitee.search.server.HttpHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -28,9 +30,9 @@ import java.util.List;
  * Make gateway as a daemon
  * @author Winter Lau<javayou@gmail.com>
  */
-public class ServerDaemon implements Daemon , AccessLogger {
+public class Gateway implements Daemon , AccessLogger {
 
-    private final static Logger log = LoggerFactory.getLogger(ServerDaemon.class);
+    private final static Logger log = LoggerFactory.getLogger(Gateway.class);
 
     private ServerBootstrap server;
     private EventLoopGroup bossGroup;
@@ -40,7 +42,7 @@ public class ServerDaemon implements Daemon , AccessLogger {
     private int port;
     private List<MessageFormat> log_patterns = new ArrayList<>();
 
-    public ServerDaemon() {
+    public Gateway() {
         this.server = new ServerBootstrap();
         this.bossGroup = new NioEventLoopGroup(1);
         this.workerGroup = new NioEventLoopGroup();
@@ -70,7 +72,7 @@ public class ServerDaemon implements Daemon , AccessLogger {
      * @param args
      */
     public static void main(String[] args) {
-        ServerDaemon daemon = new ServerDaemon();
+        Gateway daemon = new Gateway();
         daemon.init(null);
         daemon.start();
     }
