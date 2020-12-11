@@ -62,15 +62,17 @@ public class QueryHelper {
 
         //BoostQuery
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        qbuilder.add(makeBoostQuery("name", q, 20.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("description", q, 10.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("name", q, 10.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("description", q, 2.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("detail", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("tags", q, 10.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("catalogs", q, 10.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("owner.name", q, 2.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("catalogs", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("owner.name", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.setMinimumNumberShouldMatch(1);
 
         builder.add(qbuilder.build(), BooleanClause.Occur.MUST);
+
+        //return builder.build();
 
         //custom query score
         SimpleBindings bindings = new SimpleBindings();
@@ -80,7 +82,6 @@ public class QueryHelper {
         bindings.add("$gindex", DoubleValuesSource.fromIntField("count.gindex"));
 
         return new FunctionScoreQuery(builder.build(), repoScoreExpr.getDoubleValuesSource(bindings));
-
     }
 
     /**

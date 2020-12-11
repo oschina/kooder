@@ -16,15 +16,23 @@ public class ScoreHelper {
      * @return
      */
     public static double repoSort(double score, double recomm, double stars, double gindex) {
-        //System.out.printf("score:%.2f, recomm: %f, stars: %f, gindex: %f", score, recomm, stars, gindex);
-        if(score >= 40) {
-            score += (recomm * 100);
+        //System.out.printf("%s -> score:%.2f, recomm: %f, stars: %f, gindex: %f\n", Thread.currentThread().getName(), score, recomm, stars, gindex);
+        if(score > 10) {
+            //官方推荐加权
+            if(recomm > 0)
+                score += (recomm * 20);
+            else
+                score -= 10;
+            //Star 数加权
             if(stars >= 100)
-                score += (stars/100) * 10;
+                score += (stars/((recomm>0)?100:1000));
+            else if(stars <= 20)
+                score -= 10;
+            //Gitee Index 加权
             if(gindex > 80)
-                score += 100;
+                score += 15;
             else if(gindex > 50)
-                score += 20;
+                score += 10;
         }
         //System.out.println(" new score: " + score);
         return score;
