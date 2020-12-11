@@ -35,6 +35,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
 
+        long ct = System.currentTimeMillis();
+
         if (msg instanceof HttpRequest) {
             if (HttpUtil.is100ContinueExpected((HttpRequest) msg))
                 ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE, Unpooled.EMPTY_BUFFER));
@@ -58,7 +60,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
                 int len = this.writeResponse(ctx, httpRequest, httpResponse);
 
-                this.showAccessLog(ctx, httpRequest, httpResponse, len);
+                this.writeAccessLog(ctx, httpRequest, httpResponse, len, System.currentTimeMillis() - ct);
             }
         }
     }
@@ -71,15 +73,15 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
      * @return
      */
     private int writeResponse(ChannelHandlerContext ctx, Request req, Response resp) {
-        int len = 0;
         boolean keepAlive = req.isKeepAlive();
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(HTTP_1_1, resp.getStatus(), resp.getBody());
         httpResponse.headers().set(HttpHeaderNames.SERVER, "Gitee Search Gateway/1.0");
         httpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, resp.getContentType());
         httpResponse.headers().set(HttpHeaderNames.DATE, new Date());
 
+        int len = httpResponse.content().readableBytes();
+
         if (keepAlive) {
-            len = httpResponse.content().readableBytes();
             httpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, len);
             httpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         }
@@ -112,16 +114,17 @@ public class HttpHandler extends SimpleChannelInboundHandler<Object> {
      * @param req
      * @param resp
      * @param len
+     * @param time
      */
-    private void showAccessLog(ChannelHandlerContext ctx, Request req, Response resp, int len) {
-        String ua = req.getHeader("user-agent");
+    private void writeAccessLog(ChannelHandlerContext ctx, Request req, Response resp, int len, long time) {
+        String ua = req.getHeader("User-Agent");
         if(ua == null)
             ua = "-";
         InetSocketAddress insocket = (InetSocketAddress) ctx.channel().remoteAddress();
         String ip = insocket.getAddress().getHostAddress();
-        logger.writeAccessLog(req.getUri(),
-                String.format("%s - \"%s %s\" %d %d - \"%s\"",
-                        ip, req.getMethod().name(), req.getUri(), resp.getStatus().code(), len, ua));
+        logger.writeAccessLog(req.getPath(),
+                String.format("%s - \"%s %s\" %d %d - %dms - \"%s\"",
+                        ip, req.getMethod().name(), req.getUri(), resp.getStatus().code(), len, time, ua));
     }
 
 }
