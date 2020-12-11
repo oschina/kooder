@@ -7,7 +7,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,12 +54,12 @@ public class DiskIndexStorage implements IndexStorage {
         writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));
         writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
 
-        return new IndexWriter(FSDirectory.open(getIndexPath(type)), writerConfig);
+        return new IndexWriter(NIOFSDirectory.open(getIndexPath(type)), writerConfig);
     }
 
     @Override
     public IndexReader getReader(String type) throws IOException {
-        return DirectoryReader.open(FSDirectory.open(getIndexPath(type)));
+        return DirectoryReader.open(NIOFSDirectory.open(getIndexPath(type)));
     }
 
     /**
