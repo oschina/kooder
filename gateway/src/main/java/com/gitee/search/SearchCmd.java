@@ -1,15 +1,12 @@
 package com.gitee.search;
 
-import com.gitee.search.action.SearchAction;
 import com.gitee.search.core.SearchHelper;
 import com.gitee.search.index.IndexManager;
 import com.gitee.search.query.QueryHelper;
 import com.gitee.search.queue.QueueTask;
-import com.gitee.search.server.Request;
 import jline.TerminalFactory;
 import jline.console.ConsoleReader;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
 
 /**
  * 测试搜索的控制台程序
