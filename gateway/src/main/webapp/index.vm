@@ -49,12 +49,12 @@ query: <code>$result.get("query").textValue()</code>
     <tr>
         <td>$pi</td>
         <td valign="top" nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
-        <td>$obj.get('_id_')</td>
-        <td>$obj.get('_score_')</td>
+        <td valign="top">$obj.get('_id_')</td>
+        <td valign="top">$obj.get('_score_')</td>
         <td>$obj.get('description').textValue()</td>
-        <td align="right">$obj.get('count').get('star').intValue()</td>
-        <td align="right">$obj.get('count').get('fork').intValue()</td>
-        <td align="right">$obj.get('count').get('gindex').intValue()</td>
+        <td valign="top" align="right">$obj.get('count').get('star').intValue()</td>
+        <td valign="top" align="right">$obj.get('count').get('fork').intValue()</td>
+        <td valign="top" align="right">$obj.get('count').get('gindex').intValue()</td>
     </tr>
     #end
     </tbody>
