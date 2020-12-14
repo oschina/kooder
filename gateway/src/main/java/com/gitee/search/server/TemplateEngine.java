@@ -5,8 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.event.EventCartridge;
-import org.apache.velocity.app.event.ReferenceInsertionEventHandler;
-import org.apache.velocity.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +27,7 @@ public class TemplateEngine {
     private final static EventCartridge eventCartridge = new EventCartridge();
 
     static {
+        //Initialize velocity engine
         try (InputStream stream = TemplateEngine.class.getResourceAsStream("/velocity.properties")) {
             Properties p = new Properties();
             p.load(stream);
@@ -39,14 +38,10 @@ public class TemplateEngine {
             }
             Velocity.init(p);
 
-            eventCartridge.addReferenceInsertionEventHandler(new ReferenceInsertionEventHandler() {
-                @Override
-                public Object referenceInsert(Context context, String reference, Object value) {
-                    if(value instanceof String)
-                        return html((String)value);
-                    return value;
-                }
-
+            eventCartridge.addReferenceInsertionEventHandler((context, reference, value) -> {
+                if(value instanceof String)
+                    return html((String)value);
+                return value;
             });
         } catch(IOException e) {
             log.error("Failed to loading velocity.properties", e);
@@ -69,6 +64,11 @@ public class TemplateEngine {
         return w.toString();
     }
 
+    /**
+     * HTML escape
+     * @param content
+     * @return
+     */
     private final static String html(String content) {
         if (content == null) return "";
         String html = content;
