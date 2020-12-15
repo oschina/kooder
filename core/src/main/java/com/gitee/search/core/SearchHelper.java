@@ -25,10 +25,10 @@ public class SearchHelper {
     private final static Logger log = LoggerFactory.getLogger(SearchHelper.class);
 
     public static void main(String[] args) {
-        String text = "Gitee Search是Gitee的搜索引擎服务模块，为Gitee提供仓库、Issue、代码等搜索服务。";
+        String text = "Gitee Search是Gitee的搜索引擎服务模块，为Gitee提供仓库、Issue、代码等搜索服务。小程序";
         System.out.println(highlight(text, "gitee search 仓库"));
         //splitKeywords(text).forEach(e -> System.out.println(e));
-        System.out.println(cleanupKey(text));
+        System.out.println(cleanupKey("小程序"));
     }
 
     /**

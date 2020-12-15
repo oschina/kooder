@@ -11,11 +11,17 @@ import org.lionsoul.jcseg.segmenter.SegmenterConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
+import java.net.URLDecoder;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Using jcseg analyzer
@@ -37,12 +43,49 @@ public class JcsegAnalyzer extends Analyzer {
             this.configForSplit = this.config.clone();//new SegmenterConfig(true);
         } catch (CloneNotSupportedException e) {}
         this.configForSplit.setAppendCJKSyn(false);
+        this.configForSplit.setAppendCJKPinyin(false);
         this.dic = DictionaryFactory.createDefaultDictionary(config, false,true);
+        try {
+            this.loadCustomLexicon(dic);
+        } catch (IOException e) {
+            log.error("Failed to loading custom lexicon", e);
+        }
+    }
+
+    /**
+     * 加载扩展词库
+     * @param dic
+     * @throws IOException
+     */
+    private static void loadCustomLexicon(ADictionary dic) throws IOException {
+        CodeSource codeSrc = JcsegAnalyzer.class.getProtectionDomain().getCodeSource();
+        String codePath = codeSrc.getLocation().getPath();
+        if ( codePath.toLowerCase().endsWith(".jar") ) {
+            try(ZipInputStream zip = new ZipInputStream(codeSrc.getLocation().openStream())) {
+                while (true) {
+                    ZipEntry e = zip.getNextEntry();
+                    if (e == null) {
+                        break;
+                    }
+                    String fileName = e.getName();
+                    if (fileName.endsWith(".lex") && fileName.startsWith("lexicon/lex-")) {
+                        try(InputStream stream = JcsegAnalyzer.class.getResourceAsStream("/" + fileName)) {
+                            dic.load(stream);
+                        }
+                    }
+                }
+            }
+        } else {
+            //now, the classpath is an IDE directory
+            //  like eclipse ./bin or maven ./target/classes/
+            //System.out.println()
+            File files = new File(URLDecoder.decode(codeSrc.getLocation().getFile(),"utf-8"));
+            dic.loadDirectory(files.getPath() + File.separator + "lexicon");
+        }
     }
 
     protected TokenStreamComponents createComponents(String fieldName) {
         try {
-            //MOST ?
             Tokenizer tokenizer = new JcsegTokenizer(ISegment.Type.MOST, this.config, this.dic);
             return new TokenStreamComponents(tokenizer);
         } catch (IOException e) {
