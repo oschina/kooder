@@ -122,6 +122,9 @@ public class Response {
         try {
             ByteBuf body = StaticFileService.read(path);
             response.setBody(body);
+            //set cache headers
+            response.headers.set("Cache-Control", "public, max-age=315360000");
+            response.headers.set("Expires", "Thu, 31 Dec 2037 23:55:55 GMT");
         } catch (NoSuchFileException e) {
             response.setStatus(HttpResponseStatus.NOT_FOUND);
         } catch (Exception e) {
