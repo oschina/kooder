@@ -12,7 +12,7 @@
 <form class="pure-form pure-form-aligned">
     <fieldset>
         <label for="i_query">搜索 :</label>
-        <input type="text" name="q" value="$!q" id="i_query">
+        <input type="text" name="q" value="$!q" id="i_query" size="50">
         <select name="type">
             <option value="repo">Repository</option>
             <option value="issue">Issue</option>
@@ -39,7 +39,7 @@ query: <code>$result.get("query").textValue()</code>
         <th>Description</th>
         <th>Star</th>
         <th>Fork</th>
-        <th>Gindex</th>
+        <th>G-Index</th>
     </tr>
     </thead>
     <tbody>
@@ -52,15 +52,15 @@ query: <code>$result.get("query").textValue()</code>
         <td valign="top">$obj.get('_id_')</td>
         <td valign="top">$obj.get('_score_')</td>
         <td>$obj.get('description').textValue()</td>
-        <td valign="top" align="right">$obj.get('count').get('star').intValue()</td>
-        <td valign="top" align="right">$obj.get('count').get('fork').intValue()</td>
-        <td valign="top" align="right">$obj.get('count').get('gindex').intValue()</td>
+        <td valign="top" align="right">$obj.get('count').get('star')</td>
+        <td valign="top" align="right">$obj.get('count').get('fork')</td>
+        <td valign="top" align="right">$obj.get('count').get('gindex')</td>
     </tr>
     #end
     </tbody>
 </table>
 <div class="pager">
-    #foreach($page in [1..$result.get("totalPages").intValue()])
+    #foreach($page in [1..$result.get("totalPages")])
     <a href="$request.uri('p',$page)">$page</a>
     #end
 </div>
