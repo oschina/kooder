@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -80,6 +82,19 @@ public class IndexMapping {
     public boolean isIndex(String field) { return fields.get(field).isIndex(); }
 
     public String getType(String field) { return fields.get(field).getType(); }
+
+    /**
+     * 罗列所有的 facet 字段
+     * @return
+     */
+    public List<String> listFacetFields() {
+        List<String> facets = new ArrayList<>();
+        fields.forEach((k,v) -> {
+            if(v.isFacet())
+                facets.add(k);
+        });
+        return facets;
+    }
 
     /**
      * 解析 mapping-xxx.json

@@ -25,10 +25,11 @@
     </fieldset>
 </form>
 #if($result)
+query: <code>$result.get("query").textValue()</code><br/>
 totalHits: <em>$result.get("totalHits")</em><br/>
 totalPages: <em>$result.get("totalPages")</em><br/>
 timeUsed: <em>$result.get("timeUsed")ms</em><br/>
-query: <code>$result.get("query").textValue()</code>
+Languages: #foreach($lang in $result.get('facets').get('lang'))<span>$lang.get('label').textValue():$lang.get('value')</span>/#end
 <table class="pure-table pure-table-striped">
     <thead>
     <tr>
@@ -39,7 +40,7 @@ query: <code>$result.get("query").textValue()</code>
         <th>Description</th>
         <th>Star</th>
         <th>Fork</th>
-        <th>G-Index</th>
+        <th nowrap>G-Index</th>
     </tr>
     </thead>
     <tbody>
@@ -47,7 +48,7 @@ query: <code>$result.get("query").textValue()</code>
     #set($recomm = $obj.get('recomm').intValue())
     #set($pi = (($request.param('p', 1) - 1) * 20) + ${foreach.count})
     <tr>
-        <td>$pi</td>
+        <td valign="top">$pi</td>
         <td valign="top" nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
         <td valign="top">$obj.get('_id_')</td>
         <td valign="top">$obj.get('_score_')</td>

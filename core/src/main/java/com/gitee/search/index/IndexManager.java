@@ -7,10 +7,7 @@ import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
-import org.apache.lucene.facet.FacetResult;
-import org.apache.lucene.facet.Facets;
-import org.apache.lucene.facet.FacetsCollector;
-import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -79,57 +76,29 @@ public class IndexManager {
             FacetsCollector fc = new FacetsCollector(false);
             TopDocs docs = FacetsCollector.searchAfter(searcher, after, query, numHits, fc);
 
-            Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
-            FacetResult facetResult = facets.getTopChildren(20, "lang");
-            System.out.println(facetResult);
-            //TopDocs docs = searcher.searchAfter(after, query, numHits);
-
             //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
             result.put("type", type);
             result.put("totalHits", docs.totalHits.value);
             result.put("totalPages", (docs.totalHits.value + numHits - 1) / numHits);
             result.put("timeUsed", (System.currentTimeMillis() - ct));
+            if(after != null) {
+                result.put("afterDoc", after.doc);
+                result.put("afterScore", after.score);
+            }
             result.put("query", query.toString());
 
-            readObjects(type, result, docs, searcher);
+            ArrayNode objects = result.putArray("objects");
+            for(ScoreDoc sdoc : docs.scoreDocs) {
+                Document doc = searcher.doc(sdoc.doc);
+                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
+                pojo.put(KEY_DOC_ID, sdoc.doc);
+                pojo.put(KEY_SCORE, sdoc.score);
+                objects.addPOJO(pojo);
+            }
+
+            readTaxonomy(type, result, taxoReader, fc);
 
             return result.toString();
-        }
-    }
-
-    private static void readTaxonomy() {
-
-    }
-
-    /**
-     * 读取结果对象
-     * @param type
-     * @param result
-     * @param docs
-     * @param searcher
-     * @throws IOException
-     */
-    private static void readObjects(String type, ObjectNode result, TopDocs docs, IndexSearcher searcher) throws IOException {
-        ArrayNode objects = result.putArray("objects");
-        for(ScoreDoc sdoc : docs.scoreDocs) {
-            Document doc = searcher.doc(sdoc.doc);
-            Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
-            pojo.put(KEY_DOC_ID, sdoc.doc);
-            pojo.put(KEY_SCORE, sdoc.score);
-            objects.addPOJO(pojo);
-            /*
-            log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
-                    doc.get("id"),
-                    sdoc.score,
-                    doc.get("namespace.path"),
-                    doc.get("path"),
-                    doc.get("name"),
-                    doc.get("type"),
-                    doc.get("count.star"),
-                    doc.get("recomm"),
-                    doc.get("fork")
-            );
-            */
         }
     }
 
@@ -156,7 +125,12 @@ public class IndexManager {
             searcher.setQueryCache(queryCache);
             searcher.setQueryCachingPolicy(defaultCachingPolicy);
 
-            TopFieldDocs docs = searcher.search(query, MAX_RESULT_COUNT, sort, true);
+            TaxonomyReader taxoReader = StorageFactory.getTaxonomyReader(type);
+            // Aggregates the facet values
+            FacetsCollector fc = new FacetsCollector(false);
+
+            //如果 n 传 0 ，则 search 方法 100% 报 ClassCastException 异常，这是 Lucene 的 bug
+            TopDocs docs = FacetsCollector.search(searcher, query, page * pageSize, sort,true, fc);
 
             //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
             result.put("type", type);
@@ -167,9 +141,41 @@ public class IndexManager {
             result.put("timeUsed", (System.currentTimeMillis() - ct));
             result.put("query", query.toString());
 
-            readObjects(type, result, docs, searcher);
+            ArrayNode objects = result.putArray("objects");
+            for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
+                Document doc = searcher.doc(docs.scoreDocs[i].doc);
+                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
+                pojo.put(KEY_DOC_ID, docs.scoreDocs[i].doc);
+                pojo.put(KEY_SCORE, docs.scoreDocs[i].score);
+                objects.addPOJO(pojo);
+            }
+
+            readTaxonomy(type, result, taxoReader, fc);
 
             return result.toString();
+        }
+    }
+
+    /**
+     * 读取分类信息
+     * @param type
+     * @param json
+     * @param taxoReader
+     * @param  fc
+     */
+    private static void readTaxonomy(String type, ObjectNode json, TaxonomyReader taxoReader, FacetsCollector fc) throws IOException {
+        List<String> facetFields = IndexMapping.get(type).listFacetFields();
+        if(facetFields.size() == 0)
+            return ;
+
+        ObjectNode taxs = json.putObject("facets");
+        Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+        for(String facetField : facetFields) {
+            FacetResult facetResult = facets.getTopChildren(Integer.MAX_VALUE, facetField);
+            ArrayNode taxs2 = taxs.putArray(facetField);
+            for (LabelAndValue lav : facetResult.labelValues) {
+                taxs2.addPOJO(lav);
+            }
         }
     }
 
