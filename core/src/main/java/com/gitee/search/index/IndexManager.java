@@ -7,6 +7,8 @@ import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.*;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * 索引管理器
@@ -35,12 +38,14 @@ public class IndexManager {
     public final static String KEY_SCORE = "_score_"; //在 json 中存放文档的score值
     public final static String KEY_DOC_ID = "_id_"; //在 json 中存放文档的 id
 
-    final static int maxNumberOfCachedQueries = 256;
-    final static long maxRamBytesUsed = 50 * 1024L * 1024L; // 50MB
+    private final static int maxNumberOfCachedQueries = 256;
+    private final static long maxRamBytesUsed = 50 * 1024L * 1024L; // 50MB
     // these cache and policy instances can be shared across several queries and readers
     // it is fine to eg. store them into static variables
-    final static QueryCache queryCache = new LRUQueryCache(maxNumberOfCachedQueries, maxRamBytesUsed);
-    final static QueryCachingPolicy defaultCachingPolicy = new UsageTrackingQueryCachingPolicy();
+    private final static QueryCache queryCache = new LRUQueryCache(maxNumberOfCachedQueries, maxRamBytesUsed);
+    private final static QueryCachingPolicy defaultCachingPolicy = new UsageTrackingQueryCachingPolicy();
+
+    private final static FacetsConfig facetsConfig = new FacetsConfig();
 
     /**
      * search after document
@@ -58,7 +63,7 @@ public class IndexManager {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
 
-        try (IndexReader reader = StorageFactory.getReader(type)) {
+        try (IndexReader reader = StorageFactory.getIndexReader(type)) {
             ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
             IndexSearcher searcher = new IndexSearcher(reader, pool);
             searcher.setQueryCache(queryCache);
@@ -113,7 +118,7 @@ public class IndexManager {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
 
-        try (IndexReader reader = StorageFactory.getReader(type)) {
+        try (IndexReader reader = StorageFactory.getIndexReader(type)) {
             ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
             IndexSearcher searcher = new IndexSearcher(reader, pool);
             searcher.setQueryCache(queryCache);
@@ -159,26 +164,29 @@ public class IndexManager {
      * @exception
      */
     public static int write(QueueTask task) throws IOException {
+        long ct = System.currentTimeMillis();
         List<Document> docs = ObjectMapping.task2doc(task);
         if(docs != null && docs.size() > 0) {
-            try (IndexWriter writer = StorageFactory.getWriter(task.getType())) {
+            try (
+                IndexWriter writer = StorageFactory.getIndexWriter(task.getType());
+                TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(task.getType());
+            ) {
                 switch (task.getAction()) {
                     case QueueTask.ACTION_ADD:
-                        long ct = System.currentTimeMillis();
-                        writer.addDocuments(docs);
+                        writer.addDocuments(docs.stream().map(d -> buildFacet(taxonomyWriter, d)).collect(Collectors.toList()));
+                        //writer.addDocuments(docs);
                         log.info("{} documents writed to index. {}ms", docs.size(), (System.currentTimeMillis()-ct));
                         break;
                     case QueueTask.ACTION_UPDATE:
                         //update documents
-                        ct = System.currentTimeMillis();
                         Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
                         writer.deleteDocuments(queries);
                         //re-add documents
-                        writer.addDocuments(docs);
+                        writer.addDocuments(docs.stream().map(d -> buildFacet(taxonomyWriter, d)).collect(Collectors.toList()));
+                        //writer.addDocuments(docs);
                         log.info("{} documents updated to index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
                         break;
                     case QueueTask.ACTION_DELETE:
-                        ct = System.currentTimeMillis();
                         queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
                         writer.deleteDocuments(queries);
                         log.info("{} documents deleted from index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
@@ -187,6 +195,14 @@ public class IndexManager {
 
         }
         return (docs!=null)?docs.size():0;
+    }
+
+    private static Document buildFacet(TaxonomyWriter taxonomyWriter, Document doc) {
+        try {
+            return facetsConfig.build(taxonomyWriter, doc);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void main(String[] args) throws IOException {

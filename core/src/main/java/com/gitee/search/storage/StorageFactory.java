@@ -1,6 +1,8 @@
 package com.gitee.search.storage;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
@@ -40,7 +42,7 @@ public class StorageFactory {
      * @return
      * @exception
      */
-    public static IndexWriter getWriter(String type) throws IOException {
+    public static IndexWriter getIndexWriter(String type) throws IOException {
         return storage.getWriter(type);
     }
 
@@ -50,8 +52,27 @@ public class StorageFactory {
      * @return
      * @exception
      */
-    public static IndexReader getReader(String type) throws IOException {
+    public static IndexReader getIndexReader(String type) throws IOException {
         return storage.getReader(type);
     }
 
+    /**
+     * 获取分类数据写入入口
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    public static TaxonomyWriter getTaxonomyWriter(String type) throws IOException {
+        return storage.getTaxonomyWriter(type);
+    }
+
+    /**
+     * 获取分类索引的读取入口
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    public static TaxonomyReader getTaxonomyReader(String type) throws IOException {
+        return storage.getTaxonomyReader(type);
+    }
 }

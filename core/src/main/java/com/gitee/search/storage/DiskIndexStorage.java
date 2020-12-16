@@ -3,6 +3,10 @@ package com.gitee.search.storage;
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.GiteeSearchConfig;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -47,33 +51,65 @@ public class DiskIndexStorage implements IndexStorage {
 
     @Override
     public IndexWriter getWriter(String type) throws IOException {
-        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
-
-        writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
-        writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
-        writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));
-        writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-
-        return new IndexWriter(NIOFSDirectory.open(getIndexPath(type)), writerConfig);
+        return new IndexWriter(NIOFSDirectory.open(getIndexPath(type, false)), getWriterConfig());
     }
 
     @Override
     public IndexReader getReader(String type) throws IOException {
-        return DirectoryReader.open(NIOFSDirectory.open(getIndexPath(type)));
+        return DirectoryReader.open(NIOFSDirectory.open(getIndexPath(type, false)));
+    }
+
+    /**
+     * 获取分类数据写入入口
+     *
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public TaxonomyWriter getTaxonomyWriter(String type) throws IOException {
+        return new DirectoryTaxonomyWriter(NIOFSDirectory.open(getIndexPath(type, true)));
+    }
+
+    /**
+     * 获取分类索引的读取入口
+     *
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public TaxonomyReader getTaxonomyReader(String type) throws IOException {
+        return new DirectoryTaxonomyReader(NIOFSDirectory.open(getIndexPath(type, true)));
     }
 
     /**
      * 获取指定类型对象的索引目录
      * @param type
+     * @parma taxonomy  是否为分类数据
      * @return
      * @throws IOException
      */
-    private Path getIndexPath(String type) throws IOException {
+    private Path getIndexPath(String type, boolean taxonomy) throws IOException {
         String subPath = MAPPING_TYPES.getProperty(type, type);
+        subPath += taxonomy?"_taxo":"_idxs";
         Path ipath = indexBasePath.resolve(subPath);
         if(!Files.exists(ipath) || !Files.isDirectory(ipath))
             Files.createDirectory(ipath);
         return ipath;
+    }
+
+    /**
+     * 索引配置
+     * @return
+     */
+    private IndexWriterConfig getWriterConfig() {
+        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
+        writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
+        writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
+        writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));
+        writerConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+        return writerConfig;
     }
 
     @Override

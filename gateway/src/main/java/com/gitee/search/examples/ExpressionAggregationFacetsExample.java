@@ -1,14 +1,18 @@
 package com.gitee.search.examples;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
@@ -23,9 +27,7 @@ import org.apache.lucene.facet.taxonomy.TaxonomyFacetSumValueSource;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.*;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.DoubleValuesSource;
 import org.apache.lucene.search.IndexSearcher;
@@ -34,6 +36,7 @@ import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NIOFSDirectory;
+import org.apache.lucene.util.BytesRef;
 
 
 /** Shows facets aggregation by an expression. */
@@ -48,32 +51,49 @@ public class ExpressionAggregationFacetsExample {
 
     /** Build the example index. */
     private void index() throws IOException {
-        IndexWriter indexWriter = new IndexWriter(indexDir, new IndexWriterConfig(
-                new WhitespaceAnalyzer()).setOpenMode(OpenMode.CREATE));
+        IndexWriter indexWriter = new IndexWriter(indexDir, new IndexWriterConfig().setOpenMode(OpenMode.CREATE_OR_APPEND));
 
         // Writes facet ords to a separate directory from the main index
         DirectoryTaxonomyWriter taxoWriter = new DirectoryTaxonomyWriter(taxoDir);
 
         Document doc = new Document();
+        doc.add(new StringField("id", "1", Store.NO));
         doc.add(new TextField("c", "foo bar", Store.NO));
         doc.add(new NumericDocValuesField("popularity", 5L));
         doc.add(new FacetField("lang", "Java"));
         indexWriter.addDocument(config.build(taxoWriter, doc));
 
         doc = new Document();
+        doc.add(new StringField("id", "2", Store.NO));
         doc.add(new TextField("c", "foo foo bar", Store.NO));
         doc.add(new NumericDocValuesField("popularity", 3L));
         doc.add(new FacetField("lang", "Java"));
         indexWriter.addDocument(config.build(taxoWriter, doc));
 
         doc = new Document();
+        doc.add(new StringField("id", "3", Store.NO));
         doc.add(new TextField("c", "第三个 foo bar", Store.NO));
         doc.add(new NumericDocValuesField("popularity", 3L));
         doc.add(new FacetField("lang", "PHP"));
         indexWriter.addDocument(config.build(taxoWriter, doc));
 
+        doc = new Document();
+        doc.add(new StringField("id", "4", Store.NO));
+        doc.add(new TextField("c", "第四个 foo bar", Store.NO));
+        doc.add(new NumericDocValuesField("popularity", 3L));
+        doc.add(new FacetField("lang", "C#"));
+        indexWriter.addDocument(config.build(taxoWriter, doc));
+
         indexWriter.close();
         taxoWriter.close();
+    }
+
+
+    /** Build the example index. */
+    private void delete() throws IOException {
+        IndexWriter indexWriter = new IndexWriter(indexDir, new IndexWriterConfig().setOpenMode(OpenMode.CREATE_OR_APPEND));
+        indexWriter.deleteDocuments(new Term("id", "3"));
+        indexWriter.close();
     }
 
     /** User runs a query and aggregates facets. */
@@ -102,23 +122,22 @@ public class ExpressionAggregationFacetsExample {
         return result;
     }
 
-    /** Runs the search example. */
-    public FacetResult runSearch() throws IOException, ParseException {
-        index();
-        return search();
-    }
-
     /** Runs the search and drill-down examples and prints the results. */
     public static void main(String[] args) throws Exception {
         try {
             taxoDir = NIOFSDirectory.open(Paths.get("D:\\lucene_taxo"));
             indexDir = NIOFSDirectory.open(Paths.get("D:\\lucene_index"));
-        } catch (IOException e ){
+        } catch (IOException e ){}
 
-        }
-        System.out.println("Facet counting example:");
-        System.out.println("-----------------------");
-        FacetResult result = new ExpressionAggregationFacetsExample().runSearch();
+        ExpressionAggregationFacetsExample app = new ExpressionAggregationFacetsExample();
+        app.index();
+
+        FacetResult result = app.search();
+        System.out.println(result);
+
+        System.out.println("----------test delete---------");
+        app.delete();
+        result = app.search();
         System.out.println(result);
     }
 }

@@ -42,6 +42,9 @@
     "namespace.id": {
       "type": "long"
     },
+    "namespace.name": {
+      "type": "text"
+    },
     "namespace.path": {
       "type": "text"
     },
@@ -53,10 +56,10 @@
       "type": "integer"
     },
     "lang": {
-      "type": "string"
+      "type": "facet"
     },
     "license": {
-      "type": "text"
+      "type": "facet"
     },
     "tags": {
       "type": "text"

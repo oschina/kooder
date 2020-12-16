@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
+import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.index.IndexableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +160,11 @@ public class ObjectMapping {
                 if("string".equalsIgnoreCase(setting.getType())){
                     doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
-                else {
+                else if("facet".equalsIgnoreCase(setting.getType())) {
+                    String fnv = getTextValue(field);
+                    if(StringUtils.isNotBlank(fnv))
+                        doc.add(new FacetField(fn, getTextValue(field)));
+                } else {
                     doc.add(new TextField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
             }
