@@ -146,6 +146,10 @@ public class IndexMapping {
             this.type = node.get("type").textValue();
         }
 
+        public boolean isFacet() {
+            return "facet".equalsIgnoreCase(type);
+        }
+
         public boolean isNumber() {
             return "long".equalsIgnoreCase(type) || "integer".equalsIgnoreCase(type);
         }

@@ -7,6 +7,7 @@ import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
+import org.apache.lucene.facet.taxonomy.FloatAssociationFacetField;
 import org.apache.lucene.index.IndexableField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,24 +148,33 @@ public class ObjectMapping {
             return ;
         try {
             if(field.isIntegralNumber()){ //整数值
-                doc.add(new NumericDocValuesField(fn, field.longValue()));
-                if (setting.isStore())
-                    doc.add(new StoredField(fn, field.longValue()));
+                if(setting.isFacet())
+                    doc.add(new FacetField(fn, String.valueOf(field.longValue())));
+                else {
+                    doc.add(new NumericDocValuesField(fn, field.longValue()));
+                    if (setting.isStore())
+                        doc.add(new StoredField(fn, field.longValue()));
+                }
             }
             else if(field.isFloatingPointNumber()) {
-                doc.add(new FloatDocValuesField(fn, field.floatValue()));
-                if (setting.isStore())
-                    doc.add(new StoredField(fn, field.floatValue()));
+                if(setting.isFacet())
+                    doc.add(new FacetField(fn, String.valueOf(field.floatValue())));
+                else {
+                    doc.add(new FloatDocValuesField(fn, field.floatValue()));
+                    if (setting.isStore())
+                        doc.add(new StoredField(fn, field.floatValue()));
+                }
             }
             else if(field.isTextual()) {//文本内容
-                if("string".equalsIgnoreCase(setting.getType())){
-                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
-                }
-                else if("facet".equalsIgnoreCase(setting.getType())) {
+                if(setting.isFacet()) {
                     String fnv = getTextValue(field);
                     if(StringUtils.isNotBlank(fnv))
                         doc.add(new FacetField(fn, getTextValue(field)));
-                } else {
+                }
+                else if("string".equalsIgnoreCase(setting.getType())){
+                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+                }
+                else {
                     doc.add(new TextField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
             }
