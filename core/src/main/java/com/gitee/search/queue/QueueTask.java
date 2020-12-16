@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.index.IndexManager;
 
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
+import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +151,17 @@ public class QueueTask {
      */
     public int write() throws IOException {
         return IndexManager.write(this);
+    }
+
+    /**
+     * 用于多线程环境下共享 IndexWriter 写入
+     * @param i_writer
+     * @param t_writer
+     * @return
+     * @throws IOException
+     */
+    public int write(IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
+        return IndexManager.write(this, i_writer, t_writer);
     }
 
     public static boolean isValidJSON(final String json) {

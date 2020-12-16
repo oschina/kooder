@@ -7,7 +7,12 @@ import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.facet.FacetResult;
+import org.apache.lucene.facet.Facets;
+import org.apache.lucene.facet.FacetsCollector;
 import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -69,7 +74,15 @@ public class IndexManager {
             searcher.setQueryCache(queryCache);
             searcher.setQueryCachingPolicy(defaultCachingPolicy);
 
-            TopDocs docs = searcher.searchAfter(after, query, numHits);
+            TaxonomyReader taxoReader = StorageFactory.getTaxonomyReader(type);
+            // Aggregates the facet values
+            FacetsCollector fc = new FacetsCollector(false);
+            TopDocs docs = FacetsCollector.searchAfter(searcher, after, query, numHits, fc);
+
+            Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+            FacetResult facetResult = facets.getTopChildren(20, "lang");
+            System.out.println(facetResult);
+            //TopDocs docs = searcher.searchAfter(after, query, numHits);
 
             //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
             result.put("type", type);
@@ -77,27 +90,46 @@ public class IndexManager {
             result.put("totalPages", (docs.totalHits.value + numHits - 1) / numHits);
             result.put("timeUsed", (System.currentTimeMillis() - ct));
             result.put("query", query.toString());
-            ArrayNode objects = result.putArray("objects");
-            for(ScoreDoc sdoc : docs.scoreDocs) {
-                Document doc = searcher.doc(sdoc.doc);
-                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
-                pojo.put(KEY_DOC_ID, sdoc.doc);
-                pojo.put(KEY_SCORE, sdoc.score);
-                objects.addPOJO(pojo);
 
-                log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
-                        doc.get("id"),
-                        sdoc.score,
-                        doc.get("namespace.path"),
-                        doc.get("path"),
-                        doc.get("name"),
-                        doc.get("type"),
-                        doc.get("count.star"),
-                        doc.get("recomm"),
-                        doc.get("fork")
-                );
-            }
+            readObjects(type, result, docs, searcher);
+
             return result.toString();
+        }
+    }
+
+    private static void readTaxonomy() {
+
+    }
+
+    /**
+     * 读取结果对象
+     * @param type
+     * @param result
+     * @param docs
+     * @param searcher
+     * @throws IOException
+     */
+    private static void readObjects(String type, ObjectNode result, TopDocs docs, IndexSearcher searcher) throws IOException {
+        ArrayNode objects = result.putArray("objects");
+        for(ScoreDoc sdoc : docs.scoreDocs) {
+            Document doc = searcher.doc(sdoc.doc);
+            Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
+            pojo.put(KEY_DOC_ID, sdoc.doc);
+            pojo.put(KEY_SCORE, sdoc.score);
+            objects.addPOJO(pojo);
+            /*
+            log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
+                    doc.get("id"),
+                    sdoc.score,
+                    doc.get("namespace.path"),
+                    doc.get("path"),
+                    doc.get("name"),
+                    doc.get("type"),
+                    doc.get("count.star"),
+                    doc.get("recomm"),
+                    doc.get("fork")
+            );
+            */
         }
     }
 
@@ -134,26 +166,9 @@ public class IndexManager {
             result.put("pageSize", pageSize);
             result.put("timeUsed", (System.currentTimeMillis() - ct));
             result.put("query", query.toString());
-            ArrayNode objects = result.putArray("objects");
-            for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
-                Document doc = searcher.doc(docs.scoreDocs[i].doc);
-                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
-                pojo.put(KEY_DOC_ID, docs.scoreDocs[i].doc);
-                pojo.put(KEY_SCORE, docs.scoreDocs[i].score);
-                objects.addPOJO(pojo);
-                /*
-                log.info("id:{},score:{},repo:{}/{},name:{},type:{},stars:{},recomm:{},fork:{}",
-                        doc.get("id"),
-                        docs.scoreDocs[i].score,
-                        doc.get("namespace.path"),
-                        doc.get("path"),
-                        doc.get("name"),
-                        doc.get("type"),
-                        doc.get("count.star"),
-                        doc.get("recomm"),
-                        doc.get("fork")
-                );*/
-            }
+
+            readObjects(type, result, docs, searcher);
+
             return result.toString();
         }
     }
@@ -164,39 +179,56 @@ public class IndexManager {
      * @exception
      */
     public static int write(QueueTask task) throws IOException {
+        try (
+            IndexWriter writer = StorageFactory.getIndexWriter(task.getType());
+            TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(task.getType());
+        ) {
+            return write(task,writer, taxonomyWriter);
+        }
+    }
+
+    /**
+     * 用于多线程环境下共享 IndexWriter 写入
+     * @param task
+     * @param i_writer
+     * @param t_writer
+     * @return
+     * @throws IOException
+     */
+    public static int write(QueueTask task, IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
         long ct = System.currentTimeMillis();
         List<Document> docs = ObjectMapping.task2doc(task);
         if(docs != null && docs.size() > 0) {
-            try (
-                IndexWriter writer = StorageFactory.getIndexWriter(task.getType());
-                TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(task.getType());
-            ) {
-                switch (task.getAction()) {
-                    case QueueTask.ACTION_ADD:
-                        writer.addDocuments(docs.stream().map(d -> buildFacet(taxonomyWriter, d)).collect(Collectors.toList()));
-                        //writer.addDocuments(docs);
-                        log.info("{} documents writed to index. {}ms", docs.size(), (System.currentTimeMillis()-ct));
-                        break;
-                    case QueueTask.ACTION_UPDATE:
-                        //update documents
-                        Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-                        writer.deleteDocuments(queries);
-                        //re-add documents
-                        writer.addDocuments(docs.stream().map(d -> buildFacet(taxonomyWriter, d)).collect(Collectors.toList()));
-                        //writer.addDocuments(docs);
-                        log.info("{} documents updated to index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
-                        break;
-                    case QueueTask.ACTION_DELETE:
-                        queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-                        writer.deleteDocuments(queries);
-                        log.info("{} documents deleted from index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
-                }
+            switch (task.getAction()) {
+                case QueueTask.ACTION_ADD:
+                    i_writer.addDocuments(docs.stream().map(d -> buildFacet(t_writer, d)).collect(Collectors.toList()));
+                    //writer.addDocuments(docs);
+                    log.info("{} documents writed to index. {}ms", docs.size(), (System.currentTimeMillis()-ct));
+                    break;
+                case QueueTask.ACTION_UPDATE:
+                    //update documents
+                    Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+                    i_writer.deleteDocuments(queries);
+                    //re-add documents
+                    i_writer.addDocuments(docs.stream().map(d -> buildFacet(t_writer, d)).collect(Collectors.toList()));
+                    //writer.addDocuments(docs);
+                    log.info("{} documents updated to index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
+                    break;
+                case QueueTask.ACTION_DELETE:
+                    queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+                    i_writer.deleteDocuments(queries);
+                    log.info("{} documents deleted from index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
             }
-
         }
         return (docs!=null)?docs.size():0;
     }
 
+    /**
+     * 将普通 document 转成 facet 文档
+     * @param taxonomyWriter
+     * @param doc
+     * @return
+     */
     private static Document buildFacet(TaxonomyWriter taxonomyWriter, Document doc) {
         try {
             return facetsConfig.build(taxonomyWriter, doc);
