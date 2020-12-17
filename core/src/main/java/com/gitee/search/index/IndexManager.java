@@ -69,10 +69,10 @@ public class IndexManager {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
 
-        boolean needOriginQuery = facets != null && facets.size() > 0;
+        boolean needFacetQuery = facets != null && facets.size() > 0;
         Query thisQuery = query;
 
-        if (needOriginQuery) {
+        if ( needFacetQuery ) { // 避免二次执行 FunctionScoreQuery ，比较耗时
             if(query instanceof FunctionScoreQuery)
                 thisQuery = ((FunctionScoreQuery)query).getWrappedQuery();
         }
@@ -89,7 +89,7 @@ public class IndexManager {
             //如果 n 传 0 ，则 search 方法 100% 报 ClassCastException 异常，这是 Lucene 的 bug
             TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,true, fc); //fetch all facets
 
-            if(facets != null && facets.size() > 0) {
+            if( needFacetQuery ) {
                 BooleanQuery.Builder builder = new BooleanQuery.Builder();
                 builder.add(query, BooleanClause.Occur.MUST);
                 DrillDownQuery q = new DrillDownQuery(facetsConfig);
