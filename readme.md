@@ -29,10 +29,12 @@ Windows 系统请使用 indexer.bat 和 gateway.bat
 ```
 $ git clone https://gitee.com/oschina/gitee-search.git
 $ cd gitee-search
-$ 修改 core/src/main/resource/gitee-search.properties 的 storage.disk.path 配置
 $ mvn install
+### 构建索引
+$ bin/gsimport.sh -p <json-file-path>
 ### 启动 indexer
 $ bin/indexer.sh
 ### 启动 gateway
 $ bin/gateway.sh
+### 浏览器访问 http://localhost:8080
 ```
