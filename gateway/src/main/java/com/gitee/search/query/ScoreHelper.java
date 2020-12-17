@@ -17,21 +17,21 @@ public class ScoreHelper {
      */
     public static double repoSort(double score, double recomm, double stars, double gindex) {
         //System.out.printf("%s -> score:%.2f, recomm: %f, stars: %f, gindex: %f\n", Thread.currentThread().getName(), score, recomm, stars, gindex);
-        if(score > 10) {
+        if(score > 4) {
             //官方推荐加权
             if(recomm > 0)
-                score += (recomm * 50);
+                score += (recomm * 10);
             else {
                 //Star 数加权
                 if (stars >= 100)
-                    score += stars / 100;
+                    score += stars / 200;
                 else if (stars > 0 && stars < 10)
-                    score -= 20;
+                    score -= 5;
                 else
-                    score -= 30;
+                    score -= 10;
             }
-            if(score < 0)
-                score = 1;
+            while(score < 0)
+                score += 1;
         }
         //System.out.println(" new score: " + score);
         return score;

@@ -77,8 +77,8 @@ public class QueryHelper {
 
         //BoostQuery
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        qbuilder.add(makeBoostQuery("name", q, 5.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("description", q, 5.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("name", q, 6.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("description", q, 4.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("detail", q, 0.5f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("catalogs", q, 1.0f), BooleanClause.Occur.SHOULD);
@@ -113,7 +113,10 @@ public class QueryHelper {
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
         for(int i=0;i<keys.size();i++) {
             String key = keys.get(i);
-            qbuilder.add(new TermQuery(new Term(field, key)), BooleanClause.Occur.SHOULD);
+            if("name".equals(field)) //TODO 提取该定制逻辑以支持不同的 type
+                qbuilder.add(new WildcardQuery(new Term(field, "*"+key+"*")), BooleanClause.Occur.SHOULD);
+            else
+                qbuilder.add(new TermQuery(new Term(field, key)), BooleanClause.Occur.SHOULD);
         }
         return new BoostQuery(qbuilder.build(), boost);
     }
