@@ -2,8 +2,6 @@ package com.gitee.search.query;
 
 import com.gitee.search.action.Constants;
 import com.gitee.search.core.SearchHelper;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
@@ -59,7 +57,7 @@ public class QueryHelper {
      * @param recomm
      * @return
      */
-    public static Query buildRepoQuery(String q, String lang, int recomm) {
+    public static Query buildRepoQuery(String q, int recomm) {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //只搜索公开仓库
         builder.add(NumericDocValuesField.newSlowExactQuery("type", Constants.REPO_TYPE_PUBLIC), BooleanClause.Occur.FILTER);
@@ -68,8 +66,6 @@ public class QueryHelper {
         //不搜索被屏蔽的仓库
         builder.add(NumericDocValuesField.newSlowExactQuery("block", Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
 
-        if(StringUtils.isNotBlank(lang))//编程语言
-            builder.add(new TermQuery(new Term("lang", lang)), BooleanClause.Occur.FILTER);
         if(recomm >= Constants.RECOMM_GVP)//搜索范围
             builder.add(NumericDocValuesField.newSlowExactQuery("recomm", Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
         else if(recomm > Constants.RECOMM_NONE)

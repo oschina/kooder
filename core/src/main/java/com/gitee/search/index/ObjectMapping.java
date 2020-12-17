@@ -9,6 +9,7 @@ import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.taxonomy.FloatAssociationFacetField;
 import org.apache.lucene.index.IndexableField;
+import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,26 +151,25 @@ public class ObjectMapping {
             if(field.isIntegralNumber()){ //整数值
                 if(setting.isFacet())
                     doc.add(new FacetField(fn, String.valueOf(field.longValue())));
-                else {
-                    doc.add(new NumericDocValuesField(fn, field.longValue()));
-                    if (setting.isStore())
-                        doc.add(new StoredField(fn, field.longValue()));
-                }
+
+                doc.add(new NumericDocValuesField(fn, field.longValue()));
+                if (setting.isStore())
+                    doc.add(new StoredField(fn, field.longValue()));
             }
             else if(field.isFloatingPointNumber()) {
                 if(setting.isFacet())
                     doc.add(new FacetField(fn, String.valueOf(field.floatValue())));
-                else {
-                    doc.add(new FloatDocValuesField(fn, field.floatValue()));
-                    if (setting.isStore())
-                        doc.add(new StoredField(fn, field.floatValue()));
-                }
+                doc.add(new FloatDocValuesField(fn, field.floatValue()));
+                if (setting.isStore())
+                    doc.add(new StoredField(fn, field.floatValue()));
             }
             else if(field.isTextual()) {//文本内容
                 if(setting.isFacet()) {
                     String fnv = getTextValue(field);
                     if(StringUtils.isNotBlank(fnv))
-                        doc.add(new FacetField(fn, getTextValue(field)));
+                        doc.add(new FacetField(fn, fnv));
+                    doc.add(new SortedDocValuesField(fn, new BytesRef(fnv)));
+                    //doc.add(new StringField(fn, fnv, setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
                 else if("string".equalsIgnoreCase(setting.getType())){
                     doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));

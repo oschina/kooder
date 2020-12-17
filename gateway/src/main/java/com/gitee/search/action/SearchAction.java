@@ -10,6 +10,7 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * 搜索接口
@@ -30,16 +31,20 @@ public class SearchAction {
         String sort = request.param("sort");
         int page = request.param("p", 1);
         String lang = request.param("lang");
-        String scope = request.param("scope");
 
         q = SearchHelper.cleanupKey(q);
         if(StringUtils.isBlank(q))
             return "{}";
 
-        Query query = QueryHelper.buildRepoQuery(q, lang, 0);
+        Query query = QueryHelper.buildRepoQuery(q, 0);
         Sort nSort = QueryHelper.buildRepoSort(sort);
 
-        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, nSort, page, PAGE_SIZE);
+        HashMap<String, String> facets = new HashMap(){{
+            if(StringUtils.isNotBlank(lang))
+                put("lang", lang);
+        }};
+
+        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, facets, nSort, page, PAGE_SIZE);
     }
 
     /**

@@ -34,7 +34,6 @@ public class IndexManager {
 
     private final static Logger log = LoggerFactory.getLogger(IndexManager.class);
 
-    public final static int MAX_RESULT_COUNT = 1000;
     public final static int SEARCH_THREAD_COUNT = 10; //并发搜索线程数
 
     public final static String KEY_SCORE = "_score_"; //在 json 中存放文档的score值
@@ -48,6 +47,77 @@ public class IndexManager {
     private final static QueryCachingPolicy defaultCachingPolicy = new UsageTrackingQueryCachingPolicy();
 
     private final static FacetsConfig facetsConfig = new FacetsConfig();
+
+    /**
+     * 执行搜索
+     * @param type
+     * @param query
+     * @param facets
+     * @param sort
+     * @param page
+     * @param pageSize
+     * @return
+     * @throws IOException
+     */
+    public static String search(String type, Query query, Map<String,String> facets, Sort sort, int page, int pageSize)
+            throws IOException
+    {
+
+        long ct = System.currentTimeMillis();
+
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode result = mapper.createObjectNode();
+
+        Query thisQuery = query;
+
+        try (IndexReader reader = StorageFactory.getIndexReader(type)) {
+            ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
+            IndexSearcher searcher = new IndexSearcher(reader, pool);
+            searcher.setQueryCache(queryCache);
+            searcher.setQueryCachingPolicy(defaultCachingPolicy);
+
+            TaxonomyReader taxoReader = StorageFactory.getTaxonomyReader(type);
+            // Aggregates the facet values
+            FacetsCollector fc = new FacetsCollector(false);
+            //如果 n 传 0 ，则 search 方法 100% 报 ClassCastException 异常，这是 Lucene 的 bug
+            TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,false, fc); //fetch all facets
+
+            if(facets != null && facets.size() > 0) {
+                BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                builder.add(query, BooleanClause.Occur.MUST);
+                DrillDownQuery q = new DrillDownQuery(facetsConfig);
+                facets.forEach((k,v) -> {
+                    q.add(k, v);
+                    builder.add(q, BooleanClause.Occur.FILTER);
+                });
+                thisQuery = builder.build();
+                //TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,true, new FacetsCollector(false));
+                docs = searcher.search(thisQuery, page * pageSize, sort,true);
+            }
+
+            //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
+            result.put("type", type);
+            result.put("totalHits", docs.totalHits.value);
+            result.put("totalPages", (docs.totalHits.value + pageSize - 1) / pageSize);
+            result.put("pageIndex", page);
+            result.put("pageSize", pageSize);
+            result.put("timeUsed", (System.currentTimeMillis() - ct));
+            result.put("query", thisQuery.toString());
+
+            ArrayNode objects = result.putArray("objects");
+            for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
+                Document doc = searcher.doc(docs.scoreDocs[i].doc);
+                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
+                pojo.put(KEY_DOC_ID, docs.scoreDocs[i].doc);
+                pojo.put(KEY_SCORE, docs.scoreDocs[i].score);
+                objects.addPOJO(pojo);
+            }
+
+            readTaxonomy(type, result, taxoReader, fc);
+
+            return result.toString();
+        }
+    }
 
     /**
      * search after document
@@ -93,60 +163,6 @@ public class IndexManager {
                 Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
                 pojo.put(KEY_DOC_ID, sdoc.doc);
                 pojo.put(KEY_SCORE, sdoc.score);
-                objects.addPOJO(pojo);
-            }
-
-            readTaxonomy(type, result, taxoReader, fc);
-
-            return result.toString();
-        }
-    }
-
-    /**
-     * 执行搜索
-     * @param type
-     * @param query
-     * @param sort
-     * @param page
-     * @param pageSize
-     * @return
-     * @throws IOException
-     */
-    public static String search(String type, Query query, Sort sort, int page, int pageSize) throws IOException {
-
-        long ct = System.currentTimeMillis();
-
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode result = mapper.createObjectNode();
-
-        try (IndexReader reader = StorageFactory.getIndexReader(type)) {
-            ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
-            IndexSearcher searcher = new IndexSearcher(reader, pool);
-            searcher.setQueryCache(queryCache);
-            searcher.setQueryCachingPolicy(defaultCachingPolicy);
-
-            TaxonomyReader taxoReader = StorageFactory.getTaxonomyReader(type);
-            // Aggregates the facet values
-            FacetsCollector fc = new FacetsCollector(false);
-
-            //如果 n 传 0 ，则 search 方法 100% 报 ClassCastException 异常，这是 Lucene 的 bug
-            TopDocs docs = FacetsCollector.search(searcher, query, page * pageSize, sort,true, fc);
-
-            //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
-            result.put("type", type);
-            result.put("totalHits", docs.totalHits.value);
-            result.put("totalPages", (docs.totalHits.value + pageSize - 1) / pageSize);
-            result.put("pageIndex", page);
-            result.put("pageSize", pageSize);
-            result.put("timeUsed", (System.currentTimeMillis() - ct));
-            result.put("query", query.toString());
-
-            ArrayNode objects = result.putArray("objects");
-            for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
-                Document doc = searcher.doc(docs.scoreDocs[i].doc);
-                Map<String, Object> pojo = ObjectMapping.doc2json(type, doc);
-                pojo.put(KEY_DOC_ID, docs.scoreDocs[i].doc);
-                pojo.put(KEY_SCORE, docs.scoreDocs[i].score);
                 objects.addPOJO(pojo);
             }
 
@@ -209,16 +225,17 @@ public class IndexManager {
         if(docs != null && docs.size() > 0) {
             switch (task.getAction()) {
                 case QueueTask.ACTION_ADD:
-                    i_writer.addDocuments(docs.stream().map(d -> buildFacet(t_writer, d)).collect(Collectors.toList()));
+                    i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
                     //writer.addDocuments(docs);
                     log.info("{} documents writed to index. {}ms", docs.size(), (System.currentTimeMillis()-ct));
                     break;
                 case QueueTask.ACTION_UPDATE:
+                    //FIXME 读出文档，然后更新文档字段，然后写入
                     //update documents
                     Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
                     i_writer.deleteDocuments(queries);
                     //re-add documents
-                    i_writer.addDocuments(docs.stream().map(d -> buildFacet(t_writer, d)).collect(Collectors.toList()));
+                    i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
                     //writer.addDocuments(docs);
                     log.info("{} documents updated to index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
                     break;
@@ -237,7 +254,7 @@ public class IndexManager {
      * @param doc
      * @return
      */
-    private static Document buildFacet(TaxonomyWriter taxonomyWriter, Document doc) {
+    private static Document buildFacetDocument(TaxonomyWriter taxonomyWriter, Document doc) {
         try {
             return facetsConfig.build(taxonomyWriter, doc);
         } catch (IOException e) {

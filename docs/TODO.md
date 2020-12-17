@@ -21,6 +21,7 @@
 27. 支持不同排序方法  DONE
 29. 使用不同的 Query 来应对不同的 Field  DONE
 28. 通用词汇的搜索效果不满意（ruby，数据库、web 等）  DONE
+26. 通过 facet 提供二次过滤  DONE
     
 9. 代码搜索
 11. 服务脚本 bin/*.sh ，守护进程处理
@@ -28,4 +29,5 @@
 17. issue 和其他内容搜索
 19. 从搜索关键字中提取编程语言\分类，进行单独的过滤
 20. 搜索性能优化，并发50 -> 60/s
-26. 通过 facet 提供二次过滤
+27. 使用 IntAssociationFacetField 来处理 tags 和 catalogs
+28. 支持只传递要更新的文档字段

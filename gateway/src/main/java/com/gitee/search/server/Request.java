@@ -80,7 +80,7 @@ public class Request {
         StringBuilder newUri = new StringBuilder();
         newUri.append(this.path);
         params.forEach((k,v) -> {
-            if(!"p".equals(k)) {
+            if(!name.equals(k)) {
                 newUri.append((newUri.length()==this.path.length())?'?':'&');
                 newUri.append(encodeURL(k));
                 newUri.append('=');

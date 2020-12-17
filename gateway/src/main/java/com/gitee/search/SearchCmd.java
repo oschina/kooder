@@ -28,7 +28,7 @@ public class SearchCmd {
             long ct = System.currentTimeMillis();
 
             String q = SearchHelper.cleanupKey(line);
-            Query query = QueryHelper.buildRepoQuery(q, null, 0);
+            Query query = QueryHelper.buildRepoQuery(q, 0);
 
             String json = IndexManager.searchAfter(QueueTask.TYPE_REPOSITORY, null, query, 10);
             System.out.println(json);
