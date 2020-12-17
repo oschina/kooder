@@ -172,9 +172,11 @@ public class IndexManager {
         Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
         for(String facetField : facetFields) {
             FacetResult facetResult = facets.getTopChildren(Integer.MAX_VALUE, facetField);
-            ArrayNode taxs2 = taxs.putArray(facetField);
-            for (LabelAndValue lav : facetResult.labelValues) {
-                taxs2.addPOJO(lav);
+            if(facetResult != null) {
+                ArrayNode taxs2 = taxs.putArray(facetField);
+                for (LabelAndValue lav : facetResult.labelValues) {
+                    taxs2.addPOJO(lav);
+                }
             }
         }
     }

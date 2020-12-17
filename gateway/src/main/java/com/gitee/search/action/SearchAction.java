@@ -5,6 +5,7 @@ import com.gitee.search.index.IndexManager;
 import com.gitee.search.query.QueryHelper;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.server.Request;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 
@@ -32,6 +33,9 @@ public class SearchAction {
         String scope = request.param("scope");
 
         q = SearchHelper.cleanupKey(q);
+        if(StringUtils.isBlank(q))
+            return "{}";
+
         Query query = QueryHelper.buildRepoQuery(q, lang, 0);
         Sort nSort = QueryHelper.buildRepoSort(sort);
 
