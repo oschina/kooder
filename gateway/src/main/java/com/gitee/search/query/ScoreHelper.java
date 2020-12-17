@@ -7,6 +7,8 @@ package com.gitee.search.query;
  */
 public class ScoreHelper {
 
+    public final static int SCORE_FACTOR = 6;
+
     /**
      * 自定义仓库的搜索评分规则
      * @param score
@@ -16,24 +18,22 @@ public class ScoreHelper {
      * @return
      */
     public static double repoSort(double score, double recomm, double stars, double gindex) {
-        //System.out.printf("%s -> score:%.2f, recomm: %f, stars: %f, gindex: %f\n", Thread.currentThread().getName(), score, recomm, stars, gindex);
-        if(score > 4) {
+        if(score >= SCORE_FACTOR) {
             //官方推荐加权
             if(recomm > 0)
-                score += (recomm * 10);
+                score += (recomm * 20);
             else {
                 //Star 数加权
                 if (stars >= 100)
-                    score += stars / 200;
+                    score += stars / 20;
                 else if (stars > 0 && stars < 10)
-                    score -= 5;
-                else
                     score -= 10;
+                else
+                    score -= 20;
             }
-            while(score < 0)
+            while(score < SCORE_FACTOR)
                 score += 1;
         }
-        //System.out.println(" new score: " + score);
         return score;
     }
 

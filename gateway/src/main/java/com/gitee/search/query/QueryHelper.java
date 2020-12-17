@@ -76,8 +76,9 @@ public class QueryHelper {
             builder.add(NumericDocValuesField.newSlowRangeQuery("recomm", Constants.RECOMM, Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
 
         //BoostQuery
+        //如果调整  boost 就要调整 ScoreHelper 中的 SCORE_FACTOR
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        qbuilder.add(makeBoostQuery("name", q, 6.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("name", q, ScoreHelper.SCORE_FACTOR), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("description", q, 4.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("detail", q, 0.5f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);

@@ -5,73 +5,85 @@
     <title>#if($q)$q - #{end}Gitee Search</title>
     <link href="/css/main.css" media="all" rel="stylesheet" />
     <link href="/css/pure-min.css" media="all" rel="stylesheet" />
+    <link href="/css/grids-responsive-min.css" media="all" rel="stylesheet" />
     <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 </head>
 <body>
-<div class="main">
-<form class="pure-form pure-form-aligned">
-    <fieldset>
-        <label for="i_query">搜索 :</label>
-        <input type="text" name="q" value="$!q" id="i_query" size="50">
-        <select name="type">
-            <option value="repo">Repository</option>
-            <option value="issue">Issue</option>
-            <option value="commit">Commit</option>
-            <option value="pr">PR</option>
-            <option value="user">User</option>
-            <option value="code">Code</option>
-        </select>
-        <select name="sort">
-            <option value="score">最佳匹配</option>
-            <option value="stars">最多 Star 数</option>
-            <option value="forks">最多 Fork 数</option>
-            <option value="update">最近更新</option>
-        </select>
-        <button type="submit" class="pure-button pure-button-primary">Search</button>
-    </fieldset>
-</form>
-#if($result)
-query: <code>$result.get("query").textValue()</code><br/>
-totalHits: <em>$result.get("totalHits")</em><br/>
-totalPages: <em>$result.get("totalPages")</em><br/>
-timeUsed: <em>$result.get("timeUsed")ms</em><br/>
-    Languages: #foreach($lang in $result.get('facets').get('lang'))<span>$lang.get('label').textValue():<em>$lang.get('value')</em></span>/#end
-<table class="pure-table pure-table-striped">
-    <thead>
-    <tr>
-        <th>No</th>
-        <th>Name</th>
-        <th>Doc</th>
-        <th>Score</th>
-        <th>Description</th>
-        <th>Star</th>
-        <th>Fork</th>
-        <th nowrap>G-Index</th>
-    </tr>
-    </thead>
-    <tbody>
-    #foreach($obj in $result.get("objects"))
-    #set($recomm = $obj.get('recomm').intValue())
-    #set($pi = (($request.param('p', 1) - 1) * 20) + ${foreach.count})
-    <tr>
-        <td valign="top">$pi</td>
-        <td valign="top" nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
-        <td valign="top">$obj.get('_id_')</td>
-        <td valign="top">$obj.get('_score_')</td>
-        <td>$obj.get('description').textValue()</td>
-        <td valign="top" align="right">$obj.get('count').get('star')</td>
-        <td valign="top" align="right">$obj.get('count').get('fork')</td>
-        <td valign="top" align="right">$obj.get('count').get('gindex')</td>
-    </tr>
-    #end
-    </tbody>
-</table>
-<div class="pager">
-    #foreach($page in [1..$result.get("totalPages")])
-    <a href="$request.uri('p',$page)">$page</a>
-    #end
-</div>
-#end
+
+<div id="main" class="pure-g">
+    <div class="content pure-u-1 pure-u-md-3-4">
+        <form class="pure-form pure-form-aligned">
+            <fieldset>
+                <label for="i_query">搜索 :</label>
+                <input type="text" name="q" value="$!q" id="i_query" size="50">
+                <select name="type">
+                    <option value="repo">Repository</option>
+                    <option value="issue">Issue</option>
+                    <option value="commit">Commit</option>
+                    <option value="pr">PR</option>
+                    <option value="user">User</option>
+                    <option value="code">Code</option>
+                </select>
+                <select name="sort">
+                    <option value="score">最佳匹配</option>
+                    <option value="stars">最多 Star 数</option>
+                    <option value="forks">最多 Fork 数</option>
+                    <option value="update">最近更新</option>
+                </select>
+                <button type="submit" class="pure-button pure-button-primary">Search</button>
+            </fieldset>
+        </form>
+        #if($result)
+        query: <code>$result.get("query").textValue()</code><br/>
+        totalHits: <em>$result.get("totalHits")</em><br/>
+        totalPages: <em>$result.get("totalPages")</em><br/>
+        timeUsed: <em>$result.get("timeUsed")ms</em><br/>
+        <table class="pure-table pure-table-striped">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Doc</th>
+                <th>Score</th>
+                <th>Description</th>
+                <th>Star</th>
+                <th>Fork</th>
+                <th nowrap>G-Index</th>
+            </tr>
+            </thead>
+            <tbody>
+            #foreach($obj in $result.get("objects"))
+            #set($recomm = $obj.get('recomm').intValue())
+            #set($pi = (($request.param('p', 1) - 1) * 20) + ${foreach.count})
+            <tr>
+                <td valign="top">$pi</td>
+                <td valign="top" nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
+                <td valign="top">$obj.get('_id_')</td>
+                <td valign="top">$obj.get('_score_')</td>
+                <td>$obj.get('description').textValue()</td>
+                <td valign="top" align="right">$obj.get('count').get('star')</td>
+                <td valign="top" align="right">$obj.get('count').get('fork')</td>
+                <td valign="top" align="right">$obj.get('count').get('gindex')</td>
+            </tr>
+            #end
+            </tbody>
+        </table>
+        <div class="pager">
+            #foreach($page in [1..$result.get("totalPages")])
+            <a href="$request.uri('p',$page)">$page</a>
+            #end
+        </div>
+        #end
+    </div>
+    <div class="sidebar pure-u-1 pure-u-md-1-4">
+        #if($result)
+        <ul>
+        #foreach($lang in $result.get('facets').get('lang'))
+        <li><span><a href="$request.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
+        #end
+        </ul>
+        #end
+    </div>
 </div>
 </body>
 </html>
