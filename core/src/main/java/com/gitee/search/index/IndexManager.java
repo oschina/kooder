@@ -13,6 +13,7 @@ import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.search.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,13 @@ public class IndexManager {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
 
+        boolean needOriginQuery = facets != null && facets.size() > 0;
         Query thisQuery = query;
+
+        if (needOriginQuery) {
+            if(query instanceof FunctionScoreQuery)
+                thisQuery = ((FunctionScoreQuery)query).getWrappedQuery();
+        }
 
         try (IndexReader reader = StorageFactory.getIndexReader(type)) {
             ExecutorService pool = Executors.newFixedThreadPool(SEARCH_THREAD_COUNT);//FIXED 似乎不起作用
@@ -80,7 +87,7 @@ public class IndexManager {
             // Aggregates the facet values
             FacetsCollector fc = new FacetsCollector(false);
             //如果 n 传 0 ，则 search 方法 100% 报 ClassCastException 异常，这是 Lucene 的 bug
-            TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,false, fc); //fetch all facets
+            TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,true, fc); //fetch all facets
 
             if(facets != null && facets.size() > 0) {
                 BooleanQuery.Builder builder = new BooleanQuery.Builder();
