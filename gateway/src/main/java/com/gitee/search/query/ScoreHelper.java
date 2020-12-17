@@ -20,21 +20,16 @@ public class ScoreHelper {
         if(score > 10) {
             //官方推荐加权
             if(recomm > 0)
-                score += (recomm * 20);
-            else
-                score -= 10;
-            //Star 数加权
-            if(stars >= 100)
-                score += (stars/((recomm>0)?10:100));
-            else if(stars < 10)
-                score -= 10;
-
-            //Gitee Index 加权
-            if(gindex > 80)
-                score += 15;
-            else if(gindex > 50)
-                score += 10;
-
+                score += (recomm * 50);
+            else {
+                //Star 数加权
+                if (stars >= 100)
+                    score += stars / 100;
+                else if (stars > 0 && stars < 10)
+                    score -= 20;
+                else
+                    score -= 30;
+            }
             if(score < 0)
                 score = 1;
         }

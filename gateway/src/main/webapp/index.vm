@@ -2,7 +2,7 @@
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Gitee Search</title>
+    <title>#if($q)$q - #{end}Gitee Search</title>
     <link href="/css/main.css" media="all" rel="stylesheet" />
     <link href="/css/pure-min.css" media="all" rel="stylesheet" />
     <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
@@ -21,6 +21,12 @@
             <option value="user">User</option>
             <option value="code">Code</option>
         </select>
+        <select name="sort">
+            <option value="score">最佳匹配</option>
+            <option value="stars">最多 Star 数</option>
+            <option value="forks">最多 Fork 数</option>
+            <option value="update">最近更新</option>
+        </select>
         <button type="submit" class="pure-button pure-button-primary">Search</button>
     </fieldset>
 </form>
@@ -29,7 +35,7 @@ query: <code>$result.get("query").textValue()</code><br/>
 totalHits: <em>$result.get("totalHits")</em><br/>
 totalPages: <em>$result.get("totalPages")</em><br/>
 timeUsed: <em>$result.get("timeUsed")ms</em><br/>
-Languages: #foreach($lang in $result.get('facets').get('lang'))<span>$lang.get('label').textValue():$lang.get('value')</span>/#end
+    Languages: #foreach($lang in $result.get('facets').get('lang'))<span>$lang.get('label').textValue():<em>$lang.get('value')</em></span>/#end
 <table class="pure-table pure-table-striped">
     <thead>
     <tr>

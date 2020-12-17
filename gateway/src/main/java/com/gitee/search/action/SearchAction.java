@@ -33,8 +33,9 @@ public class SearchAction {
 
         q = SearchHelper.cleanupKey(q);
         Query query = QueryHelper.buildRepoQuery(q, lang, 0);
+        Sort nSort = QueryHelper.buildRepoSort(sort);
 
-        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, Sort.RELEVANCE, page, PAGE_SIZE);
+        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, nSort, page, PAGE_SIZE);
     }
 
     /**

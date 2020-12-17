@@ -3,6 +3,7 @@ package com.gitee.search.query;
 import com.gitee.search.action.Constants;
 import com.gitee.search.core.SearchHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
@@ -37,8 +38,22 @@ public class QueryHelper {
     }
 
     /**
+     * 构建仓库搜索的排序方法
+     * @param sortMethod
+     * @return
+     */
+    public static Sort buildRepoSort(String sortMethod) {
+        if("stars".equals(sortMethod))
+            return new Sort(new SortedNumericSortField("count.star", SortField.Type.LONG, true));
+        if("forks".equals(sortMethod))
+            return new Sort(new SortedNumericSortField("count.fork", SortField.Type.LONG, true));
+        if("update".equals(sortMethod))
+            return new Sort(new SortedNumericSortField("last_push_at", SortField.Type.LONG, true));
+        return Sort.RELEVANCE;
+    }
+
+    /**
      * 仓库搜索的条件
-     * TODO 从搜索关键字中提取编程语言，进行单独的过滤
      * @param q
      * @param lang
      * @param recomm
@@ -62,12 +77,14 @@ public class QueryHelper {
 
         //BoostQuery
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        qbuilder.add(makeBoostQuery("name", q, 10.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("description", q, 2.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("detail", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("name", q, 5.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("description", q, 5.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("detail", q, 0.5f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("catalogs", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("owner.name", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("namespace.path", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("namespace.name", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.setMinimumNumberShouldMatch(1);
 
         builder.add(qbuilder.build(), BooleanClause.Occur.MUST);
@@ -96,7 +113,7 @@ public class QueryHelper {
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
         for(int i=0;i<keys.size();i++) {
             String key = keys.get(i);
-            qbuilder.add(new TermQuery(new Term(field, key)), (i==0)?BooleanClause.Occur.MUST:BooleanClause.Occur.SHOULD);
+            qbuilder.add(new TermQuery(new Term(field, key)), BooleanClause.Occur.SHOULD);
         }
         return new BoostQuery(qbuilder.build(), boost);
     }
