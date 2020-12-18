@@ -7,7 +7,6 @@ import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
-import org.apache.lucene.facet.taxonomy.FloatAssociationFacetField;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.util.BytesRef;
 import org.slf4j.Logger;
@@ -20,8 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * body -> document
- * TODO 如何在没有定义 mapping 的情况下实现文档的映射
+ * json <-> document
  * @author Winter Lau<javayou@gmail.com>
  */
 public class ObjectMapping {
@@ -30,6 +28,8 @@ public class ObjectMapping {
 
     public final static String FIELD_ID = "id"; //文档的唯一标识
     public final static String FIELD_objects = "objects";
+
+    public final static String FACET_VALUE_EMPTY = "Unknown";
 
     /**
      * 文档结果返回json
@@ -53,7 +53,6 @@ public class ObjectMapping {
         Map<String, Object> map = new HashMap<>();
         IndexMapping mapping = IndexMapping.get(type);
         doc.forEach( field -> saveFieldToMap(field, map, mapping));
-        //TODO 增加 gitee search 评分信息
         return map;
     }
 
@@ -166,8 +165,7 @@ public class ObjectMapping {
             else if(field.isTextual()) {//文本内容
                 if(setting.isFacet()) {
                     String fnv = getTextValue(field);
-                    if(StringUtils.isNotBlank(fnv))
-                        doc.add(new FacetField(fn, fnv));
+                    doc.add(new FacetField(fn, StringUtils.isBlank(fnv)?FACET_VALUE_EMPTY:fnv));
                     doc.add(new SortedDocValuesField(fn, new BytesRef(fnv)));
                     //doc.add(new StringField(fn, fnv, setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
