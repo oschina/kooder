@@ -74,9 +74,10 @@ public class QueryHelper {
         //如果调整  boost 就要调整 ScoreHelper 中的 SCORE_FACTOR
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
         qbuilder.add(makeBoostQuery("name", q, ScoreHelper.SCORE_FACTOR), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("description", q, 4.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("description", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("detail", q, 0.5f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("lang", q, 2.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("catalogs", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("owner.name", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("namespace.path", q, 1.0f), BooleanClause.Occur.SHOULD);
