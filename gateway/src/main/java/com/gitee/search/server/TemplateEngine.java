@@ -24,7 +24,6 @@ public class TemplateEngine {
 
     public final static String ENCODING = "utf-8";
     private final static EventCartridge eventCartridge = new EventCartridge();
-    private final static VelocityTool vTools = new VelocityTool();
 
     static {
         //Initialize velocity engine
@@ -70,7 +69,7 @@ public class TemplateEngine {
     private static VelocityContext initContext() {
         VelocityContext context = new VelocityContext();
         context.attachEventCartridge(eventCartridge);
-        context.put("tool", vTools);
+        context.put("tool", VelocityTool.class);
         return context;
     }
 
