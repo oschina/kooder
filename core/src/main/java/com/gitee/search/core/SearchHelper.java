@@ -1,19 +1,14 @@
 package com.gitee.search.core;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.document.*;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.highlight.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,26 +24,6 @@ public class SearchHelper {
         System.out.println(highlight(text, "gitee search 仓库"));
         //splitKeywords(text).forEach(e -> System.out.println(e));
         System.out.println(cleanupKey("小程序"));
-    }
-
-    /**
-     * 生成查询条件
-     *
-     * @param field
-     * @param q
-     * @param boost
-     * @return
-     */
-    public static Query makeQuery(String field, String q, float boost) {
-        QueryParser parser = new QueryParser(field, AnalyzerFactory.INSTANCE);
-        parser.setDefaultOperator(QueryParser.AND_OPERATOR);
-        try {
-            Query querySinger = parser.parse(q);
-            //System.out.println(querySinger.toString());
-            return querySinger;
-        } catch (Exception e) {
-            return new TermQuery(new Term(field, q));
-        }
     }
 
     /**
@@ -97,48 +72,6 @@ public class SearchHelper {
         }
 
         return (result != null) ? result : text;
-    }
-
-    /**
-     * 访问对象某个属性的值
-     *
-     * @param obj   对象
-     * @param field 属性名
-     * @return Lucene 文档字段
-     */
-    private static Object readField(Object obj, String field) {
-        try {
-            return PropertyUtils.getProperty(obj, field);
-        } catch (Exception e) {
-            log.error("Failed to get property '{}' of {}", field, obj.getClass().getName(), e);
-            return null;
-        }
-
-    }
-
-    /**
-     * add an object field to document
-     * @param doc
-     * @param field
-     * @param fieldValue
-     * @param store
-     */
-    private static void addField(Document doc, String field, Object fieldValue, boolean store) {
-        if (fieldValue == null)
-            return ;
-
-        if (fieldValue instanceof Date) //日期
-            doc.add(new LongPoint(field, ((Date) fieldValue).getTime()));
-        else if (fieldValue instanceof Number) //其他数值
-            doc.add(new LongPoint(field, ((Number) fieldValue).longValue()));
-        //其他默认当字符串处理
-        else {
-            doc.add(new StringField(field, (String) fieldValue, store ? Field.Store.YES : Field.Store.NO));
-            return;
-        }
-
-        if(store)
-            doc.add(new StoredField(field, (String) fieldValue));
     }
 
 }

@@ -1,7 +1,6 @@
 package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.event.EventCartridge;
@@ -25,6 +24,7 @@ public class TemplateEngine {
 
     public final static String ENCODING = "utf-8";
     private final static EventCartridge eventCartridge = new EventCartridge();
+    private final static VelocityTool vTools = new VelocityTool();
 
     static {
         //Initialize velocity engine
@@ -39,8 +39,8 @@ public class TemplateEngine {
             Velocity.init(p);
 
             eventCartridge.addReferenceInsertionEventHandler((context, reference, value) -> {
-                if(value instanceof String)
-                    return html((String)value);
+                if(value instanceof String) //自动对输出的文本进行 HTML 转义
+                    return VelocityTool.html((String)value);
                 return value;
             });
         } catch(IOException e) {
@@ -55,8 +55,7 @@ public class TemplateEngine {
      * @return
      */
     public static String render(String vm, Map params) {
-        VelocityContext context = new VelocityContext();
-        context.attachEventCartridge(eventCartridge);
+        VelocityContext context = initContext();
         if(params != null && params.size() > 0)
             params.forEach((k,v) -> context.put(k.toString(), v));
         StringWriter w = new StringWriter();
@@ -65,19 +64,14 @@ public class TemplateEngine {
     }
 
     /**
-     * HTML escape
-     * @param content
+     * 构造 Velocity 上下文
      * @return
      */
-    private final static String html(String content) {
-        if (content == null) return "";
-        String html = content;
-        html = StringUtils.replace(html, "'", "&apos;");
-        html = StringUtils.replace(html, "\"", "&quot;");
-        html = StringUtils.replace(html, "\t", "&nbsp;&nbsp;");// 替换跳格
-        html = StringUtils.replace(html, "<", "&lt;");
-        html = StringUtils.replace(html, ">", "&gt;");
-        return html;
+    private static VelocityContext initContext() {
+        VelocityContext context = new VelocityContext();
+        context.attachEventCartridge(eventCartridge);
+        context.put("tool", vTools);
+        return context;
     }
 
     /**

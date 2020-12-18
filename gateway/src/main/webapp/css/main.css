@@ -1,5 +1,8 @@
 #main {padding:8px;}
 table {margin-top:20px;}
+
+em.highlight {color:red;font-style:normal;margin:0 2px;}
+
 .pager {margin-top:20px;}
 .pager a {float:left; padding:2px 4px; border:1px solid #eee;background:#f1f1f1;text-decoration:none;margin:0 4px 4px 0;}
 .pager:after {
