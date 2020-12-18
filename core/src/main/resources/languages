@@ -1,0 +1,9 @@
+#编程语言定义，用于搜索关键字的提取
+#每一行一个编程语言，使用/隔开多个表达形式
+#\#开头为注释
+java
+javascript/js
+php
+python
+c#/csharp
+go/golang
