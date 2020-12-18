@@ -53,7 +53,6 @@ public class QueryHelper {
     /**
      * 仓库搜索的条件
      * @param q
-     * @param lang
      * @param recomm
      * @return
      */
