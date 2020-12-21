@@ -1,11 +1,7 @@
 package com.gitee.search.indexer;
 
 import com.gitee.search.queue.QueueTask;
-import com.gitee.search.storage.StorageFactory;
 import org.apache.commons.cli.*;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
-import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,7 +29,6 @@ public class PathImporter {
         addRequiredOption("p", "path",true, "json path");
         addOption("t", "type", true, "json object type (repo|issue|user|commit|code|pr)");
         addOption("a", "action", true, "action(add|update|delete)");
-        addOption("c", "concurrent",true, "concurrent thread count(default:5)");
         addOption("h", "help",true, "print help");
     }};
 
@@ -61,12 +53,13 @@ public class PathImporter {
                 printHelp();
                 return;
             }
-            int thread_count = NumberUtils.toInt(cmd.getOptionValue("c"), DEFAULT_THREAD_COUNT);
+
             long ct = System.currentTimeMillis();
 
-            importPath(type, action, jsonPath, thread_count);
+            int fc = importPath(type, action, jsonPath);
 
-            log.info("{} imported,time:{}ms", jsonPath.toString(), (System.currentTimeMillis()-ct));
+            log.info("\"{}\" {} files imported, time:{}ms", jsonPath.toString(), fc, (System.currentTimeMillis()-ct));
+
         } catch (IOException e) {
             log.error("Failed to import path:" + jsonPath.toString(), e);
         } catch (ParseException e) {
@@ -79,27 +72,17 @@ public class PathImporter {
      * @param type
      * @param action
      * @param path
-     * @param thread_count
      */
-    private static void importPath(String type, String action, Path path, int thread_count) throws IOException {
-        thread_count = Math.min(MAX_THREAD_COUNT, Math.max(thread_count, 1));
-        ExecutorService executorService = Executors.newFixedThreadPool(thread_count);
-        try (
-                IndexWriter writer = StorageFactory.getIndexWriter(type);
-                TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
-        ) {
-            try (Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p))) {
-                files.forEach(jsonFile -> {
-                    executorService.submit(() -> {
-                        importFile(type, action, jsonFile, writer, taxonomyWriter);
-                    });
-                });
-            }
-            try {
-                executorService.shutdown();
-                executorService.awaitTermination(10, TimeUnit.HOURS);
-            } catch(InterruptedException e) {}
-        }
+    private static int importPath(String type, String action, Path path) throws IOException {
+        final AtomicInteger fc = new AtomicInteger(0);
+        Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p));
+        files.forEach(jsonFile -> {
+            long ct = System.currentTimeMillis();
+            importFile(type, action, jsonFile);
+            log.info("{} imported in {}ms. ({})", jsonFile.toString(), System.currentTimeMillis() - ct, Thread.currentThread().getName());
+            fc.addAndGet(1);
+        });
+        return fc.get();
     }
 
     /**
@@ -107,23 +90,23 @@ public class PathImporter {
      * @param type
      * @param action
      * @param file
-     * @param i_writer
-     * @param t_writer
      */
-    private static void importFile(String type, String action, Path file, IndexWriter i_writer, TaxonomyWriter t_writer) {
+    private static void importFile(String type, String action, Path file) {
         try {
             String json = Files.readAllLines(file).stream().collect(Collectors.joining());
             QueueTask task = new QueueTask();
             task.setType(type);
             task.setAction(action);
             task.setBody(json);
-            task.write(i_writer, t_writer);
-            log.info("{} imported. ({})", file.toString(), Thread.currentThread().getName());
+            task.write();
         } catch (IOException e) {
             log.error("Failed to import file: " + file.toString(), e);
         }
     }
 
+    /**
+     * 显示帮助
+     */
     private static void printHelp() {
         HelpFormatter hf = new HelpFormatter();
         hf.setWidth(110);
