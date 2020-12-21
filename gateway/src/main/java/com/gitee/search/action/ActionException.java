@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  * Action 异常
  * @author Winter Lau<javayou@gmail.com>
  */
-public class ActionException extends Exception {
+public class ActionException extends RuntimeException {
 
     private HttpResponseStatus errorCode;
 
