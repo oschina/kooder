@@ -54,7 +54,8 @@ public class DiskIndexStorage implements IndexStorage {
     }
 
     private FSDirectory getDirectory(String type, boolean taxonomy) throws IOException {
-        return isWindows?FSDirectory.open(getIndexPath(type, false)):NIOFSDirectory.open(getIndexPath(type, true));
+        Path path = getIndexPath(type, taxonomy);
+        return isWindows?FSDirectory.open(path):NIOFSDirectory.open(path);
     }
 
     @Override
