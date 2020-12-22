@@ -2,6 +2,7 @@ package com.gitee.search.storage;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.GiteeSearchConfig;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -11,6 +12,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,7 @@ public class DiskIndexStorage implements IndexStorage {
 
     private Path indexBasePath;
     private Properties props;
+    private boolean isWindows = false;
 
     /**
      * 初始化磁盘索引存储
@@ -47,16 +50,21 @@ public class DiskIndexStorage implements IndexStorage {
             log.warn("Path '" + this.indexBasePath.toString()+"' for indexes not exists, created it!");
             Files.createDirectory(indexBasePath);
         }
+        isWindows = SystemUtils.IS_OS_WINDOWS;
+    }
+
+    private FSDirectory getDirectory(String type, boolean taxonomy) throws IOException {
+        return isWindows?FSDirectory.open(getIndexPath(type, false)):NIOFSDirectory.open(getIndexPath(type, true));
     }
 
     @Override
     public IndexWriter getWriter(String type) throws IOException {
-        return new IndexWriter(NIOFSDirectory.open(getIndexPath(type, false)), getWriterConfig());
+        return new IndexWriter(getDirectory(type, false), getWriterConfig());
     }
 
     @Override
     public IndexReader getReader(String type) throws IOException {
-        return DirectoryReader.open(NIOFSDirectory.open(getIndexPath(type, false)));
+        return DirectoryReader.open(getDirectory(type, false));
     }
 
     /**
@@ -68,7 +76,7 @@ public class DiskIndexStorage implements IndexStorage {
      */
     @Override
     public TaxonomyWriter getTaxonomyWriter(String type) throws IOException {
-        return new DirectoryTaxonomyWriter(NIOFSDirectory.open(getIndexPath(type, true)));
+        return new DirectoryTaxonomyWriter(getDirectory(type, true));
     }
 
     /**
@@ -80,7 +88,7 @@ public class DiskIndexStorage implements IndexStorage {
      */
     @Override
     public TaxonomyReader getTaxonomyReader(String type) throws IOException {
-        return new DirectoryTaxonomyReader(NIOFSDirectory.open(getIndexPath(type, true)));
+        return new DirectoryTaxonomyReader(getDirectory(type, true));
     }
 
     /**
