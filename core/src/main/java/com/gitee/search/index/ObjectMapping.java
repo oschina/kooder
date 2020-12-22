@@ -2,7 +2,6 @@ package com.gitee.search.index;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
@@ -104,35 +103,42 @@ public class ObjectMapping {
         Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(FIELD_objects).elements();
         while(objects.hasNext()) {
             JsonNode obj = objects.next();
-            docs.add(parseObjectJson(mapping, obj));
+            Document doc = new Document();
+            parseObjectJson("", obj, doc, mapping);
+            docs.add(doc);
         }
         return docs;
     }
 
     /**
      * 将 object json 转成 lucene 文档
-     * @param mapping
+     * @param prefix 字段名前缀
      * @param node
+     * @param doc
+     * @param mapping
      * @return
      */
-    private static Document parseObjectJson(IndexMapping mapping, JsonNode node) {
-        Document doc = new Document();
+    private static void parseObjectJson(String prefix, JsonNode node, Document doc, IndexMapping mapping) {
         node.fields().forEachRemaining( e -> {
-            String fn = e.getKey();
+            String key = e.getKey();
+            String fn = (prefix.length() == 0) ? key : (prefix + "." + key);
             JsonNode field = e.getValue();
-            JsonNodeType ftype = field.getNodeType();
-            if(ftype == JsonNodeType.OBJECT){
-                field.fields().forEachRemaining( f -> {
-                    String sub_fn = fn + "." + f.getKey();
-                    IndexMapping.Settings sub_fs = mapping.getField(sub_fn);
-                    addSimpleField(doc, sub_fn, f.getValue(), sub_fs);
-                });
+            if(field == null || field.isNull())
+                return ;
+            if(field.isArray()) { //handle array node
+                if(field.size() == 0)
+                    return ;
+                String[] values = new String[field.size()];
+                for(int i=0;i<field.size();i++)
+                    values[i] = field.get(i).textValue();
+                doc.add(new TextField(fn, String.join(",", values),
+                        mapping.getField(fn).isStore() ? Field.Store.YES : Field.Store.NO));
             }
-            else {
+            else if(field.isObject()) //nested object node
+                parseObjectJson(fn, field, doc, mapping);
+            else //simple node
                 addSimpleField(doc, fn, field, mapping.getField(fn));
-            }
         });
-        return doc;
     }
 
     /**
@@ -144,13 +150,10 @@ public class ObjectMapping {
      * @return
      */
     private static void addSimpleField(Document doc, String fn, JsonNode field, IndexMapping.Settings setting) {
-        if(field == null || field.isNull())
-            return ;
         try {
             if(field.isIntegralNumber()){ //整数值
                 if(setting.isFacet())
                     doc.add(new FacetField(fn, String.valueOf(field.longValue())));
-
                 doc.add(new NumericDocValuesField(fn, field.longValue()));
                 if (setting.isStore())
                     doc.add(new StoredField(fn, field.longValue()));
@@ -163,37 +166,23 @@ public class ObjectMapping {
                     doc.add(new StoredField(fn, field.floatValue()));
             }
             else if(field.isTextual()) {//文本内容
+                String fnv = field.textValue();
                 if(setting.isFacet()) {
-                    String fnv = getTextValue(field);
                     doc.add(new FacetField(fn, StringUtils.isBlank(fnv)?FACET_VALUE_EMPTY:fnv));
                     doc.add(new SortedDocValuesField(fn, new BytesRef(fnv)));
                     if(setting.isStore())
                         doc.add(new StringField(fn, fnv, Field.Store.YES));
                 }
                 else if("string".equalsIgnoreCase(setting.getType())){
-                    doc.add(new StringField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+                    doc.add(new StringField(fn, fnv, setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
                 else {
-                    doc.add(new TextField(fn, getTextValue(field), setting.isStore() ? Field.Store.YES : Field.Store.NO));
+                    doc.add(new TextField(fn, fnv, setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
             }
         } catch (Exception e) {
             log.error("Failed to add field("+fn+") to document.", e);
         }
-    }
-
-    private static String getTextValue(JsonNode field) {
-        StringBuilder val = new StringBuilder();
-        if(field.isArray()){
-            field.elements().forEachRemaining(e -> {
-                if(val.length() > 0)
-                    val.append(",");
-                val.append(e.asText());
-            });
-        }
-        else
-            val.append(field.textValue());
-        return val.toString();
     }
 
     public static void main(String[] args) throws IOException {
