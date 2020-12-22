@@ -36,8 +36,10 @@ public class IndexAction {
                     json = SearchAction.repositories(request);
             }
 
-            JsonNode node = new ObjectMapper().readTree(json);
-            params.put("result", node);
+            if(json != null) {
+                JsonNode node = new ObjectMapper().readTree(json);
+                params.put("result", node);
+            }
         }
         return Response.vm("index.vm", params);
     }
