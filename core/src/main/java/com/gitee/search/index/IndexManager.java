@@ -214,7 +214,7 @@ public class IndexManager {
             IndexWriter writer = StorageFactory.getIndexWriter(task.getType());
             TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(task.getType());
         ) {
-            return write(task,writer, taxonomyWriter);
+            return write(task, writer, taxonomyWriter);
         }
     }
 
@@ -227,32 +227,25 @@ public class IndexManager {
      * @throws IOException
      */
     public static int write(QueueTask task, IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
-        long ct = System.currentTimeMillis();
         List<Document> docs = ObjectMapping.task2doc(task);
-        if(docs != null && docs.size() > 0) {
-            switch (task.getAction()) {
-                case QueueTask.ACTION_ADD:
-                    i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
-                    //writer.addDocuments(docs);
-                    log.info("{} documents writed to index. {}ms", docs.size(), (System.currentTimeMillis()-ct));
-                    break;
-                case QueueTask.ACTION_UPDATE:
-                    //FIXME 读出文档，然后更新文档字段，然后写入
-                    //update documents
-                    Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-                    i_writer.deleteDocuments(queries);
-                    //re-add documents
-                    i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
-                    //writer.addDocuments(docs);
-                    log.info("{} documents updated to index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
-                    break;
-                case QueueTask.ACTION_DELETE:
-                    queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-                    i_writer.deleteDocuments(queries);
-                    log.info("{} documents deleted from index, {}ms", docs.size(), (System.currentTimeMillis()-ct));
-            }
+        if(docs == null || docs.size() == 0)
+            return 0;
+        switch (task.getAction()) {
+            case QueueTask.ACTION_ADD:
+                i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
+                break;
+            case QueueTask.ACTION_UPDATE:
+                //update documents
+                Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+                i_writer.deleteDocuments(queries);
+                //re-add documents
+                i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
+                break;
+            case QueueTask.ACTION_DELETE:
+                queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+                i_writer.deleteDocuments(queries);
         }
-        return (docs!=null)?docs.size():0;
+        return docs.size();
     }
 
     /**
