@@ -29,7 +29,7 @@ public class SearchAction {
     public static String repositories(Request request) throws IOException {
         String q = request.param("q");
         String sort = request.param("sort");
-        int page = request.param("p", 1);
+        int page = Math.max(1, request.param("p", 1));
         String lang = request.param("lang");
 
         q = SearchHelper.cleanupKey(q);
