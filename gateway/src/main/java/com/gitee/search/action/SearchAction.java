@@ -1,13 +1,11 @@
 package com.gitee.search.action;
 
 import com.gitee.search.core.SearchHelper;
-import com.gitee.search.index.IndexManager;
+import com.gitee.search.http.Action;
 import com.gitee.search.query.QueryHelper;
-import com.gitee.search.queue.QueueTask;
-import com.gitee.search.server.Request;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Sort;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,89 +14,30 @@ import java.util.HashMap;
  * 搜索接口
  * @author Winter Lau<javayou@gmail.com>
  */
-public class SearchAction {
-
-    public final static int PAGE_SIZE = 20; //结果集每页显示的记录数
+public class SearchAction implements Action {
 
     /**
-     * 仓库搜索
+     * search git repositories
      * https://<search-server>/search/repositories?q=xxxx&sort=xxxx
-     * @param request
+     * @param context
      * @return
      */
-    public static String repositories(Request request) throws IOException {
-        String q = request.param("q");
-        String sort = request.param("sort");
-        int page = Math.max(1, request.param("p", 1));
-        String lang = request.param("lang");
+    public void repositories(RoutingContext context) throws IOException {
+        HttpServerRequest request = context.request();
+        String q = param(request, "q");
+        String sort = param(request, "sort");
+        int page = Math.max(1, param(request,"p", 1));
+        String lang = param(request, "lang");
 
         q = SearchHelper.cleanupKey(q);
-        if(StringUtils.isBlank(q))
-            return "{}";
+        if(StringUtils.isBlank(q)) {
+            this.json(context.response(), "{}");
+            return ;
+        }
 
-        Query query = QueryHelper.buildRepoQuery(q, 0);
-        Sort nSort = QueryHelper.buildRepoSort(sort);
+        String json = QueryHelper.searchRepositories(q, sort, lang, page, PAGE_SIZE);
 
-        HashMap<String, String> facets = new HashMap(){{
-            if(StringUtils.isNotBlank(lang))
-                put("lang", lang);
-        }};
-
-        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, facets, nSort, page, PAGE_SIZE);
-    }
-
-    /**
-     * 代码搜索
-     * @param request
-     * @return
-     */
-    public static String codes(Request request) throws ActionException {
-        return null;
-    }
-
-    /**
-     * issue 任务搜索
-     * @param request
-     * @return
-     */
-    public static String issues(Request request) throws ActionException {
-        return null;
-    }
-
-    /**
-     * PR 搜索
-     * @param request
-     * @return
-     */
-    public static String pullrequests(Request request) throws ActionException {
-        return null;
-    }
-
-    /**
-     * 文档搜索
-     * @param request
-     * @return
-     */
-    public static String wiki(Request request) throws ActionException {
-        return null;
-    }
-
-    /**
-     * 代码提交搜索
-     * @param request
-     * @return
-     */
-    public static String commits(Request request) throws ActionException {
-        return null;
-    }
-
-    /**
-     * 搜索用户
-     * @param request
-     * @return
-     */
-    public static String users(Request request) throws ActionException {
-        return null;
+        this.json(context.response(), json);
     }
 
 }

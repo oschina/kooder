@@ -60,7 +60,7 @@ public class QueueTask {
     }
 
     public final static boolean isAvailType(String p_type) {
-        return types.contains(p_type.toLowerCase());
+        return (p_type!=null) && types.contains(p_type.toLowerCase());
     }
 
     public final static boolean isAvailAction(String p_action) {

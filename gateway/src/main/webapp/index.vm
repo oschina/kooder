@@ -9,7 +9,6 @@
     <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 </head>
 <body>
-
 <div id="main" class="pure-g">
     <div class="content pure-u-1 pure-u-md-3-4">
         <form class="pure-form pure-form-aligned">
@@ -70,7 +69,7 @@
         </table>
         <div class="pager">
             #foreach($page in [1..$result.get("totalPages")])
-            <a href="$request.uri('p',$page)">$page</a>
+            <a href="$tool.uri($request,'p',$page)">$page</a>
             #end
         </div>
         #end
@@ -79,7 +78,7 @@
         #if($result)
         <ul>
         #foreach($lang in $result.get('facets').get('lang'))
-        <li><span><a href="$request.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
+        <li><span><a href="$tool.uri($request,'lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
         #end
         </ul>
         #end

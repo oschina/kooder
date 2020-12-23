@@ -1,68 +1,66 @@
 package com.gitee.search.action;
 
+import com.gitee.search.http.Action;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
-import com.gitee.search.server.Request;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.ext.web.RoutingContext;
 
 import java.util.Arrays;
 
 /**
- * 索引的维护
+ * index add/update/delete etc.
  * @author Winter Lau<javayou@gmail.com>
  */
-public class TaskAction {
+public class TaskAction implements Action {
 
     /**
      * 添加索引
-     * @param request
+     * @param context
      */
-    public static void add(Request request) throws ActionException {
-        pushTask(QueueTask.ACTION_ADD, request);
+    public void add(RoutingContext context) {
+        pushTask(QueueTask.ACTION_ADD, context);
     }
 
     /**
      * 修改索引
-     * @param request
+     * @param context
      */
-    public static void update(Request request) throws ActionException {
-        pushTask(QueueTask.ACTION_UPDATE, request);
+    public void update(RoutingContext context) {
+        pushTask(QueueTask.ACTION_UPDATE, context);
     }
 
     /**
      * 删除索引
-     * @param request
+     * @param context
      */
-    public static void delete(Request request) throws ActionException {
-        pushTask(QueueTask.ACTION_DELETE, request);
+    public void delete(RoutingContext context) {
+        pushTask(QueueTask.ACTION_DELETE, context);
     }
 
-    private static void pushTask(String action, Request request) throws ActionException {
+    /**
+     * push task to queue for later handler
+     * @param action
+     * @param context
+     */
+    private void pushTask(String action, RoutingContext context) {
         QueueTask task = new QueueTask();
         task.setAction(action);
-        task.setType(parseType(request));
-        task.setBody(request.getBody());
+        task.setType(parseType(context));
+        task.setBody(context.getBodyAsString());
         if(task.check())
             QueueFactory.getProvider().push(Arrays.asList(task));
         else
-            throw new ActionException(HttpResponseStatus.NOT_ACCEPTABLE);
+            error(context.response(), 406);
     }
 
     /**
      * 从参数中解析对象类型字段，并判断值是否有效
-     * @param request
+     * @param context
      * @return
-     * @throws ActionException
      */
-    private static String parseType(Request request) throws ActionException {
-        try {
-            String type = request.param("type");
-            if(!QueueTask.isAvailType(type))
-                throw new IllegalArgumentException(type);
-            return type.toLowerCase();
-        }catch(Exception e) {
-            throw new ActionException(HttpResponseStatus.BAD_REQUEST);
-        }
+    private static String parseType(RoutingContext context) {
+        String type = context.request().getParam("type");
+        return QueueTask.isAvailType(type)?type.toLowerCase():null;
     }
 
 }

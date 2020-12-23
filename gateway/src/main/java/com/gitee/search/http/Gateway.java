@@ -1,10 +1,15 @@
 package com.gitee.search.http;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import com.gitee.search.server.AccessLogger;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.ext.web.AllowForwardHeaders;
+import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.StaticHandler;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.lang.StringUtils;
@@ -12,32 +17,106 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Gateway http server base on vert.x
  * @author Winter Lau<javayou@gmail.com>
  */
-public class Gateway implements Daemon, AccessLogger {
+public class Gateway extends GatewayBase {
 
-    private final static Logger log = LoggerFactory.getLogger(Gateway.class);
+    private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)"; ///(css|js|img)/*
 
-    private Vertx vertx;
-    private HttpServer server;
-
-    private String bind;
-    private int port;
-    private int workerPoolSize;
-    private List<MessageFormat> log_patterns = new ArrayList<>();
+    private Path webRoot;
+    private StaticHandler staticHandler;
+    private VertxOptions vOptions;
 
     private Gateway() {
+        super();
+        String sWebroot = GiteeSearchConfig.getProperty("http.webroot");
+        webRoot = GiteeSearchConfig.getPath(sWebroot);
+        this.staticHandler = StaticHandler.create().setAllowRootFileSystemAccess(true).setWebRoot(webRoot.toString());
+
+        this.vOptions = new VertxOptions();
+        this.vOptions.setWorkerPoolSize(this.workerPoolSize);
+        this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
+    }
+
+    @Override
+    public void start() {
+        this.vertx = Vertx.vertx(this.vOptions);
+        this.server = vertx.createHttpServer();
+        Router router = Router.router(this.vertx);
+        router.allowForward(AllowForwardHeaders.X_FORWARD);
+        //global headers
+        router.route().handler( context -> {
+            this.writeGlobalHeaders(context.response());
+            context.next();
+        });
+        //static files
+        router.routeWithRegex(pattern_static_file).handler(new AutoContentTypeStaticHandler(webRoot.toString()));
+        //body parser
+        router.route().handler(BodyHandler.create());
+        //action handler
+        router.route().handler(context -> {
+            long ct = System.currentTimeMillis();
+            HttpServerRequest req = context.request();
+            HttpServerResponse res = context.response();
+            try {
+                ActionExecutor.execute(context);
+            } finally {
+                if(!res.ended())
+                    res.end();
+                if(!res.closed())
+                    res.close();
+            }
+            writeAccessLog(req, System.currentTimeMillis() - ct);
+        });
+
+        this.server.requestHandler(router).listen(port).onSuccess(server -> {
+            log.info("READY (:{})!", port);
+        });
+    }
+
+    private void writeGlobalHeaders(HttpServerResponse res) {
+        res.putHeader("server", VERSION);
+        res.putHeader("date", new Date().toString());
+    }
+
+    public static void main(String[] args) {
+        Gateway daemon = new Gateway();
+        daemon.init(null);
+        daemon.start();
+    }
+
+}
+
+/**
+ * 把 Gateway 底层逻辑移到 GatewayBase
+ */
+abstract class GatewayBase implements Daemon {
+
+    final static Logger log = LoggerFactory.getLogger("GSearch");
+
+    public final static String VERSION = "GSearch/1.0";
+
+    String bind;
+    int port;
+    int workerPoolSize;
+
+    Vertx vertx;
+    HttpServer server;
+
+    List<MessageFormat> log_patterns = new ArrayList<>();
+
+    public GatewayBase() {
         this.bind = GiteeSearchConfig.getHttpBind();
         this.port = GiteeSearchConfig.getHttpPort();
         this.workerPoolSize = NumberUtils.toInt(GiteeSearchConfig.getProperty("http.worker.pool.size"), 16);
+
         String logs_pattern = GiteeSearchConfig.getProperty("http.log.pattern");
         if(logs_pattern != null) {
             Arrays.stream(logs_pattern.split(",")).forEach(pattern -> {
@@ -47,27 +126,12 @@ public class Gateway implements Daemon, AccessLogger {
     }
 
     @Override
-    public void writeAccessLog(String uri, String msg) {
-        for(MessageFormat fmt : log_patterns) {
-            try {
-                fmt.parse(uri);
-                log.info(msg);
-                break;
-            } catch(ParseException e) {}
-        }
-    }
-
-    @Override
     public void init(DaemonContext daemonContext) {
-        this.vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(this.workerPoolSize));
-        this.server = vertx.createHttpServer().requestHandler(request -> ActionExecutor.execute(request));
+
     }
 
     @Override
     public void start() {
-        this.server.listen(port).onSuccess(server -> {
-            log.info("Gitee Search Gateway READY (:{})!", port);
-        });
     }
 
     @Override
@@ -77,13 +141,34 @@ public class Gateway implements Daemon, AccessLogger {
 
     @Override
     public void destroy() {
-        log.info("Gitee Search Gateway exit.");
+        log.info("EXIT!");
     }
 
-    public static void main(String[] args) {
-        Gateway daemon = new Gateway();
-        daemon.init(null);
-        daemon.start();
+    /**
+     * 记录日志
+     * @param req
+     * @param time
+     */
+    protected void writeAccessLog(HttpServerRequest req, long time) {
+        String ua = req.getHeader("User-Agent");
+        if(ua == null)
+            ua = "-";
+        String msg = String.format("%s - \"%s %s\" %d %d - %dms - \"%s\"",
+                req.remoteAddress().hostAddress(),
+                req.method().name(),
+                req.uri(),
+                req.response().getStatusCode(),
+                req.response().bytesWritten(),
+                time,
+                ua);
+
+        for(MessageFormat fmt : log_patterns) {
+            try {
+                fmt.parse(req.path());
+                log.info(msg);
+                break;
+            } catch(ParseException e) {}
+        }
     }
 
 }

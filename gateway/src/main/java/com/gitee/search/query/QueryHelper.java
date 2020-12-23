@@ -3,6 +3,9 @@ package com.gitee.search.query;
 import com.gitee.search.action.Constants;
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.SearchHelper;
+import com.gitee.search.index.IndexManager;
+import com.gitee.search.queue.QueueTask;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
@@ -13,6 +16,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +40,28 @@ public class QueryHelper {
         } catch (java.text.ParseException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 仓库搜索
+     * @param q
+     * @param sort
+     * @param lang
+     * @param page
+     * @param PAGE_SIZE
+     * @return
+     * @throws IOException
+     */
+    public static String searchRepositories(String q, String sort, String lang, int page, int PAGE_SIZE) throws IOException  {
+        Query query = QueryHelper.buildRepoQuery(q, 0);
+        Sort nSort = QueryHelper.buildRepoSort(sort);
+
+        HashMap<String, String> facets = new HashMap(){{
+            if(StringUtils.isNotBlank(lang))
+                put("lang", lang);
+        }};
+
+        return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, facets, nSort, page, PAGE_SIZE);
     }
 
     /**

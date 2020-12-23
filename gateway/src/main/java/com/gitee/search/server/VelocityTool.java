@@ -1,9 +1,12 @@
 package com.gitee.search.server;
 
 import com.gitee.search.core.SearchHelper;
+import io.vertx.core.http.HttpServerRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 
 /**
@@ -11,6 +14,34 @@ import java.util.Date;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class VelocityTool {
+
+    /**
+     * url 拼接
+     * @param req
+     * @param name
+     * @param value
+     * @return
+     */
+    public static StringBuffer uri(HttpServerRequest req, String name, Object value) {
+        StringBuffer newUri = new StringBuffer();
+        String path = req.path();
+        newUri.append(path);
+        req.params().forEach(e -> {
+            String k = e.getKey();
+            String v = e.getValue();
+            if(!name.equals(k)) {
+                newUri.append((newUri.length()==path.length())?'?':'&');
+                newUri.append(encodeURL(k));
+                newUri.append('=');
+                newUri.append(encodeURL(v.toString()));
+            }
+        });
+        newUri.append((newUri.length()==path.length())?'?':'&');
+        newUri.append(encodeURL(name));
+        newUri.append('=');
+        newUri.append(encodeURL(value.toString()));
+        return newUri;
+    }
 
     /**
      * 搜索关键字高亮
@@ -52,4 +83,12 @@ public class VelocityTool {
         return DateFormatUtils.format(millis, fmt);
     }
 
+    public final static String encodeURL(String url) {
+        if (StringUtils.isEmpty(url))
+            return "";
+        try {
+            return URLEncoder.encode(url, "utf-8");
+        } catch (UnsupportedEncodingException e) {}
+        return url;
+    }
 }

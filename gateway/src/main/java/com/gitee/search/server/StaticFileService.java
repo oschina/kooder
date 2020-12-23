@@ -31,7 +31,7 @@ public class StaticFileService {
         try (InputStream stream = Response.class.getResourceAsStream("/mime-types.properties")) {
             CONTENT_TYPES.load(stream);
         } catch(IOException e) {
-            log.error("Failed to loading velocity.properties", e);
+            log.error("Failed to loading mime-types.properties", e);
         }
     }
 

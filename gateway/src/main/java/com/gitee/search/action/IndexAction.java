@@ -2,9 +2,11 @@ package com.gitee.search.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.http.Action;
+import com.gitee.search.query.QueryHelper;
 import com.gitee.search.queue.QueueTask;
-import com.gitee.search.server.Request;
-import com.gitee.search.server.Response;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -15,25 +17,32 @@ import java.util.Map;
  * Default action
  * @author Winter Lau<javayou@gmail.com>
  */
-public class IndexAction {
+public class IndexAction implements Action {
 
     /**
      * web searcher
-     * @param request
+     * @param context
      * @return
      */
-    public static Response index(Request request) throws IOException {
-        String q = request.param("q");
-        String type = request.param("type", "repo");
+    public void index(RoutingContext context) throws IOException {
+        HttpServerRequest request = context.request();
+        String q = param(request, "q");
+        String type = param(request,"type", "repo");
+
+        String sort = param(request, "sort");
+        int page = Math.max(1, param(request,"p", 1));
+        String lang = param(request, "lang");
+
         Map<String, Object> params = new HashMap();
-        params.putAll(request.params());
+
+        params.putAll(params(request));
         params.put("request", request);
 
         if(StringUtils.isNotBlank(q)) {
             String json = null;
             switch (type) {
                 case QueueTask.TYPE_REPOSITORY:
-                    json = SearchAction.repositories(request);
+                    json = QueryHelper.searchRepositories(q, sort, lang, page, PAGE_SIZE);
             }
 
             if(json != null) {
@@ -41,16 +50,7 @@ public class IndexAction {
                 params.put("result", node);
             }
         }
-        return Response.vm("index.vm", params);
-    }
-
-    /**
-     * test redirect
-     * @param req
-     * @return
-     */
-    public static Response test(Request req) {
-        return Response.redirect("/", false);
+        this.vm(context.response(), "index.vm", params);
     }
 
 }

@@ -12,6 +12,10 @@
 
     <artifactId>gitee-search-gateway</artifactId>
 
+    <properties>
+        <vertx.version>4.0.0</vertx.version>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -23,15 +27,20 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
-            <version>4.0.0</version>
+            <version>${vertx.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+        <!--
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>4.1.54.Final</version>
         </dependency>
-
+        -->
         <dependency>
             <groupId>commons-daemon</groupId>
             <artifactId>commons-daemon</artifactId>
