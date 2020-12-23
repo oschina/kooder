@@ -1,6 +1,7 @@
 package com.gitee.search.core;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
@@ -33,7 +34,7 @@ public class SearchHelper {
      * @return 返回分词结果
      */
     public static List<String> splitKeywords(String sentence) {
-        return AnalyzerFactory.INSTANCE.splitKeywords(sentence);
+        return AnalyzerFactory.splitKeywords(sentence);
     }
 
     /**
@@ -60,12 +61,13 @@ public class SearchHelper {
         String result = null;
 
         try {
-            QueryParser parser = new QueryParser(null, AnalyzerFactory.INSTANCE);
+            Analyzer analyzer = AnalyzerFactory.getInstance(false);
+            QueryParser parser = new QueryParser(null, analyzer);
             Query query = parser.parse(key);
             QueryScorer scorer = new QueryScorer(query);
             Formatter fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
             Highlighter hig = new Highlighter(fmt, scorer);
-            TokenStream tokens = AnalyzerFactory.INSTANCE.tokenStream(null, new StringReader(text));
+            TokenStream tokens = analyzer.tokenStream(null, new StringReader(text));
             result = hig.getBestFragment(tokens, text);
         } catch (Exception e) {
             log.error("Unabled to hightlight text", e);

@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 public class PathImporter {
 
     private final static Logger log = LoggerFactory.getLogger(PathImporter.class);
-    private final static int DEFAULT_THREAD_COUNT = 5;
+    private final static int DEFAULT_THREAD_COUNT = 1;
     private final static int MAX_THREAD_COUNT = 50;
 
     private final static Options options = new Options(){{
@@ -90,14 +90,13 @@ public class PathImporter {
                 IndexWriter writer = StorageFactory.getIndexWriter(type);
                 TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
         ) {
-            try (Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p))) {
-                files.forEach(jsonFile -> {
-                    executorService.submit(() -> {
-                        importFile(type, action, jsonFile, writer, taxonomyWriter);
-                        fc.addAndGet(1);
-                    });
+            Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p));
+            files.forEach(jsonFile -> {
+                executorService.submit(() -> {
+                    importFile(type, action, jsonFile, writer, taxonomyWriter);
+                    fc.addAndGet(1);
                 });
-            }
+            });
             try {
                 executorService.shutdown();
                 while(!executorService.awaitTermination(2, TimeUnit.SECONDS));
@@ -117,14 +116,19 @@ public class PathImporter {
     private static void importFile(String type, String action, Path file, IndexWriter i_writer, TaxonomyWriter t_writer) {
         try {
             long ct = System.currentTimeMillis();
-            String json = Files.readAllLines(file).stream().collect(Collectors.joining());
             QueueTask task = new QueueTask();
             task.setType(type);
             task.setAction(action);
+            String json = Files.readAllLines(file).stream().collect(Collectors.joining());
             task.setBody(json);
             task.write(i_writer, t_writer);
-            log.info("{} imported in {}ms. ({})", file.toString(), (System.currentTimeMillis()-ct), Thread.currentThread().getName());
-        } catch (IOException e) {
+            log.info("{} imported in {}ms. ({})", file.toString(), (System.currentTimeMillis() - ct), Thread.currentThread().getName());
+        } catch (IllegalArgumentException e) {
+            //This is an jcseg & lucene bug, just retry to avoid this bug
+            log.error("Retry to import file: " + file.toString(), e);
+            //java.lang.IllegalArgumentException: startOffset must be non-negative, and endOffset must be >= startOffset
+            importFile(type, action, file, i_writer, t_writer);
+        } catch (Exception e) {
             log.error("Failed to import file: " + file.toString(), e);
         }
     }

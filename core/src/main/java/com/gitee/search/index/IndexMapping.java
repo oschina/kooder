@@ -170,7 +170,11 @@ public class IndexMapping {
         }
 
         public boolean isText() {
-            return "text".equalsIgnoreCase(type) || "string".equalsIgnoreCase(type);
+            return "text".equalsIgnoreCase(type);
+        }
+
+        public boolean isString() {
+            return "string".equalsIgnoreCase(type);
         }
 
         public boolean isStore() {

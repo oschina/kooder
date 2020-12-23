@@ -113,7 +113,7 @@ public class DiskIndexStorage implements IndexStorage {
      * @return
      */
     private IndexWriterConfig getWriterConfig() {
-        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.INSTANCE);
+        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.getInstance(true));
         writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
         writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
         writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));

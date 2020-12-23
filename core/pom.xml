@@ -19,6 +19,7 @@
     <properties>
         <lucene.version>8.7.0</lucene.version>
         <jackson.version>2.11.3</jackson.version>
+        <jcseg.version>2.6.2</jcseg.version>
     </properties>
 
     <dependencies>
@@ -68,11 +69,31 @@
             <artifactId>lucene-grouping</artifactId>
             <version>${lucene.version}</version>
         </dependency>
+        <!--
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-analyzers-smartcn</artifactId>
+            <version>${lucene.version}</version>
+        </dependency>
+        -->
         <!-- jcseg -->
         <dependency>
             <groupId>org.lionsoul</groupId>
             <artifactId>jcseg-core</artifactId>
-            <version>2.6.2</version>
+            <version>${jcseg.version}</version>
+            <!--
+            <type>jar</type>
+            <scope>system</scope>
+            <systemPath>${basedir}/../lib/jcseg-core-2.6.3.jar</systemPath> -->
+        </dependency>
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>jcseg-analyzer</artifactId>
+            <version>${jcseg.version}</version>
+            <!--
+            <type>jar</type>
+            <scope>system</scope>
+            <systemPath>${basedir}/../lib/jcseg-analyzer-2.6.3.jar</systemPath> -->
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

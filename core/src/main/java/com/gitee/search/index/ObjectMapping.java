@@ -169,11 +169,12 @@ public class ObjectMapping {
                 String fnv = field.textValue();
                 if(setting.isFacet()) {
                     doc.add(new FacetField(fn, StringUtils.isBlank(fnv)?FACET_VALUE_EMPTY:fnv));
-                    doc.add(new SortedDocValuesField(fn, new BytesRef(fnv)));
+                    if(StringUtils.isNotBlank(fnv))
+                        doc.add(new SortedDocValuesField(fn, new BytesRef(fnv)));
                     if(setting.isStore())
                         doc.add(new StringField(fn, fnv, Field.Store.YES));
                 }
-                else if("string".equalsIgnoreCase(setting.getType())){
+                else if(setting.isString()){
                     doc.add(new StringField(fn, fnv, setting.isStore() ? Field.Store.YES : Field.Store.NO));
                 }
                 else {
