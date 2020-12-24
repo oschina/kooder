@@ -31,10 +31,10 @@ public class AutoContentTypeStaticHandler extends StaticHandlerImpl {
         }
     }
 
-    public AutoContentTypeStaticHandler(String webRoot){
+    public AutoContentTypeStaticHandler(){
         super();
         this.setAllowRootFileSystemAccess(true);
-        this.setWebRoot(webRoot);
+        this.setWebRoot(webRoot.toString());
     }
 
     @Override

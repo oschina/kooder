@@ -9,7 +9,6 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.StaticHandler;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.lang.StringUtils;
@@ -17,7 +16,6 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -28,18 +26,12 @@ import java.util.*;
  */
 public class Gateway extends GatewayBase {
 
-    private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)"; ///(css|js|img)/*
+    private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)";
 
-    private Path webRoot;
-    private StaticHandler staticHandler;
     private VertxOptions vOptions;
 
     private Gateway() {
         super();
-        String sWebroot = GiteeSearchConfig.getProperty("http.webroot");
-        webRoot = GiteeSearchConfig.getPath(sWebroot);
-        this.staticHandler = StaticHandler.create().setAllowRootFileSystemAccess(true).setWebRoot(webRoot.toString());
-
         this.vOptions = new VertxOptions();
         this.vOptions.setWorkerPoolSize(this.workerPoolSize);
         this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
@@ -57,13 +49,12 @@ public class Gateway extends GatewayBase {
             context.next();
         });
         //static files
-        router.routeWithRegex(pattern_static_file).handler(new AutoContentTypeStaticHandler(webRoot.toString()));
+        router.routeWithRegex(pattern_static_file).handler(new AutoContentTypeStaticHandler());
         //body parser
         router.route().handler(BodyHandler.create());
         //action handler
         router.route().handler(context -> {
             long ct = System.currentTimeMillis();
-            HttpServerRequest req = context.request();
             HttpServerResponse res = context.response();
             try {
                 ActionExecutor.execute(context);
@@ -73,7 +64,7 @@ public class Gateway extends GatewayBase {
                 if(!res.closed())
                     res.close();
             }
-            writeAccessLog(req, System.currentTimeMillis() - ct);
+            writeAccessLog(context.request(), System.currentTimeMillis() - ct);
         });
 
         this.server.requestHandler(router).listen(port).onSuccess(server -> {
@@ -81,11 +72,19 @@ public class Gateway extends GatewayBase {
         });
     }
 
+    /**
+     * 全局 headers
+     * @param res
+     */
     private void writeGlobalHeaders(HttpServerResponse res) {
         res.putHeader("server", VERSION);
         res.putHeader("date", new Date().toString());
     }
 
+    /**
+     * 启动入口
+     * @param args
+     */
     public static void main(String[] args) {
         Gateway daemon = new Gateway();
         daemon.init(null);
@@ -126,13 +125,7 @@ abstract class GatewayBase implements Daemon {
     }
 
     @Override
-    public void init(DaemonContext daemonContext) {
-
-    }
-
-    @Override
-    public void start() {
-    }
+    public void init(DaemonContext daemonContext) {}
 
     @Override
     public void stop() {
