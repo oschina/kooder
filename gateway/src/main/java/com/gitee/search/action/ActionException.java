@@ -5,7 +5,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 /**
  * Action 异常
  * @author Winter Lau<javayou@gmail.com>
+ * @Deprecated 基于 vertx 的 http 不再需要这个
  */
+@Deprecated
 public class ActionException extends RuntimeException {
 
     private HttpResponseStatus errorCode;

@@ -1,7 +1,6 @@
 package com.gitee.search.http;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import com.gitee.search.server.StaticFileService;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
 import org.slf4j.Logger;
@@ -18,7 +17,7 @@ import java.util.Properties;
  */
 public class AutoContentTypeStaticHandler extends StaticHandlerImpl {
 
-    private final static Logger log = LoggerFactory.getLogger(StaticFileService.class);
+    private final static Logger log = LoggerFactory.getLogger(AutoContentTypeStaticHandler.class);
     private final static Properties CONTENT_TYPES = new Properties();
     private final static Path webRoot;
 

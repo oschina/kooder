@@ -17,6 +17,7 @@ import java.util.Properties;
  * HTTP static file service
  * @author Winter Lau<javayou@gmail.com>
  */
+@Deprecated
 public class StaticFileService {
 
     private final static Logger log = LoggerFactory.getLogger(StaticFileService.class);

@@ -15,7 +15,9 @@ import java.util.stream.Stream;
 /**
  * Bind url to action
  * @author Winter Lau<javayou@gmail.com>
+ * @Deprecated http 服务改用 vertx 实现，该类由 http 包中的 ActionExecutor 替代
  */
+@Deprecated
 public class ActionExecutor {
 
     private final static Logger log = LoggerFactory.getLogger(ActionExecutor.class);

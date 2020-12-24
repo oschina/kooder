@@ -17,6 +17,7 @@ import java.util.Map;
  * HTTP Response
  * @author Winter Lau<javayou@gmail.com>
  */
+@Deprecated
 public class Response {
 
     private final static Logger log = LoggerFactory.getLogger(Response.class);

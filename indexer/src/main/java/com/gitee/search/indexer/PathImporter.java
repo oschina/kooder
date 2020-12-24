@@ -123,11 +123,12 @@ public class PathImporter {
             task.setBody(json);
             task.write(i_writer, t_writer);
             log.info("{} imported in {}ms. ({})", file.toString(), (System.currentTimeMillis() - ct), Thread.currentThread().getName());
+            /*
         } catch (IllegalArgumentException e) {
             //This is an jcseg & lucene bug, just retry to avoid this bug
             log.error("Retry to import file: " + file.toString(), e);
             //java.lang.IllegalArgumentException: startOffset must be non-negative, and endOffset must be >= startOffset
-            importFile(type, action, file, i_writer, t_writer);
+            importFile(type, action, file, i_writer, t_writer);*/
         } catch (Exception e) {
             log.error("Failed to import file: " + file.toString(), e);
         }

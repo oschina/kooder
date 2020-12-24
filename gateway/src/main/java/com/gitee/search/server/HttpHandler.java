@@ -20,6 +20,7 @@ import java.util.Date;
  * Http requeset handler
  * @author Winter Lau<javayou@gmail.com>
  */
+@Deprecated
 public class HttpHandler extends SimpleChannelInboundHandler<Object> {
 
     private final static Logger log = LoggerFactory.getLogger(HttpHandler.class);

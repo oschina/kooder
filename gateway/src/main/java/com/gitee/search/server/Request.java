@@ -16,6 +16,7 @@ import java.util.Map;
  * HTTP Request
  * @author Winter Lau<javayou@gmail.com>
  */
+@Deprecated
 public class Request {
 
     private Map<String, Object> params;

@@ -29,7 +29,9 @@ import java.util.List;
 /**
  * Make gateway as a daemon
  * @author Winter Lau<javayou@gmail.com>
+ * @Deprecated http 服务改由 vertx 实现
  */
+@Deprecated
 public class Gateway implements Daemon , AccessLogger {
 
     private final static Logger log = LoggerFactory.getLogger(Gateway.class);
