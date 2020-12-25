@@ -34,5 +34,4 @@
 12. 支持 gitlab
 17. issue 和其他内容搜索
 20. 搜索性能优化，目前数据：50并发 -> 60/s
-27. 使用 IntAssociationFacetField 来处理 tags 和 catalogs
 31. 更新陈鑫的分词库
