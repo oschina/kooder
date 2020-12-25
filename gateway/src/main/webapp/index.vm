@@ -16,18 +16,18 @@
                 <label for="i_query">搜索 :</label>
                 <input type="text" name="q" value="$!q" id="i_query" size="50">
                 <select name="type">
-                    <option value="repo">Repository</option>
-                    <option value="issue">Issue</option>
-                    <option value="commit">Commit</option>
-                    <option value="pr">PR</option>
-                    <option value="user">User</option>
-                    <option value="code">Code</option>
+                    <option value="repo" #if($type=='repo')selected#end>Repository</option>
+                    <option value="issue" #if($type=='issue')selected#end>Issue</option>
+                    <option value="commit" #if($type=='commit')selected#end>Commit</option>
+                    <option value="pr" #if($type=='pr')selected#end>PR</option>
+                    <option value="user" #if($type=='user')selected#end>User</option>
+                    <option value="code" #if($type=='code')selected#end>Code</option>
                 </select>
                 <select name="sort">
-                    <option value="score">最佳匹配</option>
-                    <option value="stars">最多 Star 数</option>
-                    <option value="forks">最多 Fork 数</option>
-                    <option value="update">最近更新</option>
+                    <option value="score" #if($sort=='score')selected#end>最佳匹配</option>
+                    <option value="stars" #if($sort=='stars')selected#end>最多 Star 数</option>
+                    <option value="forks" #if($sort=='forks')selected#end>最多 Fork 数</option>
+                    <option value="update" #if($sort=='update')selected#end>最近更新</option>
                 </select>
                 <button type="submit" class="pure-button pure-button-primary">Search</button>
             </fieldset>
@@ -37,6 +37,7 @@
         totalHits: <em>$result.get("totalHits")</em><br/>
         totalPages: <em>$result.get("totalPages")</em><br/>
         timeUsed: <em>$result.get("timeUsed")ms</em><br/>
+        #if($type=='repo')
         <table class="pure-table pure-table-striped">
             <thead>
             <tr>
@@ -53,7 +54,7 @@
             <tbody>
             #foreach($obj in $result.get("objects"))
             #set($recomm = $obj.get('recomm').intValue())
-            #set($pi = (($request.param('p', 1) - 1) * 20) + ${foreach.count})
+            #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
             <tr>
                 <td valign="top">$pi</td>
                 <td valign="top" nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$tool.highlight("$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()",$q)</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
@@ -67,22 +68,51 @@
             #end
             </tbody>
         </table>
+        #elseif($type=='issue')
+        <table class="pure-table pure-table-striped">
+            <thead>
+            <tr>
+                <th>No</th>
+                <th>Repository</th>
+                <th>Title</th>
+                <th>Time</th>
+                <th>Doc</th>
+                <th>Score</th>
+                <th>Detail</th>
+            </tr>
+            </thead>
+            <tbody>
+            #foreach($obj in $result.get("objects"))
+            #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
+            <tr>
+                <td valign="top">$pi</td>
+                <td valign="top">$obj.get('project').get('name').textValue()</td>
+                <td valign="top" nowrap><a href="" target="_blank">$tool.highlight($obj.get('title').textValue(),$q)</a></td>
+                <td valign="top">$tool.format('yyyy/MM/dd',$obj.get('created_at').longValue())</td>
+                <td valign="top">$obj.get('_id_')</td>
+                <td valign="top">$obj.get('_score_')</td>
+                <td>$tool.highlight($obj.get('description').textValue(), $q)</td>
+            </tr>
+            #end
+            </tbody>
+        </table>
+        #end
         <div class="pager">
             #foreach($page in [1..$result.get("totalPages")])
-            <a href="$tool.uri($request,'p',$page)">$page</a>
+            <a href="$tool.uri('p',$page)">$page</a>
             #end
         </div>
         #end
     </div>
+    #if($result && $result.get('facets'))
     <div class="sidebar pure-u-1 pure-u-md-1-4">
-        #if($result)
         <ul>
         #foreach($lang in $result.get('facets').get('lang'))
-        <li><span><a href="$tool.uri($request,'lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
+        <li><span><a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
         #end
         </ul>
-        #end
     </div>
+    #end
 </div>
 </body>
 </html>

@@ -58,7 +58,7 @@ public class IndexAction implements Action {
                 params.put("result", node);
             }
         }
-        this.vm(context.response(), "index.vm", params);
+        this.vm(context, "index.vm", params);
     }
 
 }

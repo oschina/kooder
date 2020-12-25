@@ -4,6 +4,7 @@ import com.gitee.search.server.TemplateEngine;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.math.NumberUtils;
 
 import java.util.Collections;
@@ -22,13 +23,13 @@ public interface Action {
 
     /**
      * invoke velocity template
-     * @param res
+     * @param context
      * @param vm
      * @param params
      */
-    default void vm(HttpServerResponse res, String vm, Map params) {
-        String content = TemplateEngine.render(vm, params);
-        res.putHeader("Content-Type", "text/html; charset=UTF-8").send(content);
+    default void vm(RoutingContext context, String vm, Map params) {
+        String content = TemplateEngine.render(vm, params, context);
+        context.response().putHeader("Content-Type", "text/html; charset=UTF-8").send(content);
     }
 
     /**
