@@ -9,35 +9,54 @@
     "id": {
       "type": "long"
     },
-    "subject": {
+    "ident": {
+      "type": "string"
+    },
+    "title": {
       "type": "text",
       "index": true
     },
-    "user": {
-      "type": "integer"
-    },
-    "repository": {
-      "type": "integer"
-    },
-    "project": {
-      "type": "integer"
-    },
-    "enterprise": {
-      "type": "integer"
-    },
-    "detail": {
+    "description": {
       "type": "text",
       "index": true,
       "store": false
+    },
+    "author.id": {
+      "type": "integer"
+    },
+    "author.path": {
+      "type": "string",
+      "index": true
+    },
+    "author.name": {
+      "type": "string",
+      "index": true
+    },
+    "project.id": {
+      "type": "integer"
+    },
+    "project.path": {
+      "type": "string",
+      "index": true
+    },
+    "project.name": {
+      "type": "string",
+      "index": true
+    },
+    "public": {
+      "type": "integer"
+    },
+    "enterprise_id": {
+      "type": "integer"
+    },
+    "state": {
+      "type": "string"
     },
     "created_at": {
       "type": "long"
     },
     "updated_at": {
       "type": "long"
-    },
-    "reply_count": {
-      "type": "integer"
     }
   }
 }

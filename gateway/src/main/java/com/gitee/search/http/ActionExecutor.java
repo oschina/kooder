@@ -1,5 +1,6 @@
 package com.gitee.search.http;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class ActionExecutor {
         if(actionMethod == null) {
             //actionMethod = findActionMethod(DEFAULT_ACTION_CLASS, DEFAULT_ACTION_METHOD);
             //if(actionMethod == null)
-            sendError(res, 404);
+            sendError(res, HttpResponseStatus.NOT_FOUND.code());
             return ;
         }
 
@@ -93,16 +94,16 @@ public class ActionExecutor {
             }
         } catch (InvocationTargetException e) {
             log.error("Failed to invoke " + context.request().uri(), e.getCause());
-            sendError(response, 500, e.getCause().getMessage());
+            sendError(response, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), e.getCause().getMessage());
         } catch (IllegalArgumentException e) {
-            sendError(response, 400);
+            sendError(response, HttpResponseStatus.NOT_ACCEPTABLE.code());
         } catch (IllegalAccessException e) {
-            sendError(response, 403);
+            sendError(response, HttpResponseStatus.FORBIDDEN.code());
         } catch (NoSuchMethodException e) {
-            sendError(response, 404);
+            sendError(response, HttpResponseStatus.NOT_FOUND.code());
         } catch (Throwable t) {
             log.error("Failed to invoke " + context.request().uri(), t);
-            sendError(response, 500, t.getMessage());
+            sendError(response, HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), t.getMessage());
         }
 
     }

@@ -20,4 +20,6 @@ public class Constants {
     public final static byte REPO_FORK_NO = 0x00;
     public final static byte REPO_FORK_YES = 0x01;
 
+    public final static byte ISSUE_PUBLIC = 1;
+
 }

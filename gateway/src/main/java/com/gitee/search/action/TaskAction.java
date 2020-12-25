@@ -3,6 +3,7 @@ package com.gitee.search.action;
 import com.gitee.search.http.Action;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.ext.web.RoutingContext;
 
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public class TaskAction implements Action {
         if(task.check())
             QueueFactory.getProvider().push(Arrays.asList(task));
         else
-            error(context.response(), 406);
+            error(context.response(), HttpResponseStatus.NOT_ACCEPTABLE.code());
     }
 
     /**

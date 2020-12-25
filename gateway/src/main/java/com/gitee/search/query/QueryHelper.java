@@ -53,8 +53,8 @@ public class QueryHelper {
      * @throws IOException
      */
     public static String searchRepositories(String q, String sort, String lang, int page, int PAGE_SIZE) throws IOException  {
-        Query query = QueryHelper.buildRepoQuery(q, 0);
-        Sort nSort = QueryHelper.buildRepoSort(sort);
+        Query query = buildRepoQuery(q, 0);
+        Sort nSort = buildRepoSort(sort);
 
         HashMap<String, String> facets = new HashMap(){{
             if(StringUtils.isNotBlank(lang))
@@ -62,6 +62,60 @@ public class QueryHelper {
         }};
 
         return IndexManager.search(QueueTask.TYPE_REPOSITORY, query, facets, nSort, page, PAGE_SIZE);
+    }
+
+    /**
+     * Issue 搜索
+     * @param q
+     * @param sort
+     * @param page
+     * @param PAGE_SIZE
+     * @return
+     * @throws IOException
+     */
+    public static String searchIssues(String q, String sort, int page, int PAGE_SIZE) throws IOException {
+        Query query = buildIssueQuery(q);
+        Sort nSort = QueryHelper.buildIssueSort(sort);
+        return IndexManager.search(QueueTask.TYPE_ISSUE, query, null, nSort, page, PAGE_SIZE);
+    }
+
+    /**
+     * Issue 搜索条件
+     * @param q
+     * @return
+     */
+    public static Query buildIssueQuery(String q) {
+        q = QueryParser.escape(q);
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        //filter
+        builder.add(NumericDocValuesField.newSlowExactQuery("public", Constants.ISSUE_PUBLIC), BooleanClause.Occur.FILTER);
+        //search
+        BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
+        qbuilder.add(makeBoostQuery("ident", q, 100.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("subject", q, 10.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("description", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("author.name", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("author.path", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("project.path", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery("project.name", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.setMinimumNumberShouldMatch(1);
+
+        builder.add(qbuilder.build(), BooleanClause.Occur.MUST);
+
+        return builder.build();
+    }
+
+    /**
+     * Issue 搜索排序
+     * @param sortMethod
+     * @return
+     */
+    public static Sort buildIssueSort(String sortMethod) {
+        if("create".equals(sortMethod))
+            return new Sort(new SortedNumericSortField("created_at", SortField.Type.LONG, true));
+        if("update".equals(sortMethod))
+            return new Sort(new SortedNumericSortField("updated_at", SortField.Type.LONG, true));
+        return Sort.RELEVANCE;
     }
 
     /**
@@ -131,6 +185,7 @@ public class QueryHelper {
 
     /**
      * 对搜索加权
+     * TODO 提取该定制逻辑以支持不同的 type（根据不通的 field 返回不通的 Query)
      * @param field
      * @param q
      * @param boost
@@ -138,25 +193,28 @@ public class QueryHelper {
      */
     private static BoostQuery makeBoostQuery(String field, String q, float boost) {
         try {
-            QueryParser parser = new QueryParser(field, AnalyzerFactory.getInstance(false));
-            Query query = parser.parse(q);
+            Query query;
+            if("ident".equals(field)) {
+                query = new TermQuery(new Term("ident", "q"));
+            }
+            else if("name".equals(field)){
+                List<String> keys = SearchHelper.splitKeywords(q);
+                BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
+                for(int i=0;i<keys.size();i++) {
+                    String key = keys.get(i);
+                    qbuilder.add(new WildcardQuery(new Term(field, "*"+key+"*")), BooleanClause.Occur.SHOULD);
+                }
+                query = qbuilder.build();
+            }
+            else {
+                QueryParser parser = new QueryParser(field, AnalyzerFactory.getInstance(false));
+                query = parser.parse(q);
+            }
             return new BoostQuery(query, boost);
         } catch(ParseException e) {
             e.printStackTrace();
             return null;
         }
-        /*
-        List<String> keys = SearchHelper.splitKeywords(q);
-        BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        for(int i=0;i<keys.size();i++) {
-            String key = keys.get(i);
-            if("name".equals(field)) //TODO 提取该定制逻辑以支持不同的 type
-                qbuilder.add(new WildcardQuery(new Term(field, "*"+key+"*")), BooleanClause.Occur.SHOULD);
-            else
-                qbuilder.add(new TermQuery(new Term(field, key)), BooleanClause.Occur.SHOULD);
-        }
-        return new BoostQuery(qbuilder.build(), boost);
-         */
     }
 
 }

@@ -8,7 +8,6 @@ import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * 搜索接口
@@ -34,9 +33,27 @@ public class SearchAction implements Action {
             this.json(context.response(), "{}");
             return ;
         }
-
         String json = QueryHelper.searchRepositories(q, sort, lang, page, PAGE_SIZE);
+        this.json(context.response(), json);
+    }
 
+    /**
+     * search git issues
+     * https://<search-server>/search/issues?q=xxxx&sort=xxxx
+     * @param context
+     * @return
+     */
+    public void issues(RoutingContext context) throws IOException {
+        HttpServerRequest request = context.request();
+        String q = param(request, "q");
+        String sort = param(request, "sort");
+        int page = Math.max(1, param(request,"p", 1));
+        q = SearchHelper.cleanupKey(q);
+        if(StringUtils.isBlank(q)) {
+            this.json(context.response(), "{}");
+            return ;
+        }
+        String json = QueryHelper.searchIssues(q, sort, page, PAGE_SIZE);
         this.json(context.response(), json);
     }
 

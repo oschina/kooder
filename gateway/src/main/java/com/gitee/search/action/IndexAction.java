@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.http.Action;
 import com.gitee.search.query.QueryHelper;
 import com.gitee.search.queue.QueueTask;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +44,13 @@ public class IndexAction implements Action {
             switch (type) {
                 case QueueTask.TYPE_REPOSITORY:
                     json = QueryHelper.searchRepositories(q, sort, lang, page, PAGE_SIZE);
+                    break;
+                case QueueTask.TYPE_ISSUE:
+                    json = QueryHelper.searchIssues(q, sort, page, PAGE_SIZE);
+                    break;
+                default:
+                    error(context.response(), HttpResponseStatus.BAD_REQUEST.code());
+                    return;
             }
 
             if(json != null) {
