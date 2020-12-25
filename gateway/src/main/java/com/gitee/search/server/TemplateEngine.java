@@ -1,6 +1,7 @@
 package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.event.EventCartridge;
@@ -51,10 +52,11 @@ public class TemplateEngine {
      * execute velocity template
      * @param vm
      * @param params
+     * @param routingContext
      * @return
      */
-    public static String render(String vm, Map params) {
-        VelocityContext context = initContext();
+    public static String render(String vm, Map params, RoutingContext routingContext) {
+        VelocityContext context = initContext(routingContext);
         if(params != null && params.size() > 0)
             params.forEach((k,v) -> context.put(k.toString(), v));
         StringWriter w = new StringWriter();
@@ -66,10 +68,10 @@ public class TemplateEngine {
      * 构造 Velocity 上下文
      * @return
      */
-    private static VelocityContext initContext() {
+    private static VelocityContext initContext(RoutingContext routingContext) {
         VelocityContext context = new VelocityContext();
         context.attachEventCartridge(eventCartridge);
-        context.put("tool", VelocityTool.class);
+        context.put("tool", new VelocityTool(routingContext));
         return context;
     }
 

@@ -2,7 +2,9 @@ package com.gitee.search.server;
 
 import com.gitee.search.core.SearchHelper;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.lang.time.DateFormatUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -15,14 +17,28 @@ import java.util.Date;
  */
 public class VelocityTool {
 
+    private RoutingContext context;
+
+    public VelocityTool(RoutingContext context) {
+        this.context = context;
+    }
+
+    public RoutingContext context() {
+        return context;
+    }
+
+    public int param(String name, int defValue) {
+        return NumberUtils.toInt(context.request().getParam("name"), defValue);
+    }
+
     /**
      * url 拼接
-     * @param req
      * @param name
      * @param value
      * @return
      */
-    public static StringBuffer uri(HttpServerRequest req, String name, Object value) {
+    public StringBuffer uri(String name, Object value) {
+        HttpServerRequest req = context.request();
         StringBuffer newUri = new StringBuffer();
         String path = req.path();
         newUri.append(path);
