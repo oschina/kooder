@@ -16,6 +16,7 @@ import java.util.Map;
 /**
  * HTTP Response
  * @author Winter Lau<javayou@gmail.com>
+ * @deprecated
  */
 @Deprecated
 public class Response {
@@ -98,7 +99,7 @@ public class Response {
      * @return
      */
     public final static Response vm(String vm, Map params) {
-        return Response.html(TemplateEngine.render(vm, params));
+        return Response.html(TemplateEngine.render(vm, params, null));
     }
 
     /**
