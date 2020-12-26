@@ -32,11 +32,15 @@
                 <button type="submit" class="pure-button pure-button-primary">Search</button>
             </fieldset>
         </form>
+    </div>
+    <div class="content pure-u-1 pure-u-md-3-4">
         #if($result)
+        <p>
         query: <code>$result.get("query").textValue()</code><br/>
         totalHits: <em>$result.get("totalHits")</em><br/>
         totalPages: <em>$result.get("totalPages")</em><br/>
         timeUsed: <em>$result.get("timeUsed")ms</em><br/>
+        </p>
         #if($type=='repo')
         <table class="pure-table pure-table-striped">
             <thead>
@@ -87,8 +91,8 @@
             <tr>
                 <td valign="top">$pi</td>
                 <td valign="top">$obj.get('project').get('name').textValue()</td>
-                <td valign="top" nowrap><a href="" target="_blank">$tool.highlight($obj.get('title').textValue(),$q)</a></td>
-                <td valign="top">$tool.format('yyyy/MM/dd',$obj.get('created_at').longValue())</td>
+                <td valign="top"><a href="" target="_blank">$tool.highlight($obj.get('title').textValue(),$q)</a></td>
+                <td valign="top" nowrap>$tool.format('yyyy/MM/dd HH:mm',$obj.get('created_at').longValue())</td>
                 <td valign="top">$obj.get('_id_')</td>
                 <td valign="top">$obj.get('_score_')</td>
                 <td>$tool.highlight($obj.get('description').textValue(), $q)</td>

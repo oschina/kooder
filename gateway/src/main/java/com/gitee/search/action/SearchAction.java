@@ -27,8 +27,6 @@ public class SearchAction implements Action {
         String sort = param(request, "sort");
         int page = Math.max(1, param(request,"p", 1));
         String lang = param(request, "lang");
-
-        q = SearchHelper.cleanupKey(q);
         if(StringUtils.isBlank(q)) {
             this.json(context.response(), "{}");
             return ;
@@ -48,7 +46,6 @@ public class SearchAction implements Action {
         String q = param(request, "q");
         String sort = param(request, "sort");
         int page = Math.max(1, param(request,"p", 1));
-        q = SearchHelper.cleanupKey(q);
         if(StringUtils.isBlank(q)) {
             this.json(context.response(), "{}");
             return ;

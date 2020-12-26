@@ -1,5 +1,6 @@
 package com.gitee.search.core;
 
+import com.gitee.search.jcseg.JcsegAnalyzer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -19,6 +20,7 @@ import java.util.List;
 public class SearchHelper {
 
     private final static Logger log = LoggerFactory.getLogger(SearchHelper.class);
+    private final static Analyzer highlight_analyzer = AnalyzerFactory.getHighlightInstance();
 
     public static void main(String[] args) {
         String text = "Gitee Search是Gitee的搜索引擎服务模块，为Gitee提供仓库、Issue、代码等搜索服务。小程序";
@@ -61,16 +63,15 @@ public class SearchHelper {
         String result = null;
 
         try {
-            Analyzer analyzer = AnalyzerFactory.getInstance(false);
-            QueryParser parser = new QueryParser(null, analyzer);
+            QueryParser parser = new QueryParser(null, highlight_analyzer);
             Query query = parser.parse(key);
             QueryScorer scorer = new QueryScorer(query);
             Formatter fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
             Highlighter hig = new Highlighter(fmt, scorer);
-            TokenStream tokens = analyzer.tokenStream(null, new StringReader(text));
+            TokenStream tokens = highlight_analyzer.tokenStream(null, new StringReader(text));
             result = hig.getBestFragment(tokens, text);
         } catch (Exception e) {
-            log.error("Unabled to hightlight text", e);
+            log.error("Unabled to hightlight text("+key+"): " + text, e);
         }
 
         return (result != null) ? result : text;

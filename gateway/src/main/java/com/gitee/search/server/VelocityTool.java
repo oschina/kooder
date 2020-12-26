@@ -96,7 +96,7 @@ public class VelocityTool {
     }
 
     public final static String format(String fmt, long millis) {
-        return DateFormatUtils.format(millis, fmt);
+        return DateFormatUtils.format(millis * 1000, fmt);
     }
 
     public final static String encodeURL(String url) {

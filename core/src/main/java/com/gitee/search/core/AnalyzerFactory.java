@@ -56,8 +56,15 @@ public class AnalyzerFactory {
      * @return
      */
     public final static Analyzer getInstance(boolean forIndexer) {
-        //return new SmartChineseAnalyzer();
-        return forIndexer?new JcsegAnalyzer(ISegment.Type.MOST, config, dic):new JcsegAnalyzer(ISegment.Type.NLP, configForSplit, dic);
+        return forIndexer?new JcsegAnalyzer(ISegment.Type.MOST, config, dic):new JcsegAnalyzer(ISegment.Type.MOST, configForSplit, dic);
+    }
+
+    /**
+     * 返回高亮分词器
+     * @return
+     */
+    public final static Analyzer getHighlightInstance() {
+        return new JcsegAnalyzer(ISegment.Type.COMPLEX, configForSplit, dic);
     }
 
     /**

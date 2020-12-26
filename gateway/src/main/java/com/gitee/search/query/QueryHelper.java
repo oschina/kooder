@@ -208,6 +208,7 @@ public class QueryHelper {
             }
             else {
                 QueryParser parser = new QueryParser(field, AnalyzerFactory.getInstance(false));
+                parser.setDefaultOperator(QueryParser.Operator.AND);
                 query = parser.parse(q);
             }
             return new BoostQuery(query, boost);
