@@ -1,12 +1,9 @@
 package com.gitee.search;
 
 import com.gitee.search.core.SearchHelper;
-import com.gitee.search.index.IndexManager;
 import com.gitee.search.query.QueryHelper;
-import com.gitee.search.queue.QueueTask;
 import jline.TerminalFactory;
 import jline.console.ConsoleReader;
-import org.apache.lucene.search.Query;
 
 /**
  * 测试搜索的控制台程序
@@ -24,13 +21,9 @@ public class SearchCmd {
             String line = reader.readLine("> ");
             if (line == null || "quit".equalsIgnoreCase(line) || "exit".equalsIgnoreCase(line))
                 break;
-
             long ct = System.currentTimeMillis();
-
             String q = SearchHelper.cleanupKey(line);
-            Query query = QueryHelper.buildRepoQuery(q, 0);
-
-            String json = IndexManager.searchAfter(QueueTask.TYPE_REPOSITORY, null, query, 10);
+            String json = QueryHelper.REPOSITORY.setSearchKey(q).search();
             System.out.println(json);
 
             System.out.println("total time: " + (System.currentTimeMillis() - ct) + " ms");

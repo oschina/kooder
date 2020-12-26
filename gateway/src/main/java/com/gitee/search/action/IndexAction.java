@@ -43,10 +43,21 @@ public class IndexAction implements Action {
             String json = null;
             switch (type) {
                 case QueueTask.TYPE_REPOSITORY:
-                    json = QueryHelper.searchRepositories(q, sort, lang, page, PAGE_SIZE);
+                    json = QueryHelper.REPOSITORY
+                            .setSearchKey(q)
+                            .setSort(sort)
+                            .setPage(page)
+                            .setPageSize(PAGE_SIZE)
+                            .setFacets("lang", lang)
+                            .search();
                     break;
                 case QueueTask.TYPE_ISSUE:
-                    json = QueryHelper.searchIssues(q, sort, page, PAGE_SIZE);
+                    json = QueryHelper.ISSUE
+                            .setSearchKey(q)
+                            .setSort(sort)
+                            .setPage(page)
+                            .setPageSize(PAGE_SIZE)
+                            .search();
                     break;
                 default:
                     error(context.response(), HttpResponseStatus.BAD_REQUEST.code());

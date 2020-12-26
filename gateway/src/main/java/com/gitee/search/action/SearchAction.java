@@ -1,6 +1,5 @@
 package com.gitee.search.action;
 
-import com.gitee.search.core.SearchHelper;
 import com.gitee.search.http.Action;
 import com.gitee.search.query.QueryHelper;
 import io.vertx.core.http.HttpServerRequest;
@@ -24,14 +23,20 @@ public class SearchAction implements Action {
     public void repositories(RoutingContext context) throws IOException {
         HttpServerRequest request = context.request();
         String q = param(request, "q");
-        String sort = param(request, "sort");
-        int page = Math.max(1, param(request,"p", 1));
-        String lang = param(request, "lang");
         if(StringUtils.isBlank(q)) {
             this.json(context.response(), "{}");
             return ;
         }
-        String json = QueryHelper.searchRepositories(q, sort, lang, page, PAGE_SIZE);
+        String sort = param(request, "sort");
+        int page = Math.max(1, param(request,"p", 1));
+        String lang = param(request, "lang");
+        String json = QueryHelper.REPOSITORY
+                                    .setSearchKey(q)
+                                    .setSort(sort)
+                                    .setPage(page)
+                                    .setPageSize(PAGE_SIZE)
+                                    .setFacets("lang", lang)
+                                    .search();
         this.json(context.response(), json);
     }
 
@@ -50,7 +55,12 @@ public class SearchAction implements Action {
             this.json(context.response(), "{}");
             return ;
         }
-        String json = QueryHelper.searchIssues(q, sort, page, PAGE_SIZE);
+        String json = QueryHelper.ISSUE
+                                    .setSearchKey(q)
+                                    .setSort(sort)
+                                    .setPage(page)
+                                    .setPageSize(PAGE_SIZE)
+                                    .search();
         this.json(context.response(), json);
     }
 

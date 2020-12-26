@@ -1,4 +1,4 @@
-package com.gitee.search.action;
+package com.gitee.search.core;
 
 /**
  * 搜索相关常量定义

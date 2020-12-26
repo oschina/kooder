@@ -69,7 +69,7 @@ public class IndexManager {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode result = mapper.createObjectNode();
 
-        boolean needFacetQuery = facets != null && facets.size() > 0;
+        boolean needFacetQuery = (facets != null) && (facets.size() > 0);
         Query thisQuery = query;
 
         if ( needFacetQuery ) { // 避免二次执行 FunctionScoreQuery ，比较耗时
