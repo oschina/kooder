@@ -92,6 +92,7 @@ public class RepoQuery extends QueryBase {
      * @param boost
      * @return
      */
+    @Override
     protected BoostQuery makeBoostQuery(String field, String q, float boost) {
         /*
         if("name".equals(field)){

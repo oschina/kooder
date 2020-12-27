@@ -56,6 +56,7 @@ public class IssueQuery extends QueryBase {
      * @param boost
      * @return
      */
+    @Override
     protected BoostQuery makeBoostQuery(String field, String q, float boost) {
         if("ident".equals(field))
             return new BoostQuery(new TermQuery(new Term("ident", q)), boost);
