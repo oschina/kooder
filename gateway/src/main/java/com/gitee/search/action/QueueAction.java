@@ -1,6 +1,6 @@
 package com.gitee.search.action;
 
-import com.gitee.search.http.Action;
+import com.gitee.search.server.Action;
 import com.gitee.search.queue.EmbedQueueProvider;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
@@ -17,7 +17,6 @@ public class QueueAction implements Action {
      * 从队列中获取待索引任务
      * @param context
      * @return
-     * @throws ActionException
      */
     public void fetch(RoutingContext context) {
         EmbedQueueProvider queue = (EmbedQueueProvider)QueueFactory.getProvider();

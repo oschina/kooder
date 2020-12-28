@@ -1,4 +1,4 @@
-package com.gitee.search.http;
+package com.gitee.search.server;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerResponse;

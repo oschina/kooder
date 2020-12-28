@@ -1,6 +1,6 @@
 package com.gitee.search.action;
 
-import com.gitee.search.http.Action;
+import com.gitee.search.server.Action;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -46,22 +46,12 @@ public class TaskAction implements Action {
     private void pushTask(String action, RoutingContext context) {
         QueueTask task = new QueueTask();
         task.setAction(action);
-        task.setType(parseType(context));
+        task.setType(getType(context));
         task.setBody(context.getBodyAsString());
         if(task.check())
             QueueFactory.getProvider().push(Arrays.asList(task));
         else
             error(context.response(), HttpResponseStatus.NOT_ACCEPTABLE.code());
-    }
-
-    /**
-     * 从参数中解析对象类型字段，并判断值是否有效
-     * @param context
-     * @return
-     */
-    private static String parseType(RoutingContext context) {
-        String type = context.request().getParam("type");
-        return QueueTask.isAvailType(type)?type.toLowerCase():null;
     }
 
 }

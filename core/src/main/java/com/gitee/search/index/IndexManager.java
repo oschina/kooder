@@ -8,11 +8,8 @@ import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.*;
-import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
-import org.apache.lucene.facet.taxonomy.TaxonomyReader;
-import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.facet.taxonomy.*;
+import org.apache.lucene.index.*;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.search.*;
 import org.slf4j.Logger;
@@ -51,18 +48,16 @@ public class IndexManager {
 
     /**
      * 执行搜索
-     * @param type
-     * @param query
-     * @param facets
-     * @param sort
+     * @param type   search for what ?
+     * @param query  search condictions
+     * @param facets search facets
+     * @param sort   sort type
      * @param page
      * @param pageSize
      * @return
      * @throws IOException
      */
-    public static String search(String type, Query query, Map<String,String> facets, Sort sort, int page, int pageSize)
-            throws IOException
-    {
+    public static String search(String type, Query query, Map<String,String> facets, Sort sort, int page, int pageSize) throws IOException {
 
         long ct = System.currentTimeMillis();
 
@@ -134,7 +129,9 @@ public class IndexManager {
      * @param numHits
      * @return
      * @throws IOException
+     * @deprecated 暂时不用此方法
      */
+    @Deprecated
     public static String searchAfter(String type, ScoreDoc after, Query query, int numHits) throws IOException {
 
         long ct = System.currentTimeMillis();
@@ -232,20 +229,73 @@ public class IndexManager {
             return 0;
         switch (task.getAction()) {
             case QueueTask.ACTION_ADD:
-                i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
+                update(docs, i_writer, t_writer);
                 break;
             case QueueTask.ACTION_UPDATE:
-                //update documents
-                Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-                i_writer.deleteDocuments(queries);
-                //re-add documents
-                i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
+                update(docs, i_writer, t_writer);
                 break;
             case QueueTask.ACTION_DELETE:
-                queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-                i_writer.deleteDocuments(queries);
+                deleteByDoc(docs, i_writer);
         }
         return docs.size();
+    }
+
+    /**
+     * 添加文档
+     * @param type
+     * @param docs
+     * @return
+     * @throws IOException
+     */
+    public static long add(String type, List<Document> docs) throws IOException {
+        if(docs != null && docs.size() > 0)
+            try (
+                IndexWriter writer = StorageFactory.getIndexWriter(type);
+                TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
+            ) {
+                return update(docs, writer, taxonomyWriter);
+            }
+        return 0;
+    }
+
+    /**
+     * 更新文档
+     * @param docs
+     * @param i_writer
+     * @param t_writer
+     * @return
+     * @throws IOException
+     */
+    public static long update(List<Document> docs, IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
+        //update documents
+        Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+        i_writer.deleteDocuments(queries);
+        //re-add documents
+        return i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
+    }
+
+    /**
+     * 删除文档
+     * @param docs
+     * @param i_writer
+     * @return
+     * @throws IOException
+     */
+    public static long deleteById(List<Long> docs, IndexWriter i_writer) throws IOException {
+        Query[] queries = docs.stream().map(id -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, id)).toArray(Query[]::new);
+        return i_writer.deleteDocuments(queries);
+    }
+
+    /**
+     * 删除文档
+     * @param docs
+     * @param i_writer
+     * @return
+     * @throws IOException
+     */
+    public static long deleteByDoc(List<Document> docs, IndexWriter i_writer) throws IOException {
+        Query[] queries = docs.stream().map(doc -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, doc.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+        return i_writer.deleteDocuments(queries);
     }
 
     /**
@@ -260,18 +310,6 @@ public class IndexManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static void main(String[] args) throws IOException {
-        QueueTask task = new QueueTask();
-        task.setType(QueueTask.TYPE_REPOSITORY);
-        //test delete
-        //task.setAction(QueueTask.ACTION_DELETE);
-        //task.setBody("{\"objects\":[{\"id\":1016657},{\"id\":1495600}]}");
-        //test update
-        task.setAction(QueueTask.ACTION_UPDATE);
-        task.setBody("{\"objects\":[{\"id\":91902,\"recomm\":333}]}");
-        write(task);
     }
 
 }

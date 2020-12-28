@@ -1,4 +1,4 @@
-package com.gitee.search.http;
+package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import io.vertx.ext.web.RoutingContext;

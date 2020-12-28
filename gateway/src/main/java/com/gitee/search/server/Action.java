@@ -1,6 +1,6 @@
-package com.gitee.search.http;
+package com.gitee.search.server;
 
-import com.gitee.search.server.TemplateEngine;
+import com.gitee.search.queue.QueueTask;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -30,6 +30,16 @@ public interface Action {
     default void vm(RoutingContext context, String vm, Map params) {
         String content = TemplateEngine.render(vm, params, context);
         context.response().putHeader("Content-Type", "text/html; charset=UTF-8").send(content);
+    }
+
+    /**
+     * 从参数中解析对象类型字段，并判断值是否有效
+     * @param context
+     * @return
+     */
+    default String getType(RoutingContext context) {
+        String type = param(context.request(), "type");
+        return QueueTask.isAvailType(type)?type.toLowerCase():null;
     }
 
     /**

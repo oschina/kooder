@@ -1,6 +1,6 @@
 package com.gitee.search.action;
 
-import com.gitee.search.http.Action;
+import com.gitee.search.server.Action;
 import com.gitee.search.query.QueryHelper;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;

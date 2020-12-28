@@ -1,4 +1,4 @@
-package com.gitee.search.http;
+package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import io.vertx.core.Vertx;
@@ -8,7 +8,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.lang.StringUtils;
@@ -18,85 +17,16 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.*;
-
-/**
- * Gateway http server base on vert.x
- * @author Winter Lau<javayou@gmail.com>
- */
-public class Gateway extends GatewayBase {
-
-    private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)";
-
-    private VertxOptions vOptions;
-
-    private Gateway() {
-        super();
-        this.vOptions = new VertxOptions();
-        this.vOptions.setWorkerPoolSize(this.workerPoolSize);
-        this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
-    }
-
-    @Override
-    public void start() {
-        this.vertx = Vertx.vertx(this.vOptions);
-        this.server = vertx.createHttpServer();
-        Router router = Router.router(this.vertx);
-        router.allowForward(AllowForwardHeaders.X_FORWARD);
-        //global headers
-        router.route().handler( context -> {
-            this.writeGlobalHeaders(context.response());
-            context.next();
-        });
-        //static files
-        router.routeWithRegex(pattern_static_file).handler(new AutoContentTypeStaticHandler());
-        //body parser
-        router.route().handler(BodyHandler.create());
-        //action handler
-        router.route().handler(context -> {
-            long ct = System.currentTimeMillis();
-            HttpServerResponse res = context.response();
-            try {
-                ActionExecutor.execute(context);
-            } finally {
-                if(!res.ended())
-                    res.end();
-                if(!res.closed())
-                    res.close();
-            }
-            writeAccessLog(context.request(), System.currentTimeMillis() - ct);
-        });
-
-        this.server.requestHandler(router).listen(port).onSuccess(server -> {
-            log.info("READY (:{})!", port);
-        });
-    }
-
-    /**
-     * 全局 headers
-     * @param res
-     */
-    private void writeGlobalHeaders(HttpServerResponse res) {
-        res.putHeader("server", VERSION);
-        res.putHeader("date", new Date().toString());
-    }
-
-    /**
-     * 启动入口
-     * @param args
-     */
-    public static void main(String[] args) {
-        Gateway daemon = new Gateway();
-        daemon.init(null);
-        daemon.start();
-    }
-
-}
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 把 Gateway 底层逻辑移到 GatewayBase
+ * @author Winter Lau<javayou@gmail.com>
  */
-abstract class GatewayBase implements Daemon {
+public abstract class GatewayBase implements Daemon {
 
     final static Logger log = LoggerFactory.getLogger("GSearch");
 
@@ -107,7 +37,9 @@ abstract class GatewayBase implements Daemon {
     int workerPoolSize;
 
     Vertx vertx;
+    VertxOptions vOptions;
     HttpServer server;
+    Router router;
 
     List<MessageFormat> log_patterns = new ArrayList<>();
 
@@ -115,6 +47,10 @@ abstract class GatewayBase implements Daemon {
         this.bind = GiteeSearchConfig.getHttpBind();
         this.port = GiteeSearchConfig.getHttpPort();
         this.workerPoolSize = NumberUtils.toInt(GiteeSearchConfig.getProperty("http.worker.pool.size"), 16);
+
+        this.vOptions = new VertxOptions();
+        this.vOptions.setWorkerPoolSize(this.workerPoolSize);
+        this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
 
         String logs_pattern = GiteeSearchConfig.getProperty("http.log.pattern");
         if(logs_pattern != null) {
@@ -125,7 +61,17 @@ abstract class GatewayBase implements Daemon {
     }
 
     @Override
-    public void init(DaemonContext daemonContext) {}
+    public void init(DaemonContext daemonContext) {
+        this.vertx = Vertx.vertx(this.vOptions);
+        this.server = vertx.createHttpServer();
+        this.router = Router.router(this.vertx);
+        router.allowForward(AllowForwardHeaders.X_FORWARD);
+        //global headers
+        router.route().handler( context -> {
+            this.writeGlobalHeaders(context.response());
+            context.next();
+        });
+    }
 
     @Override
     public void stop() {
@@ -135,6 +81,15 @@ abstract class GatewayBase implements Daemon {
     @Override
     public void destroy() {
         log.info("EXIT!");
+    }
+
+    /**
+     * 全局 headers
+     * @param res
+     */
+    protected void writeGlobalHeaders(HttpServerResponse res) {
+        res.putHeader("server", VERSION);
+        res.putHeader("date", new Date().toString());
     }
 
     /**

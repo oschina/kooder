@@ -1,10 +1,13 @@
 {
   "objects": [
     {
-      "repository": 345347,
-      "path": "src/main/java/com/gitee/search/http/ServerDaemon.java",
-      "code": "",
-      "lang": "Java"
+      "id": 345347,
+      "name": "J2Cache",
+      "url": "https://gitee.com/ld/J2Cache",
+      "branch": "master",
+      "path": "d:\\projects\\j2cache",
+      "username": "",
+      "password": ""
     }
   ]
 }

@@ -2,7 +2,7 @@ package com.gitee.search.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gitee.search.http.Action;
+import com.gitee.search.server.Action;
 import com.gitee.search.query.QueryHelper;
 import com.gitee.search.queue.QueueTask;
 import io.netty.handler.codec.http.HttpResponseStatus;

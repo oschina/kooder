@@ -64,7 +64,7 @@ public class PathImporter {
             int thread_count = NumberUtils.toInt(cmd.getOptionValue("c"), DEFAULT_THREAD_COUNT);
             long ct = System.currentTimeMillis();
 
-            int fc = importPath(type, action, jsonPath, thread_count);
+            int fc = importJsonInPath(type, action, jsonPath, thread_count);
 
             log.info("{} files in {} imported,time:{}ms", fc, jsonPath.toString(), (System.currentTimeMillis()-ct));
         } catch (IOException e) {
@@ -82,18 +82,18 @@ public class PathImporter {
      * @param thread_count
      * @return file count
      */
-    private static int importPath(String type, String action, Path path, int thread_count) throws IOException {
+    private static int importJsonInPath(String type, String action, Path path, int thread_count) throws IOException {
         final AtomicInteger fc = new AtomicInteger(0);
         thread_count = Math.min(MAX_THREAD_COUNT, Math.max(thread_count, 1));
         ExecutorService executorService = Executors.newFixedThreadPool(thread_count);
         try (
-                IndexWriter writer = StorageFactory.getIndexWriter(type);
-                TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
+            IndexWriter writer = StorageFactory.getIndexWriter(type);
+            TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
         ) {
             Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p));
             files.forEach(jsonFile -> {
                 executorService.submit(() -> {
-                    importFile(type, action, jsonFile, writer, taxonomyWriter);
+                    importJsonFile(type, action, jsonFile, writer, taxonomyWriter);
                     fc.addAndGet(1);
                 });
             });
@@ -113,7 +113,7 @@ public class PathImporter {
      * @param i_writer
      * @param t_writer
      */
-    private static void importFile(String type, String action, Path file, IndexWriter i_writer, TaxonomyWriter t_writer) {
+    private static void importJsonFile(String type, String action, Path file, IndexWriter i_writer, TaxonomyWriter t_writer) {
         try {
             long ct = System.currentTimeMillis();
             QueueTask task = new QueueTask();
@@ -123,12 +123,12 @@ public class PathImporter {
             task.setBody(json);
             task.write(i_writer, t_writer);
             log.info("{} imported in {}ms. ({})", file.toString(), (System.currentTimeMillis() - ct), Thread.currentThread().getName());
-            /*
+
         } catch (IllegalArgumentException e) {
             //This is an jcseg & lucene bug, just retry to avoid this bug
             log.error("Retry to import file: " + file.toString(), e);
             //java.lang.IllegalArgumentException: startOffset must be non-negative, and endOffset must be >= startOffset
-            importFile(type, action, file, i_writer, t_writer);*/
+            importJsonFile(type, action, file, i_writer, t_writer);
         } catch (Exception e) {
             log.error("Failed to import file: " + file.toString(), e);
         }
