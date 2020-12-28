@@ -1,0 +1,28 @@
+## 搜索issue结果渲染
+<table class="pure-table pure-table-striped">
+    <thead>
+    <tr>
+        <th>No</th>
+        <th>Repository</th>
+        <th>Title</th>
+        <th>Time</th>
+        <th>Doc</th>
+        <th>Score</th>
+        <th>Detail</th>
+    </tr>
+    </thead>
+    <tbody>
+    #foreach($obj in $result.get("objects"))
+    #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
+    <tr>
+        <td valign="top">$pi</td>
+        <td valign="top">$obj.get('project').get('name').textValue()</td>
+        <td valign="top"><a href="" target="_blank">$tool.highlight($obj.get('title').textValue(),$q)</a></td>
+        <td valign="top" nowrap>$tool.format('yyyy/MM/dd HH:mm',$obj.get('created_at').longValue())</td>
+        <td valign="top">$obj.get('_id_')</td>
+        <td valign="top">$obj.get('_score_')</td>
+        <td>$tool.highlight($obj.get('description').textValue(), $q)</td>
+    </tr>
+    #end
+    </tbody>
+</table>

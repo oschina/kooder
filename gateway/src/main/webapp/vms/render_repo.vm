@@ -1,0 +1,31 @@
+## 搜索仓库结果渲染
+<table class="pure-table pure-table-striped">
+    <thead>
+    <tr>
+        <th>No</th>
+        <th>Name</th>
+        <th>Doc</th>
+        <th>Score</th>
+        <th>Description</th>
+        <th>Star</th>
+        <th>Fork</th>
+        <th nowrap>G-Index</th>
+    </tr>
+    </thead>
+    <tbody>
+    #foreach($obj in $result.get("objects"))
+    #set($recomm = $obj.get('recomm').intValue())
+    #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
+    <tr>
+        <td valign="top">$pi</td>
+        <td valign="top" nowrap><a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$tool.highlight("$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()",$q)</a>#if($recomm==2) <em>[GVP]</em>#elseif($recomm==1) <em>[荐]</em>#end</td>
+        <td valign="top">$obj.get('_id_')</td>
+        <td valign="top">$obj.get('_score_')</td>
+        <td>$tool.highlight($obj.get('description').textValue(), $q)</td>
+        <td valign="top" align="right">$obj.get('count').get('star')</td>
+        <td valign="top" align="right">$obj.get('count').get('fork')</td>
+        <td valign="top" align="right">$obj.get('count').get('gindex')</td>
+    </tr>
+    #end
+    </tbody>
+</table>
