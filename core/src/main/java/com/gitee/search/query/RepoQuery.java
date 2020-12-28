@@ -1,5 +1,6 @@
 package com.gitee.search.query;
 
+import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
 import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang.math.NumberUtils;
@@ -8,6 +9,7 @@ import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
 import org.apache.lucene.expressions.js.JavascriptCompiler;
 import org.apache.lucene.queries.function.FunctionScoreQuery;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
@@ -50,6 +52,14 @@ public class RepoQuery extends QueryBase {
      */
     @Override
     protected Query buildQuery() {
+        if(parseSearchKey) {
+            QueryParser parser = new QueryParser("repo", AnalyzerFactory.getInstance(false));
+            try {
+                return parser.parse(searchKey);
+            } catch (ParseException e) {
+                throw new QueryException("Failed to parse \""+searchKey+"\"", e);
+            }
+        }
         String q = QueryParser.escape(searchKey);
 
         BooleanQuery.Builder builder = new BooleanQuery.Builder();

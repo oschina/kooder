@@ -1,9 +1,11 @@
 package com.gitee.search.query;
 
+import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
 import com.gitee.search.queue.QueueTask;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
@@ -29,6 +31,14 @@ public class IssueQuery extends QueryBase {
      */
     @Override
     protected Query buildQuery() {
+        if(parseSearchKey) {
+            QueryParser parser = new QueryParser("issue", AnalyzerFactory.getInstance(false));
+            try {
+                return parser.parse(searchKey);
+            } catch (ParseException e) {
+                throw new QueryException("Failed to parse \""+searchKey+"\"", e);
+            }
+        }
         String q = QueryParser.escape(searchKey);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //filter

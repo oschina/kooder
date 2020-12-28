@@ -21,6 +21,13 @@ public interface IQuery {
     IQuery setSearchKey(String key);
 
     /**
+     * 是否解析查询字符串
+     * @param parseSearchKey
+     * @return
+     */
+    IQuery setParseSearchKey(boolean parseSearchKey);
+
+    /**
      * 排序方法
      * @param sort
      * @return

@@ -18,6 +18,7 @@ import java.util.Map;
 public abstract class QueryBase implements IQuery {
 
     protected String searchKey;
+    protected boolean parseSearchKey = false;
     protected String sort;
     protected int page = 1;
     protected int pageSize = 20;
@@ -54,6 +55,11 @@ public abstract class QueryBase implements IQuery {
     @Override
     public IQuery setSearchKey(String key) {
         this.searchKey = key;
+        return this;
+    }
+
+    public IQuery setParseSearchKey(boolean parseSearchKey) {
+        this.parseSearchKey = parseSearchKey;
         return this;
     }
 
