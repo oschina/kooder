@@ -1,7 +1,12 @@
 package com.gitee.search.code;
 
+import com.gitee.search.utils.FileClassifier;
+import com.gitee.search.utils.SlocCounter;
 import com.gitee.search.utils.TextFileUtils;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.eclipse.jgit.annotations.NonNull;
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -9,9 +14,13 @@ import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.errors.InvalidObjectIdException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
@@ -19,7 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -30,81 +40,11 @@ import java.util.List;
 public class GitRepositoryProvider implements RepositoryProvider {
 
     private final static Logger log = LoggerFactory.getLogger(GitRepositoryProvider.class);
+    private final static SlocCounter slocCounter = new SlocCounter();
 
     @Override
     public String name() {
         return "git";
-    }
-
-    /**
-     * 遍历所有源码文件
-     * @param repo
-     * @param traveler
-     */
-    @Override
-    public void travel(Repository repo, RepositoryChanged changed, FileTraveler traveler) {
-        try (Git git = Git.open(new File(repo.getPath()))){
-            ObjectId lastCommitId = git.getRepository().resolve(Constants.HEAD);
-            RevCommit commit = git.getRepository().parseCommit(lastCommitId);
-            try (TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
-                treeWalk.addTree(commit.getTree());
-                treeWalk.setRecursive(true);
-                while(treeWalk.next()) {
-                    String filePath = treeWalk.getPathString();
-                    System.out.println(treeWalk.getPathString());
-                    ObjectId objectId = treeWalk.getObjectId(0);
-                    ObjectLoader loader = git.getRepository().open(objectId);
-                    // and then one can the loader to read the file
-                    /*
-                    var codeIndexDocument = new CodeIndexDocument()
-                            .setRepoLocationRepoNameLocationFilename(fileToString)
-                            .setRepoName(this.repoResult.getName())
-                            .setFileName(treeWalk.getNameString())
-                            .setFileLocation(fileLocation)
-                            .setFileLocationFilename(fileLocationFilename)
-                            .setMd5hash(md5Hash)
-                            .setLanguageName(languageName)
-                            .setCodeLines(slocCount.codeCount)
-                            .setBlankLines(slocCount.blankCount)
-                            .setCommentLines(slocCount.commentCount)
-                            .setLines(slocCount.linesCount)
-                            .setComplexity(slocCount.complexity)
-                            .setContents(StringUtils.join(codeLinesReturn.getCodeLines(), "\n"))
-                            .setRepoRemoteLocation(repoRemoteLocation)
-                            .setCodeOwner(codeOwner)
-                            .setSchash(Values.EMPTYSTRING)
-                            .setDisplayLocation(displayLocation)
-                            .setSource(this.repoResult.getData().source);
-
-                    traveler.newDocument(codeIndexDocument, !TextFileUtils.isBinaryFile(filePath));
-                    */
-                }
-            }
-        } catch (IOException e) {
-            log.error("Failed to clone '" + repo.getUrl() + "'", e);
-        }
-    }
-
-    /**
-     * TODO: 为源码文件生成文档
-     * @param file
-     * @param isBinaryFile
-     * @return
-     */
-    public CodeIndexDocument fileToDocument(File file, boolean isBinaryFile) {
-        if(isBinaryFile)
-            return null;
-        try {
-            List<String> lines = TextFileUtils.readFileLines(file, 20000);
-            if(lines.isEmpty())
-                return null;
-            CodeIndexDocument doc = new CodeIndexDocument();
-
-            return doc;
-        } catch (IOException e) {
-            log.error("Failed to read file contents of '" + file.getAbsolutePath() + "'", e);
-        }
-        return null;
     }
 
     /**
@@ -113,31 +53,50 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * @return
      */
     @Override
-    public RepositoryChanged clone(Repository repo) {
-        CloneCommand cloneCommand = Git.cloneRepository();
-        cloneCommand.setURI(repo.getUrl());
-        cloneCommand.setDirectory(new File(repo.getPath()));
-        cloneCommand.setCloneAllBranches(true);
-
-        boolean successful = false;
+    public void clone(CodeRepository repo, FileTraveler traveler) {
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setURI(repo.getUrl())
+                .setDirectory(new File(repo.getPath()))
+                //.setProgressMonitor(new TextProgressMonitor())
+                .setCloneAllBranches(true);
 
         if (repo.useCredentials())
             cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
-        cloneCommand.setProgressMonitor(new TextProgressMonitor());
 
-        try (Git call = cloneCommand.call()){
-            Ref head = call.getRepository().findRef(Constants.HEAD);
-            //TODO save last head
-            head.getObjectId().getName();
-            successful = true;
-        } catch (GitAPIException e) {
-            log.error("Failed to clone '" + repo.getUrl() + "'", e);
-        } catch (IOException e) {
-            log.error("Failed to clone '" + repo.getUrl() + "'", e);
+        try (Git git = cloneCommand.call()){//克隆完遍历所有文件进行索引
+            //try (Git git = Git.open(new File(repo.getPath()))){//克隆完遍历所有文件进行索引
+            this.indexAllFiles(repo, git, traveler);
+        } catch (IOException | GitAPIException e) {
+            log.error("Failed to clone & index '" + repo.getUrl() + "'", e);
         }
-        RepositoryChanged repositoryChanged = new RepositoryChanged(successful);
-        repositoryChanged.setClone(true);
-        return repositoryChanged;
+    }
+
+    /**
+     * 重建代码仓索引
+     * @param repo
+     * @param git
+     * @param traveler
+     * @throws IOException
+     * @throws GitAPIException
+     */
+    private void indexAllFiles(CodeRepository repo, Git git, FileTraveler traveler) throws IOException, GitAPIException {
+        Ref head = git.getRepository().findRef(Constants.HEAD);
+        repo.setLastCommitId(head.getObjectId().name());//回调最新 commit id 信息
+        RevCommit commit = git.getRepository().parseCommit(head.getObjectId());
+        try (TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
+            treeWalk.addTree(commit.getTree());
+            treeWalk.setRecursive(true);
+            while(treeWalk.next()) {
+                String path = treeWalk.getPathString();
+                boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
+                if(!isBinaryFile) { //二进制文件不参与索引
+                    CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
+                    if (doc != null) {
+                        traveler.updateDocument(doc);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -146,126 +105,231 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * @return
      */
     @Override
-    public RepositoryChanged pull(Repository repo) {
-        boolean changed = false;
-        List<String> changedFiles = new ArrayList<>();
-        List<String> deletedFiles = new ArrayList<>();
+    public void pull(CodeRepository repo, FileTraveler traveler) {
+        Git git = null;
+        try {
+            File repoFile = new File(repo.getPath());
+            if(!repoFile.exists()) {//检查目录不存在就 clone
+                log.info("Repository '{}:{}' no exists, re-clone from '{}'", repo.getId(), repo.getName(), repo.getUrl());
+                CloneCommand cloneCommand = Git.cloneRepository()
+                        .setURI(repo.getUrl())
+                        .setDirectory(new File(repo.getPath()))
+                        .setCloneAllBranches(true);
 
-        try (Git git = Git.open(new File(repo.getPath()))){
+                if (repo.useCredentials())
+                    cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
+                git = cloneCommand.call();
+            }
+            else {//目录存在就 pull
+                git = Git.open(repoFile);
+                PullCommand pullCmd = git.pull();
+                if (repo.useCredentials())
+                    pullCmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
+                pullCmd.call();
+            }
 
-            Ref oldHeadRef = git.getRepository().findRef(Constants.HEAD);
-            git.reset();
-            git.clean();
+            boolean needRebuildIndexes = false;
+            //Check last commit ref
+            ObjectId oldId  = ObjectId.fromString(repo.getLastCommitId());
+            try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+                RevCommit commit = revWalk.parseCommit(oldId);
+            } catch (InvalidObjectIdException e) {
+                needRebuildIndexes = true;
+            }
 
-            PullCommand pullCmd = git.pull();
-            if (repo.useCredentials())
-                pullCmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
-            pullCmd.call();
+            if(needRebuildIndexes) { //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
+                log.warn("Failed to read last comment '{}', rebuilding '{}:{}' indexes", repo.getLastCommitId(), repo.getId(), repo.getName());
+                this.indexAllFiles(repo, git, traveler);
+                return ;
+            }
 
             Ref newHeadRef = git.getRepository().findRef(Constants.HEAD);
-            ObjectId oldId = oldHeadRef.getObjectId();
             ObjectId newId = newHeadRef.getObjectId();
 
             if (!oldId.toString().equals(newId.toString())) {
-                changed = true;
-                // Get the differences between the the heads which we updated at
-                // and use these to just update the differences between them
-                ObjectId oldHead = git.getRepository().resolve(oldId.getName() + "^{tree}");
-                ObjectId newHead = git.getRepository().resolve(newId.getName() + "^{tree}");
-
-                ObjectReader reader = git.getRepository().newObjectReader();
-
-                CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-                oldTreeIter.reset(reader, oldHead);
-
-                CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-                newTreeIter.reset(reader, newHead);
-
-                List<DiffEntry> entries = git.diff()
-                        .setNewTree(newTreeIter)
-                        .setOldTree(oldTreeIter)
-                        .call();
-
+                List<DiffEntry> entries = diffFiles(git, oldId.name(), newId.name());
                 for (DiffEntry entry : entries) {
                     if ("DELETE".equals(entry.getChangeType().name())) {
-                        deletedFiles.add(FilenameUtils.separatorsToUnix(entry.getOldPath()));
+                        CodeIndexDocument doc = new CodeIndexDocument(repo.getId(), repo.getName(), entry.getOldPath());
+                        traveler.deleteDocument(doc);
                     } else {
-                        changedFiles.add(FilenameUtils.separatorsToUnix(entry.getNewPath()));
+                        String path = entry.getNewPath();
+                        boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
+                        if(!isBinaryFile) { //二进制文件不参与索引
+                            CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
+                            if (doc != null) {
+                                traveler.updateDocument(doc);
+                            }
+                        }
                     }
                 }
             }
-
         } catch (IOException | GitAPIException ex) {
-            log.error("Failed to pull from '" + repo.getUrl() + "'", ex);
-
+            log.error("Failed to pull & index from '" + repo.getUrl() + "'", ex);
+        } finally {
+            if(git != null)
+                git.close();
         }
+    }
 
-        return new RepositoryChanged(changed, changedFiles, deletedFiles);
+    private static @NonNull
+    List<DiffEntry> diffFiles(Git git, String oldCommit, String newCommit) throws IOException, GitAPIException {
+        return git.diff()
+                .setOldTree(prepareTreeParser(git, oldCommit))
+                .setNewTree(prepareTreeParser(git, newCommit))
+                .call();
+    }
+
+    private static AbstractTreeIterator prepareTreeParser(Git git, String objectId) throws IOException {
+        // from the commit we can build the tree which allows us to construct the TreeParser
+        //noinspection Duplicates
+        try (RevWalk walk = new RevWalk(git.getRepository())) {
+            RevCommit commit = walk.parseCommit(git.getRepository().resolve(objectId));
+            RevTree tree = walk.parseTree(commit.getTree().getId());
+
+            CanonicalTreeParser treeParser = new CanonicalTreeParser();
+            try (ObjectReader reader = git.getRepository().newObjectReader()) {
+                treeParser.reset(reader, tree.getId());
+            }
+
+            return treeParser;
+        }
+    }
+
+    /**
+     * 删除仓库
+     * @param repo
+     */
+    @Override
+    public void delete(CodeRepository repo) throws IOException {
+        FileUtils.forceDelete(new File(repo.getPath()));
+    }
+
+    /**
+     * 从文件中构建文档
+     * @param repo
+     * @param git
+     * @param path
+     * @param objectId
+     * @return
+     * @throws IOException
+     */
+    private CodeIndexDocument buildDocument(CodeRepository repo, Git git, String path, ObjectId objectId)
+            throws IOException, GitAPIException
+    {
+        ObjectLoader loader = git.getRepository().open(objectId);
+        try(InputStream stream = loader.openStream()) {
+            List<String> codeLines = TextFileUtils.readFileLines(stream, 20000);
+            String contents = String.join("\n", codeLines);
+
+            CodeIndexDocument doc = new CodeIndexDocument();
+
+            doc.setRepoId(repo.getId());
+            doc.setRepoName(repo.getName());                                    //仓库名
+            doc.setRepoURL(repo.getUrl());                                      //仓库地址
+            doc.setFileName(FilenameUtils.getName(path));                       //文件名
+            doc.setFileLocation(path);                                          //完整的项目内路径
+            doc.setLanguage(FileClassifier.languageGuess(path, contents));      //语言
+            doc.setContents(contents);                                          //源码
+            doc.setCodeOwner(getCodeOwner(git, path));                          //开发者  TODO 应该支持多个开发者
+            var slocCount = slocCounter.countStats(contents, doc.getLanguage());
+            doc.setLines(slocCount.linesCount);                                 //代码行统计
+            doc.setCommentLines(slocCount.commentCount);
+            doc.setBlankLines(slocCount.blankCount);
+            doc.setCodeLines(slocCount.codeCount);
+            doc.setComplexity(slocCount.complexity);
+            doc.setSha1Hash(DigestUtils.sha1Hex(contents));
+            doc.setRevision(objectId.name());
+
+            //calculate document uuid
+            doc.generateUuid();
+
+            return doc;
+        }
     }
 
     /**
      * 读取所有开发者信息
-     * @param repo
+     * @param git
      * @param fileName
      * @return
      */
-    @Override
-    public List<CodeOwner> codeOwners(Repository repo, String fileName) {
-        List<CodeOwner> codeOwners = null;
-        try (Git git = Git.open(new File(repo.getPath()))){
-            BlameCommand blamer = git.blame();
-            ObjectId lastCommitId = git.getRepository().resolve(Constants.HEAD);
-            if(lastCommitId == null){
-                log.error("Unabled to resolve HEAD of " + repo.getPath() + " ,Filename = " + fileName);
-                return codeOwners;
-            }
-            // Somewhere in here appears to be wrong...
-            blamer.setStartCommit(lastCommitId);
-            blamer.setFilePath(fileName);
-            BlameResult blame = blamer.call();
+    private static String getCodeOwner(Git git, String fileName) throws IOException, GitAPIException {
+        BlameCommand blamer = git.blame();
+        ObjectId lastCommitId = git.getRepository().resolve(Constants.HEAD);
+        // Somewhere in here appears to be wrong...
+        blamer.setStartCommit(lastCommitId);
+        blamer.setFilePath(fileName);
+        BlameResult blame = blamer.call();
 
-            if (blame != null) {
-                // Get all the owners their number of commits and most recent commit
-                HashMap<String, CodeOwner> owners = new HashMap<>();
-                RevCommit commit;
+        HashMap<String, CodeOwner> owners = new HashMap<>();
 
-                int linec = blame.getResultContents().size();
-                for (int i = 0; i < linec; i++) {
-                    commit = blame.getSourceCommit(i);
-                    PersonIdent pident = commit.getAuthorIdent();
-                    if (owners.containsKey(pident.getName())) {
-                        CodeOwner codeOwner = owners.get(pident.getName());
-                        codeOwner.incrementLines();
-                        int timestamp = codeOwner.getMostRecentUnixCommitTimestamp();
-                        if (commit.getCommitTime() > timestamp)
-                            codeOwner.setMostRecentUnixCommitTimestamp(commit.getCommitTime());
-                        owners.put(pident.getName(), codeOwner);
-                    } else {
-                        owners.put(pident.getName(), new CodeOwner(pident.getName(), 1, commit.getCommitTime()));
-                    }
+        if (blame != null) {
+            // Get all the owners their number of commits and most recent commit
+            RevCommit commit;
+
+            int linec = blame.getResultContents().size();
+            for (int i = 0; i < linec; i++) {
+                commit = blame.getSourceCommit(i);
+                PersonIdent pident = commit.getAuthorIdent();
+                if (owners.containsKey(pident.getName())) {
+                    CodeOwner codeOwner = owners.get(pident.getName());
+                    codeOwner.incrementLines();
+                    int timestamp = codeOwner.getMostRecentUnixCommitTimestamp();
+                    if (commit.getCommitTime() > timestamp)
+                        codeOwner.setMostRecentUnixCommitTimestamp(commit.getCommitTime());
+                    owners.put(pident.getName(), codeOwner);
+                } else {
+                    owners.put(pident.getName(), new CodeOwner(pident.getName(), 1, commit.getCommitTime()));
                 }
-
-                codeOwners = new ArrayList(owners.values());
             }
-
-        } catch (IOException | GitAPIException | IllegalArgumentException ex) {
-            //this.logger.severe(String.format("8b6da512::error in class %s exception %s for repository %s", ex.getClass(), ex.getMessage(), repoName));
         }
 
-        return (codeOwners==null)?new ArrayList():codeOwners;
+        return codeOwner(owners.values());
+    }
+
+    /**
+     * Determines who owns a piece of code weighted by time based on current second (IE time now)
+     * NB if a commit is very close to this time it will always win
+     */
+    private static String codeOwner(Collection<CodeOwner> codeOwners) {
+        long currentUnix = System.currentTimeMillis() / 1_000L;
+
+        double best = 0;
+        String owner = "Unknown";
+
+        for (CodeOwner codeOwner : codeOwners) {
+            double age = (currentUnix - codeOwner.getMostRecentUnixCommitTimestamp()) / 60 / 60;
+            double calc = codeOwner.getNoLines() / Math.pow((age), 1.8);
+
+            if (calc > best) {
+                best = calc;
+                owner = codeOwner.getName();
+            }
+        }
+
+        return owner;
     }
 
     public static void main(String[] args) {
         GitRepositoryProvider grp = new GitRepositoryProvider();
-        grp.travelPath(new File("D:\\j2cache"), null);
-        /*
-        Repository repo = new Repository();
+
+        CodeRepository repo = new CodeRepository();
         repo.setName("j2cache");
         repo.setUrl("https://gitee.com/ld/J2Cache");
         repo.setPath("D:\\j2cache");
-        grp.travel(repo, null, null);
-        for (CodeOwner codeOwner : grp.codeOwners(repo, "docs/UPGRADE.md")) {
-            System.out.println(codeOwner);
-        }*/
+        repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");
+
+        grp.pull(repo, new FileTraveler() {
+            @Override
+            public void updateDocument(CodeIndexDocument doc) {
+                System.out.println("UPDATED:" + doc);
+            }
+
+            @Override
+            public void deleteDocument(CodeIndexDocument doc) {
+                System.out.println("DELETE:" + doc);
+            }
+        });
     }
 }

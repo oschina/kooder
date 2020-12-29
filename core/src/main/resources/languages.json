@@ -2971,13 +2971,6 @@
   },
   "Java": {
     "complexitychecks": [
-      "public ",
-      "private ",
-      "protected ",
-      "class ",
-      "interface ",
-      "extends ",
-      "implements ",
       "for ",
       "for(",
       "if ",
@@ -2998,7 +2991,6 @@
     ],
     "multi_line": [
       [
-        "/**",
         "/*",
         "*/"
       ]

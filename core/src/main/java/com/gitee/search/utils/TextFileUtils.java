@@ -64,10 +64,41 @@ public class TextFileUtils {
      * @param maxFileLineDepth 只返回最开始的 N 行，如果该值为负数，则返回所有行
      */
     public static List<String> readFileLines(File file, int maxFileLineDepth) throws IOException {
+        return readFileLines(new FileInputStream(file), maxFileLineDepth);
+        /*
         Charset charset = guessCharset(file);
         StringBuilder stringBuilder = new StringBuilder();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))){
+            int i = 0;
+            int count = 0;
+            char[] buffer = new char[128];
+            do {
+                int rc = reader.read(buffer);
+                if(rc > 0) {
+                    stringBuilder.append(buffer, 0, rc);
+                    count += rc;
+                }
+                if(rc == -1 || count >= DEFAULT_MAX_FILE_LENGTH_READ)
+                    break;
+            } while (true);
+        }
+
+        String[] lines = stringBuilder.toString().split("\\r\\n|\\n|\\r");
+        return (lines.length > maxFileLineDepth && maxFileLineDepth > 0)?Arrays.asList(lines).subList(0, maxFileLineDepth):Arrays.asList(lines);
+        */
+    }
+
+    /**
+     * FIXME 先不管编码的问题
+     * @param stream
+     * @param maxFileLineDepth
+     * @return
+     * @throws IOException
+     */
+    public static List<String> readFileLines(InputStream stream, int maxFileLineDepth) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))){
             int i = 0;
             int count = 0;
             char[] buffer = new char[128];

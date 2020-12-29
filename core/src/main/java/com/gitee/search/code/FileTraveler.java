@@ -7,11 +7,17 @@ package com.gitee.search.code;
 public interface FileTraveler {
 
     /**
-     * 产生新的源码文档
+     * 更新源码文档（新文件、更改文件）
      * @param doc  文档信息
-     * @param isBinaryFile 是否为二进制文件
      * @return true: 继续下一个文档， false 不再处理下面文档
      */
-    boolean newDocument(CodeIndexDocument doc, boolean isBinaryFile);
+    void updateDocument(CodeIndexDocument doc);
+
+    /**
+     * 删除文档
+     * @param doc
+     * @return
+     */
+    void deleteDocument(CodeIndexDocument doc);
 
 }

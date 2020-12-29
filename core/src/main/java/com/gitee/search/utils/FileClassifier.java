@@ -31,6 +31,10 @@ public class FileClassifier {
         }
     }
 
+    public static HashMap<String, FileClassifierResult> getDatabase() {
+        return database;
+    }
+
     public static String getExtension(String fileName) {
         return FilenameUtils.getExtension(fileName);
     }

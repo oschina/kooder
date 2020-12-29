@@ -1,6 +1,5 @@
 package com.gitee.search.code;
 
-import com.searchcode.app.config.Values;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -8,28 +7,21 @@ import org.apache.commons.lang.StringUtils;
  * 代码源的定义
  * @author Winter Lau<javayou@gmail.com>
  */
-public class Repository {
+public class CodeRepository {
+
+    public final static String SCM_GIT = "git";
+    public final static String SCM_SVN = "svn";
+    public final static String SCM_FILE = "file";
 
     private long   id;          //仓库编号
-    private String scm;         //代码源类型：gitee/gitlab/gogs/gitea/github/svn/file
+    private String scm;         //代码源类型：git/svn/file
     private String name;        //仓库名称
     private String url;         //仓库地址，ex: https://gitee.com/ld/J2Cache
     private String username;    //访问仓库的用户名
     private String password;    //访问仓库的密码
 
     private String path;        //仓库的存放路径
-
-    // Use this in order to determine checkout directory as otherwise
-    // it may be invalid on the filesystem
-    public String getDirectoryName() {
-        // Must check if name is different and if so append hash to avoid issue of collisions
-        String toReturn = this.name.replaceAll("\\W+", Values.EMPTYSTRING);
-        if (!toReturn.equals(this.name)) {
-            toReturn += "_" + DigestUtils.sha1Hex(this.name);
-        }
-        return toReturn;
-    }
-
+    private String lastCommitId;//最后提交编号
 
     public long getId() {
         return id;
@@ -89,5 +81,13 @@ public class Repository {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getLastCommitId() {
+        return lastCommitId;
+    }
+
+    public void setLastCommitId(String lastCommitId) {
+        this.lastCommitId = lastCommitId;
     }
 }
