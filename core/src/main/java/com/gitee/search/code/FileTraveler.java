@@ -20,4 +20,10 @@ public interface FileTraveler {
      */
     void deleteDocument(CodeIndexDocument doc);
 
+    /**
+     * 清空仓库所有文件，以待重建
+     * @param repoId
+     */
+    void resetRepository(long repoId);
+
 }

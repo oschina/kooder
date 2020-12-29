@@ -15,6 +15,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
@@ -129,16 +130,18 @@ public class GitRepositoryProvider implements RepositoryProvider {
             }
 
             boolean needRebuildIndexes = false;
+            ObjectId oldId = null;
             //Check last commit ref
-            ObjectId oldId  = ObjectId.fromString(repo.getLastCommitId());
             try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+                oldId  = ObjectId.fromString(repo.getLastCommitId());
                 RevCommit commit = revWalk.parseCommit(oldId);
-            } catch (InvalidObjectIdException e) {
+            } catch (InvalidObjectIdException | MissingObjectException e) {
                 needRebuildIndexes = true;
             }
 
             if(needRebuildIndexes) { //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
                 log.warn("Failed to read last comment '{}', rebuilding '{}:{}' indexes", repo.getLastCommitId(), repo.getId(), repo.getName());
+                traveler.resetRepository(repo.getId());
                 this.indexAllFiles(repo, git, traveler);
                 return ;
             }
@@ -318,7 +321,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
         repo.setName("j2cache");
         repo.setUrl("https://gitee.com/ld/J2Cache");
         repo.setPath("D:\\j2cache");
-        repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");
+        repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");//2
 
         grp.pull(repo, new FileTraveler() {
             @Override
@@ -329,6 +332,11 @@ public class GitRepositoryProvider implements RepositoryProvider {
             @Override
             public void deleteDocument(CodeIndexDocument doc) {
                 System.out.println("DELETE:" + doc);
+            }
+
+            @Override
+            public void resetRepository(long repoId) {
+                System.out.println("RESET:" + repoId);
             }
         });
     }
