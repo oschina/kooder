@@ -28,7 +28,7 @@ import java.util.List;
  */
 public abstract class GatewayBase implements Daemon {
 
-    final static Logger log = LoggerFactory.getLogger("GSearch");
+    final static Logger log = LoggerFactory.getLogger("[gateway]");
 
     public final static String VERSION = "GSearch/1.0";
 
