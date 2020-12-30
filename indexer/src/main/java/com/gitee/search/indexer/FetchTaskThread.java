@@ -4,11 +4,15 @@ import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
+import com.gitee.search.storage.StorageFactory;
 import com.gitee.search.utils.BatchTaskRunner;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
+import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,18 +48,25 @@ public class FetchTaskThread extends Thread {
                 String type = types.get(0);
                 List<QueueTask> tasks = provider.queue(type).pop(batch_fetch_count);
                 if(tasks != null && tasks.size() > 0) {
-                    BatchTaskRunner.execute(tasks, tasks_per_thread, list -> {
-                        list.forEach(task -> {
-                            try {
-                                //System.out.printf("%s --> %s\n", Thread.currentThread().getName(), task.getType());
-                                task.write();
-                            } catch (Exception e) {
-                                log.error("Failed writing task to index repository", e);
-                            }
+                    try (
+                        IndexWriter writer = StorageFactory.getIndexWriter(type);
+                        TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type))
+                    {
+                        BatchTaskRunner.execute(tasks, tasks_per_thread, list -> {
+                            list.forEach(task -> {
+                                try {
+                                    //System.out.printf("%s --> %s\n", Thread.currentThread().getName(), task.getType());
+                                    task.write(writer, taxonomyWriter);
+                                } catch (Exception e) {
+                                    log.error("Failed writing task to index repository", e);
+                                }
+                            });
                         });
-                    });
-                    log.info("{} tasks<{}> finished in {} ms", tasks.size(), type, System.currentTimeMillis() - startTime);
-                    taskCount.addAndGet(tasks.size());
+                        log.info("{} tasks<{}> finished in {} ms", tasks.size(), type, System.currentTimeMillis() - startTime);
+                        taskCount.addAndGet(tasks.size());
+                    } catch ( IOException e ) {
+                        log.error("Failed to write tasks<"+type+"> to indexes.", e);
+                    }
                 }
             });
 

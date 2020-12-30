@@ -2,6 +2,7 @@ package com.gitee.search.indexer;
 
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
+import com.gitee.search.utils.BatchTaskRunner;
 import org.apache.commons.cli.*;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -13,12 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 直接导入指定目录下的 json 数据
@@ -85,22 +83,18 @@ public class PathImporter {
     private static int importJsonInPath(String type, String action, Path path, int thread_count) throws IOException {
         final AtomicInteger fc = new AtomicInteger(0);
         thread_count = Math.min(MAX_THREAD_COUNT, Math.max(thread_count, 1));
-        ExecutorService executorService = Executors.newFixedThreadPool(thread_count);
         try (
             IndexWriter writer = StorageFactory.getIndexWriter(type);
             TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
         ) {
-            Stream<Path> files = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p));
-            files.forEach(jsonFile -> {
-                executorService.submit(() -> {
+            List<Path> allFiles = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p)).collect(Collectors.toList());
+            int threshold = Math.max(allFiles.size()/thread_count, 1);
+            BatchTaskRunner.execute(allFiles, threshold, files -> {
+                files.forEach( jsonFile -> {
                     importJsonFile(type, action, jsonFile, writer, taxonomyWriter);
                     fc.addAndGet(1);
                 });
             });
-            try {
-                executorService.shutdown();
-                while(!executorService.awaitTermination(2, TimeUnit.SECONDS));
-            } catch(InterruptedException e) {}
         }
         return fc.get();
     }
