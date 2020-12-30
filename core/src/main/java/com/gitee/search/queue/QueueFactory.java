@@ -14,7 +14,7 @@ public class QueueFactory {
 
     static {
         Properties props = GiteeSearchConfig.getQueueProperties();
-        String type = props.getProperty("type").trim();
+        String type = props.getProperty("provider").trim();
         if("redis".equalsIgnoreCase(type))
             provider = new RedisQueueProvider(props);
         else if("embed".equalsIgnoreCase(type))

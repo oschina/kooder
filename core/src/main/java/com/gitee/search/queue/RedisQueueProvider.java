@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,7 +24,7 @@ public class RedisQueueProvider implements QueueProvider {
     private String host;
     private int port;
     private int database;
-    private String key;
+    private String baseKey;
     private String username;
     private String password;
 
@@ -37,7 +38,7 @@ public class RedisQueueProvider implements QueueProvider {
         this.host = props.getProperty("redis.host", "127.0.0.1");
         this.port = NumberUtils.toInt(props.getProperty("redis.port"), 6379);
         this.database = NumberUtils.toInt(props.getProperty("redis.database"), 1);
-        this.key = props.getProperty("redis.key", "gitee-search-queue");
+        this.baseKey = props.getProperty("redis.key", "gsearch-queue");
         this.username = props.getProperty("username");
         this.password = props.getProperty("password");
 
@@ -67,30 +68,46 @@ public class RedisQueueProvider implements QueueProvider {
     }
 
     @Override
-    public void push(List<QueueTask> tasks) {
-        try (StatefulRedisConnection<String, String> connection = client.connect()) {
-            RedisCommands<String, String> cmd = connection.sync();
-            cmd.rpush(this.key, tasks.stream().map(t -> t.json()).toArray(String[]::new));
-        }
-    }
+    public Queue queue(String type) {
+        return new Queue() {
 
-    @Override
-    public List<QueueTask> pop(int fetchCount) {
-        try (StatefulRedisConnection<String, String> connection = client.connect()) {
-            RedisCommands<String, String> cmd = connection.sync();
-            List<QueueTask> tasks = new ArrayList<>();
-            do{
-                String json = cmd.lpop(this.key);
-                if(json == null)
-                    break;
-                QueueTask task = QueueTask.parse(json);
-                if(task != null)
-                    tasks.add(task);
-                else
-                    log.error("Parse queue task failed.\n{}", json);
-            }while(tasks.size() < fetchCount);
-            return tasks;
-        }
+            private String key = type + '@' + baseKey;
+
+            @Override
+            public String type() {
+                return type;
+            }
+
+            @Override
+            public void push(Collection<QueueTask> tasks) {
+                try (StatefulRedisConnection<String, String> connection = client.connect()) {
+                    RedisCommands<String, String> cmd = connection.sync();
+                    cmd.rpush(key, tasks.stream().map(t -> t.json()).toArray(String[]::new));
+                }
+            }
+
+            @Override
+            public List<QueueTask> pop(int count) {
+                try (StatefulRedisConnection<String, String> connection = client.connect()) {
+                    RedisCommands<String, String> cmd = connection.sync();
+                    List<QueueTask> tasks = new ArrayList<>();
+                    do{
+                        String json = cmd.lpop(key);
+                        if(json == null)
+                            break;
+                        QueueTask task = QueueTask.parse(json);
+                        if(task != null)
+                            tasks.add(task);
+                        else
+                            log.error("Parse queue task failed.\n{}", json);
+                    }while(tasks.size() < count);
+                    return tasks;
+                }
+            }
+
+            @Override
+            public void close() {}
+        };
     }
 
     @Override

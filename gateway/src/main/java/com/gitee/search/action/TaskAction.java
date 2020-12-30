@@ -49,7 +49,7 @@ public class TaskAction implements Action {
         task.setType(getType(context));
         task.setBody(context.getBodyAsString());
         if(task.check())
-            QueueFactory.getProvider().push(Arrays.asList(task));
+            QueueFactory.getProvider().queue(task.getType()).push(Arrays.asList(task));
         else
             error(context.response(), HttpResponseStatus.NOT_ACCEPTABLE.code());
     }

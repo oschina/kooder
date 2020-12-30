@@ -3,9 +3,8 @@
     {
       "id": 345347,
       "name": "J2Cache",
+      "scm": "git",
       "url": "https://gitee.com/ld/J2Cache",
-      "branch": "master",
-      "path": "d:\\projects\\j2cache",
       "username": "",
       "password": ""
     }
