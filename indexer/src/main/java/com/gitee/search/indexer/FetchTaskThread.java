@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
  * 用于从队列中获取待办任务的线程
  * @author Winter Lau<javayou@gmail.com>
@@ -52,8 +51,11 @@ public class FetchTaskThread extends Thread {
                         IndexWriter writer = StorageFactory.getIndexWriter(type);
                         TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type))
                     {
-                        BatchTaskRunner.execute(tasks, tasks_per_thread, list -> {
+                        //如果 tasks_per_thread < 0 ，则单线程处理
+                        int threshold = (tasks_per_thread>0)?tasks_per_thread:tasks.size();
+                        BatchTaskRunner.execute(tasks, threshold, list -> {
                             list.forEach(task -> {
+                                //TODO 代码类型的任务需要单独处理，而且需要区分对待公开和私有仓库
                                 try {
                                     //System.out.printf("%s --> %s\n", Thread.currentThread().getName(), task.getType());
                                     task.write(writer, taxonomyWriter);

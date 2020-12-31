@@ -2,14 +2,20 @@ package com.gitee.search.code;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.core.Constants;
+import com.searchcode.app.config.Values;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.lucene.document.*;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
+import spark.utils.StringUtils;
 
 /**
  * 代码文档对象
- * TODO 文档的唯一标识是什么？
  * @author Winter Lau<javayou@gmail.com>
  */
 public class CodeIndexDocument {
+
+    public final static String UUID = "uuid";
 
     private String uuid;                //file unique identify
     private long   repoId;              //repository id, use this field to delete all files of repository
@@ -29,6 +35,7 @@ public class CodeIndexDocument {
     private int complexity;             // Complexity calculation taken from scc
 
     private String revision;            //last commit id
+    private String scm;                 //scm
 
     public CodeIndexDocument() {}
 
@@ -38,6 +45,56 @@ public class CodeIndexDocument {
         this.fileLocation = fileLocation;
         this.generateUuid();
     }
+
+    /**
+     * Builds a document ready to be indexed by lucene
+     */
+    public Document buildDocument() {
+        Document document = new Document();
+
+        // Uuid is the primary key for documents
+        document.add(new StringField(UUID, uuid, Field.Store.YES));
+
+        //文档维度
+        if (StringUtils.isNotBlank(language))
+            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_LANGUAGE,     this.getLanguage()));
+        if (StringUtils.isNotBlank(repoName))
+            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_REPO_NAME,    this.getRepoName()));
+        if (StringUtils.isNotBlank(codeOwner))
+            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_CODE_OWNER,   this.getCodeOwner()));
+        if(StringUtils.isNotBlank(scm))
+            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_SCM,          this.getScm()));
+
+        //仓库信息
+        document.add(new StoredField(Constants.FIELD_REPO_ID,       this.getRepoId()));
+        document.add(new StringField(Constants.FIELD_REPO_NAME,     this.getRepoName(),         Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_REPO_URL,      this.getRepoURL(),          Field.Store.YES));
+
+        //文件信息
+        document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getFileName(),         Field.Store.YES));
+        document.add(new TextField(Constants.FIELD_FILE_LOCATION,   this.getFileLocation(),     Field.Store.YES));
+        document.add(new TextField(Constants.FIELD_CONTENTS,        this.getContents(),         Field.Store.NO));
+
+        //文件属性
+        document.add(new StringField(Constants.FIELD_CODE_OWNER,    this.getCodeOwner(),        Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_LANGUAGE,      this.getLanguage(),         Field.Store.YES));
+        document.add(new StoredField(Constants.FIELD_FILE_HASH,     this.getSha1Hash()));
+
+        //文件统计信息
+        document.add(new StoredField(Values.LINES,                  this.getLines()));
+        document.add(new StoredField(Values.CODELINES,              this.getCodeLines()));
+        document.add(new StoredField(Values.BLANKLINES,             this.getBlankLines()));
+        document.add(new StoredField(Values.COMMENTLINES,           this.getCommentLines()));
+        document.add(new StoredField(Values.COMPLEXITY,             this.getComplexity()));
+
+        document.add(new StringField(Constants.FIELD_REVISION,      this.getRevision(),         Field.Store.YES));
+
+        // Extra metadata in this case when it was last indexed
+        document.add(new StoredField(Constants.FIELD_LAST_INDEX, System.currentTimeMillis()));
+
+        return document;
+    }
+
 
     public String generateUuid() {
         this.uuid = DigestUtils.sha1Hex(String.format("%d-%s-%s", getRepoId(), getRepoName().toLowerCase(), getFileLocation()));
@@ -185,6 +242,14 @@ public class CodeIndexDocument {
     public CodeIndexDocument setRevision(String revision) {
         this.revision = revision;
         return this;
+    }
+
+    public String getScm() {
+        return scm;
+    }
+
+    public void setScm(String scm) {
+        this.scm = scm;
     }
 
     @Override

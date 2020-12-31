@@ -243,6 +243,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             doc.setComplexity(slocCount.complexity);
             doc.setSha1Hash(DigestUtils.sha1Hex(contents));
             doc.setRevision(objectId.name());
+            doc.setScm(repo.getScm());
 
             //calculate document uuid
             doc.generateUuid();

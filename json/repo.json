@@ -4,30 +4,39 @@
   "pageSize": 20,
   "objects": [
     {
-      "id": 12793, //仓库编号
-      "name": "J2Cache",  //仓库名称
-      "description": "J2Cache 是一个两级缓存框架", //仓库简述
-      "enterprise": 122,  //所属企业编号，如果不属于企业则该字段值为 0
-      "type": 1,  //仓库类型：  1 私有仓库；2 公开仓库； 3 内源仓库
-      "recomm": 1,  //推荐级别： 0 不推荐  1 推荐  2 GVP
-      "owner": {  //仓库命名空间信息
-        "id": 3133,
-        "path": "ld",
-        "name": "红薯"
+      "id": 2,
+      "name": "Gitee",
+      "path": "gitee",
+      "description": "Gitee.com 码云 —— 基于 Git 的代码托管平台",
+      "enterprise": 1,
+      "type": 0,
+      "recomm": 0,
+      "block": 0,
+      "namespace": {
+        "id": 1,
+        "name": "开源中国",
+        "path": "oschina"
       },
-      "detail": "", //仓库的详细说明 readme.md
-      "fork": 0,  //是否 fork 仓库  1 是 fork 仓库， 0 不是 fork 仓库
-      "lang": "Java", //编程语言
-      "license": "Apache",  //许可证
-      "tags": "缓存,Redis", //标签
-      "catalogs": "缓存组件", //分类
-      "created_at": 234345343434, //创建时间
-      "updated_at": 234345389434, //最近更新时间
+      "owner": {
+        "id": 1,
+        "path": "oschina-org",
+        "name": "Gitee"
+      },
+      "detail": "",
+      "fork": 0,
+      "lang": "Ruby",
+      "license": "MIT",
+      "tags": "",
+      "catalogs": [ ],
+      "created_at": 1363839782,
+      "updated_at": 1608203420,
+      "last_activity_at": 1608203420,
+      "last_push_at": 1608203420,
       "count": {
-        "star": 4500,
-        "fork": 1200,
-        "watch": 343,
-        "gindex": 76
+        "star": 1,
+        "fork": 0,
+        "watch": 61,
+        "gindex": 0
       }
     }
   ]
