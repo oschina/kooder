@@ -62,7 +62,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 .setCloneAllBranches(true);
 
         if (repo.useCredentials())
-            cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
+            cloneCommand.setCredentialsProvider(repo.getCredential());
 
         try (Git git = cloneCommand.call()){//克隆完遍历所有文件进行索引
             //try (Git git = Git.open(new File(repo.getPath()))){//克隆完遍历所有文件进行索引
@@ -109,6 +109,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
     public void pull(CodeRepository repo, FileTraveler traveler) {
         Git git = null;
         try {
+            boolean isNewRepository = false;
             File repoFile = new File(repo.getPath());
             if(!repoFile.exists()) {//检查目录不存在就 clone
                 log.info("Repository '{}:{}' no exists, re-clone from '{}'", repo.getId(), repo.getName(), repo.getUrl());
@@ -118,30 +119,36 @@ public class GitRepositoryProvider implements RepositoryProvider {
                         .setCloneAllBranches(true);
 
                 if (repo.useCredentials())
-                    cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
+                    cloneCommand.setCredentialsProvider(repo.getCredential());
                 git = cloneCommand.call();
+                isNewRepository = true;
             }
             else {//目录存在就 pull
                 git = Git.open(repoFile);
                 PullCommand pullCmd = git.pull();
                 if (repo.useCredentials())
-                    pullCmd.setCredentialsProvider(new UsernamePasswordCredentialsProvider(repo.getUsername(), repo.getPassword()));
+                    pullCmd.setCredentialsProvider(repo.getCredential());
                 pullCmd.call();
             }
 
             boolean needRebuildIndexes = false;
             ObjectId oldId = null;
-            //Check last commit ref
-            try (RevWalk revWalk = new RevWalk(git.getRepository())) {
-                oldId  = ObjectId.fromString(repo.getLastCommitId());
-                RevCommit commit = revWalk.parseCommit(oldId);
-            } catch (InvalidObjectIdException | MissingObjectException e) {
-                needRebuildIndexes = true;
+            if(!isNewRepository) { //新仓库
+                //Check last commit ref
+                try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+                    oldId = ObjectId.fromString(repo.getLastCommitId());
+                    RevCommit commit = revWalk.parseCommit(oldId);
+                } catch (InvalidObjectIdException | MissingObjectException e) {
+                    needRebuildIndexes = true;
+                }
             }
 
-            if(needRebuildIndexes) { //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
-                log.warn("Failed to read last comment '{}', rebuilding '{}:{}' indexes", repo.getLastCommitId(), repo.getId(), repo.getName());
-                traveler.resetRepository(repo.getId());
+            if(needRebuildIndexes) {
+                if(!isNewRepository) {
+                    log.warn("Failed to read last comment '{}', rebuilding '{}:{}' indexes", repo.getLastCommitId(), repo.getId(), repo.getName());
+                    traveler.resetRepository(repo.getId());
+                }
+                //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
                 this.indexAllFiles(repo, git, traveler);
                 return ;
             }
@@ -152,7 +159,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             if (!oldId.toString().equals(newId.toString())) {
                 List<DiffEntry> entries = diffFiles(git, oldId.name(), newId.name());
                 for (DiffEntry entry : entries) {
-                    if ("DELETE".equals(entry.getChangeType().name())) {
+                    if (entry.getChangeType() == DiffEntry.ChangeType.DELETE) {
                         CodeIndexDocument doc = new CodeIndexDocument(repo.getId(), repo.getName(), entry.getOldPath());
                         traveler.deleteDocument(doc);
                     } else {

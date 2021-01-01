@@ -1,5 +1,7 @@
 package com.gitee.search.indexer;
 
+import com.gitee.search.code.CodeRepository;
+import com.gitee.search.code.RepositoryFactory;
 import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueProvider;
@@ -53,17 +55,7 @@ public class FetchTaskThread extends Thread {
                     {
                         //如果 tasks_per_thread < 0 ，则单线程处理
                         int threshold = (tasks_per_thread>0)?tasks_per_thread:tasks.size();
-                        BatchTaskRunner.execute(tasks, threshold, list -> {
-                            list.forEach(task -> {
-                                //TODO 代码类型的任务需要单独处理，而且需要区分对待公开和私有仓库
-                                try {
-                                    //System.out.printf("%s --> %s\n", Thread.currentThread().getName(), task.getType());
-                                    task.write(writer, taxonomyWriter);
-                                } catch (Exception e) {
-                                    log.error("Failed writing task to index repository", e);
-                                }
-                            });
-                        });
+                        BatchTaskRunner.execute(tasks, threshold, list -> handleTasks(list, writer, taxonomyWriter));
                         log.info("{} tasks<{}> finished in {} ms", tasks.size(), type, System.currentTimeMillis() - startTime);
                         taskCount.addAndGet(tasks.size());
                     } catch ( IOException e ) {
@@ -80,6 +72,38 @@ public class FetchTaskThread extends Thread {
                 }
             }
         }
+    }
+
+    /**
+     * 批量处理统一类型的任务
+     * @param tasks
+     * @param writer
+     * @param taxonomyWriter
+     */
+    private void handleTasks(List<QueueTask> tasks, IndexWriter writer, TaxonomyWriter taxonomyWriter) {
+        tasks.forEach( task -> {
+            try {
+                //代码类型的任务需要单独处理，而且需要区分对待公开和私有仓库
+                if(!task.isCodeTask())
+                    handleCodeTask(task, writer, taxonomyWriter);
+                else
+                    task.write(writer, taxonomyWriter);
+            } catch (Exception e) {
+                log.error("Failed writing task to index repository", e);
+            }
+        });
+    }
+
+    /**
+     * TODO 处理代码索引任务
+     * @param task
+     * @param writer
+     * @param taxonomyWriter
+     */
+    private void handleCodeTask(QueueTask task, IndexWriter writer, TaxonomyWriter taxonomyWriter) {
+        List<CodeRepository> repos = RepositoryFactory.getRepositoryFromTask(task);
+        //1. 在数据库中检查每一个 CodeRepository 是否已存在
+        //2. 依次对每个 CodeRepository 进行索引
     }
 
 }

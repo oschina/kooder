@@ -1,7 +1,8 @@
 package com.gitee.search.code;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 /**
  * 代码源的定义
@@ -74,6 +75,11 @@ public class CodeRepository {
     public boolean useCredentials() {
         return StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password);
     }
+
+    public CredentialsProvider getCredential() {
+        return new UsernamePasswordCredentialsProvider(getUsername(), getPassword());
+    }
+
 
     public String getPath() {
         return path;

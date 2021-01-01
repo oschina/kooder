@@ -67,6 +67,10 @@ public class QueueTask {
         return ACTION_ADD.equalsIgnoreCase(p_action) || ACTION_DELETE.equalsIgnoreCase(p_action) || ACTION_UPDATE.equalsIgnoreCase(p_action);
     }
 
+    public boolean isCodeTask() {
+        return TYPE_CODE.equals(type);
+    }
+
     public String getAction() {
         return action;
     }

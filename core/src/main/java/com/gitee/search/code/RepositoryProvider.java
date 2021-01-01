@@ -8,14 +8,6 @@ import java.io.IOException;
  */
 public interface RepositoryProvider {
 
-    RepositoryProvider GIT = new GitRepositoryProvider();
-    RepositoryProvider GITHUB = new GitRepositoryProvider();
-    RepositoryProvider GITLAB = new GitRepositoryProvider();
-    RepositoryProvider GITEE = new GitRepositoryProvider();
-    RepositoryProvider GOGS = new GitRepositoryProvider();
-    RepositoryProvider GITEA = new GitRepositoryProvider();
-    RepositoryProvider SVN = new GitRepositoryProvider();
-
     String name();
 
     /**
