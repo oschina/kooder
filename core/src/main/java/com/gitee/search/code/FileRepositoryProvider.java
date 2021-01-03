@@ -14,18 +14,6 @@ public class FileRepositoryProvider implements RepositoryProvider {
     }
 
     /**
-     * 将仓库克隆到指定目录
-     *
-     * @param repo
-     * @param traveler
-     * @return
-     */
-    @Override
-    public void clone(CodeRepository repo, FileTraveler traveler) {
-
-    }
-
-    /**
      * 更新仓库
      *
      * @param repo

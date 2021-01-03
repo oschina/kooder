@@ -20,12 +20,12 @@ import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spark.utils.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,58 +46,6 @@ public class GitRepositoryProvider implements RepositoryProvider {
     @Override
     public String name() {
         return "git";
-    }
-
-    /**
-     * 将仓库克隆到指定目录
-     * @param repo
-     * @return
-     */
-    @Override
-    public void clone(CodeRepository repo, FileTraveler traveler) {
-        CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(repo.getUrl())
-                .setDirectory(new File(repo.getPath()))
-                //.setProgressMonitor(new TextProgressMonitor())
-                .setCloneAllBranches(true);
-
-        if (repo.useCredentials())
-            cloneCommand.setCredentialsProvider(repo.getCredential());
-
-        try (Git git = cloneCommand.call()){//克隆完遍历所有文件进行索引
-            //try (Git git = Git.open(new File(repo.getPath()))){//克隆完遍历所有文件进行索引
-            this.indexAllFiles(repo, git, traveler);
-        } catch (IOException | GitAPIException e) {
-            log.error("Failed to clone & index '" + repo.getUrl() + "'", e);
-        }
-    }
-
-    /**
-     * 重建代码仓索引
-     * @param repo
-     * @param git
-     * @param traveler
-     * @throws IOException
-     * @throws GitAPIException
-     */
-    private void indexAllFiles(CodeRepository repo, Git git, FileTraveler traveler) throws IOException, GitAPIException {
-        Ref head = git.getRepository().findRef(Constants.HEAD);
-        repo.setLastCommitId(head.getObjectId().name());//回调最新 commit id 信息
-        RevCommit commit = git.getRepository().parseCommit(head.getObjectId());
-        try (TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
-            treeWalk.addTree(commit.getTree());
-            treeWalk.setRecursive(true);
-            while(treeWalk.next()) {
-                String path = treeWalk.getPathString();
-                boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-                if(!isBinaryFile) { //二进制文件不参与索引
-                    CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
-                    if (doc != null) {
-                        traveler.updateDocument(doc);
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -133,7 +81,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
 
             boolean needRebuildIndexes = false;
             ObjectId oldId = null;
-            if(!isNewRepository) { //新仓库
+            if(StringUtils.isNotBlank(repo.getLastCommitId())) {
                 //Check last commit ref
                 try (RevWalk revWalk = new RevWalk(git.getRepository())) {
                     oldId = ObjectId.fromString(repo.getLastCommitId());
@@ -144,10 +92,8 @@ public class GitRepositoryProvider implements RepositoryProvider {
             }
 
             if(needRebuildIndexes) {
-                if(!isNewRepository) {
-                    log.warn("Failed to read last comment '{}', rebuilding '{}:{}' indexes", repo.getLastCommitId(), repo.getId(), repo.getName());
-                    traveler.resetRepository(repo.getId());
-                }
+                log.warn("Rebuilding '{}:{}' indexes", repo.getId(), repo.getName());
+                traveler.resetRepository(repo.getId());
                 //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
                 this.indexAllFiles(repo, git, traveler);
                 return ;
@@ -179,6 +125,34 @@ public class GitRepositoryProvider implements RepositoryProvider {
         } finally {
             if(git != null)
                 git.close();
+        }
+    }
+
+    /**
+     * 重建代码仓索引
+     * @param repo
+     * @param git
+     * @param traveler
+     * @throws IOException
+     * @throws GitAPIException
+     */
+    private void indexAllFiles(CodeRepository repo, Git git, FileTraveler traveler) throws IOException, GitAPIException {
+        Ref head = git.getRepository().findRef(Constants.HEAD);
+        repo.setLastCommitId(head.getObjectId().name());//回调最新 commit id 信息
+        RevCommit commit = git.getRepository().parseCommit(head.getObjectId());
+        try (TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
+            treeWalk.addTree(commit.getTree());
+            treeWalk.setRecursive(true);
+            while(treeWalk.next()) {
+                String path = treeWalk.getPathString();
+                boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
+                if(!isBinaryFile) { //二进制文件不参与索引
+                    CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
+                    if (doc != null) {
+                        traveler.updateDocument(doc);
+                    }
+                }
+            }
         }
     }
 

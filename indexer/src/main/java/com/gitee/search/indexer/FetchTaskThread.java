@@ -1,6 +1,7 @@
 package com.gitee.search.indexer;
 
 import com.gitee.search.code.CodeRepository;
+import com.gitee.search.code.FileTraveler;
 import com.gitee.search.code.RepositoryFactory;
 import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.queue.QueueFactory;
@@ -96,6 +97,7 @@ public class FetchTaskThread extends Thread {
 
     /**
      * TODO 处理代码索引任务
+     * 由于代码的索引任务繁重，因此从 QueueTask 中将逻辑剥离开来
      * @param task
      * @param writer
      * @param taxonomyWriter
@@ -104,6 +106,9 @@ public class FetchTaskThread extends Thread {
         List<CodeRepository> repos = RepositoryFactory.getRepositoryFromTask(task);
         //1. 在数据库中检查每一个 CodeRepository 是否已存在
         //2. 依次对每个 CodeRepository 进行索引
+        FileTraveler fileTraveler = new CodeFileTraveler(writer, taxonomyWriter);
+        for(CodeRepository repo : repos) {
+            RepositoryFactory.getProvider(repo.getScm()).pull(repo, fileTraveler);
+        }
     }
-
 }

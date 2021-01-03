@@ -11,14 +11,6 @@ public interface RepositoryProvider {
     String name();
 
     /**
-     * 将仓库克隆到指定目录
-     * @param repo
-     * @param traveler
-     * @return
-     */
-    void clone(CodeRepository repo, FileTraveler traveler);
-
-    /**
      * 更新仓库
      * @param repo
      * @param traveler

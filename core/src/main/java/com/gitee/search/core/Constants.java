@@ -22,7 +22,7 @@ public interface Constants {
 
     byte ISSUE_PUBLIC = 1;
 
-
+    String FIELD_UUID           = "uuid";
     String FIELD_LANGUAGE       = "lang";
     String FIELD_REPO_ID        = "repo.id";
     String FIELD_REPO_NAME      = "repo.name";

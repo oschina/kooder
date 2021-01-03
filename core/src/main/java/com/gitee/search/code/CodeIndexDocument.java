@@ -15,8 +15,6 @@ import spark.utils.StringUtils;
  */
 public class CodeIndexDocument {
 
-    public final static String UUID = "uuid";
-
     private String uuid;                //file unique identify
     private long   repoId;              //repository id, use this field to delete all files of repository
     private String repoName;
@@ -53,7 +51,7 @@ public class CodeIndexDocument {
         Document document = new Document();
 
         // Uuid is the primary key for documents
-        document.add(new StringField(UUID, uuid, Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_UUID, uuid, Field.Store.YES));
 
         //文档维度
         if (StringUtils.isNotBlank(language))
@@ -66,6 +64,7 @@ public class CodeIndexDocument {
             document.add(new SortedSetDocValuesFacetField(Constants.FIELD_SCM,          this.getScm()));
 
         //仓库信息
+        document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID,       this.getRepoId()));
         document.add(new StoredField(Constants.FIELD_REPO_ID,       this.getRepoId()));
         document.add(new StringField(Constants.FIELD_REPO_NAME,     this.getRepoName(),         Field.Store.YES));
         document.add(new StringField(Constants.FIELD_REPO_URL,      this.getRepoURL(),          Field.Store.YES));
