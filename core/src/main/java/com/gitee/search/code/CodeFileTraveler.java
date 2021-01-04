@@ -1,7 +1,5 @@
-package com.gitee.search.indexer;
+package com.gitee.search.code;
 
-import com.gitee.search.code.CodeIndexDocument;
-import com.gitee.search.code.FileTraveler;
 import com.gitee.search.core.Constants;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
@@ -38,6 +36,7 @@ public class CodeFileTraveler implements FileTraveler {
      */
     @Override
     public void updateDocument(CodeIndexDocument codeid) {
+        log.info("updateDocument:" + codeid);
         try {
             Document doc = buildFacetDocument(codeid.buildDocument());
             writer.updateDocument(new Term(Constants.FIELD_UUID,codeid.getUuid()), doc);
@@ -54,6 +53,7 @@ public class CodeFileTraveler implements FileTraveler {
      */
     @Override
     public void deleteDocument(CodeIndexDocument codeid) {
+        log.info("deleteDocument:" + codeid);
         try {
             writer.deleteDocuments(new Term(Constants.FIELD_UUID, codeid.getUuid()));
         } catch (IOException e) {
@@ -68,6 +68,7 @@ public class CodeFileTraveler implements FileTraveler {
      */
     @Override
     public void resetRepository(long repoId) {
+        log.info("resetRepository:" + repoId);
         try {
             writer.deleteDocuments(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_REPO_ID, repoId));
         } catch (IOException e) {

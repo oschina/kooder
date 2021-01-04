@@ -3,7 +3,6 @@ package com.gitee.search.code;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
-import com.searchcode.app.config.Values;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
@@ -72,7 +71,7 @@ public class CodeIndexDocument {
         //文件信息
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getFileName(),         Field.Store.YES));
         document.add(new TextField(Constants.FIELD_FILE_LOCATION,   this.getFileLocation(),     Field.Store.YES));
-        document.add(new TextField(Constants.FIELD_CONTENTS,        this.getContents(),         Field.Store.NO));
+        document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),         Field.Store.NO));
 
         //文件属性
         document.add(new StringField(Constants.FIELD_CODE_OWNER,    this.getCodeOwner(),        Field.Store.YES));
@@ -80,16 +79,16 @@ public class CodeIndexDocument {
         document.add(new StoredField(Constants.FIELD_FILE_HASH,     this.getSha1Hash()));
 
         //文件统计信息
-        document.add(new StoredField(Values.LINES,                  this.getLines()));
-        document.add(new StoredField(Values.CODELINES,              this.getCodeLines()));
-        document.add(new StoredField(Values.BLANKLINES,             this.getBlankLines()));
-        document.add(new StoredField(Values.COMMENTLINES,           this.getCommentLines()));
-        document.add(new StoredField(Values.COMPLEXITY,             this.getComplexity()));
+        document.add(new StoredField(Constants.FIELD_LINES_TOTAL,   this.getLines()));
+        document.add(new StoredField(Constants.FIELD_LINES_CODE,    this.getCodeLines()));
+        document.add(new StoredField(Constants.FIELD_LINES_BLANK,   this.getBlankLines()));
+        document.add(new StoredField(Constants.FIELD_LINES_COMMENT, this.getCommentLines()));
+        document.add(new StoredField(Constants.FIELD_COMPLEXITY,    this.getComplexity()));
 
         document.add(new StringField(Constants.FIELD_REVISION,      this.getRevision(),         Field.Store.YES));
 
         // Extra metadata in this case when it was last indexed
-        document.add(new StoredField(Constants.FIELD_LAST_INDEX, System.currentTimeMillis()));
+        document.add(new StoredField(Constants.FIELD_LAST_INDEX,    System.currentTimeMillis()));
 
         return document;
     }

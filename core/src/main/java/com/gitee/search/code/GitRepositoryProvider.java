@@ -1,11 +1,14 @@
 package com.gitee.search.code;
 
+import com.gitee.search.storage.StorageFactory;
 import com.gitee.search.utils.FileClassifier;
 import com.gitee.search.utils.SlocCounter;
 import com.gitee.search.utils.TextFileUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
+import org.apache.lucene.index.IndexWriter;
 import org.eclipse.jgit.annotations.NonNull;
 import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.CloneCommand;
@@ -79,15 +82,15 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 pullCmd.call();
             }
 
-            boolean needRebuildIndexes = false;
+            boolean needRebuildIndexes = true;
             ObjectId oldId = null;
             if(StringUtils.isNotBlank(repo.getLastCommitId())) {
                 //Check last commit ref
                 try (RevWalk revWalk = new RevWalk(git.getRepository())) {
                     oldId = ObjectId.fromString(repo.getLastCommitId());
                     RevCommit commit = revWalk.parseCommit(oldId);
+                    needRebuildIndexes = false;
                 } catch (InvalidObjectIdException | MissingObjectException e) {
-                    needRebuildIndexes = true;
                 }
             }
 
@@ -296,30 +299,21 @@ public class GitRepositoryProvider implements RepositoryProvider {
         return owner;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         GitRepositoryProvider grp = new GitRepositoryProvider();
 
         CodeRepository repo = new CodeRepository();
         repo.setName("j2cache");
         repo.setUrl("https://gitee.com/ld/J2Cache");
         repo.setPath("D:\\j2cache");
-        repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");//2
+        //repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");//2
 
-        grp.pull(repo, new FileTraveler() {
-            @Override
-            public void updateDocument(CodeIndexDocument doc) {
-                System.out.println("UPDATED:" + doc);
-            }
-
-            @Override
-            public void deleteDocument(CodeIndexDocument doc) {
-                System.out.println("DELETE:" + doc);
-            }
-
-            @Override
-            public void resetRepository(long repoId) {
-                System.out.println("RESET:" + repoId);
-            }
-        });
+        try(
+            IndexWriter writer = StorageFactory.getIndexWriter("code");
+            TaxonomyWriter twriter = StorageFactory.getTaxonomyWriter("code")
+            ) {
+            CodeFileTraveler traveler = new CodeFileTraveler(writer, twriter);
+            grp.pull(repo, traveler);
+        }
     }
 }

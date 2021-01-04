@@ -6,22 +6,23 @@ package com.gitee.search.core;
  */
 public interface Constants {
 
-    byte RECOMM_NONE    = 0x00; //未被推荐项目（推荐级别定义必须递增）
-    byte RECOMM         = 0x01; //推荐项目
-    byte RECOMM_GVP     = 0x02; //GVP推荐项目
+    byte RECOMM_NONE            = 0x00; //未被推荐项目（推荐级别定义必须递增）
+    byte RECOMM                 = 0x01; //推荐项目
+    byte RECOMM_GVP             = 0x02; //GVP推荐项目
 
-    byte REPO_TYPE_PRIVATE  = 0x00; //私有仓库
-    byte REPO_TYPE_PUBLIC   = 0x01; //公开仓库
-    byte REPO_TYPE_INNER    = 0x02; //企业内源仓库
+    byte REPO_TYPE_PRIVATE      = 0x00; //私有仓库
+    byte REPO_TYPE_PUBLIC       = 0x01; //公开仓库
+    byte REPO_TYPE_INNER        = 0x02; //企业内源仓库
 
-    byte REPO_BLOCK_YES = 0x01;
-    byte REPO_BLOCK_NO = 0x00;
+    byte REPO_BLOCK_YES         = 0x01;
+    byte REPO_BLOCK_NO          = 0x00;
 
-    byte REPO_FORK_NO = 0x00;
-    byte REPO_FORK_YES = 0x01;
+    byte REPO_FORK_NO           = 0x00;
+    byte REPO_FORK_YES          = 0x01;
 
-    byte ISSUE_PUBLIC = 1;
+    byte ISSUE_PUBLIC           = 1;
 
+    /* 代码相关的字段定义 */
     String FIELD_UUID           = "uuid";
     String FIELD_LANGUAGE       = "lang";
     String FIELD_REPO_ID        = "repo.id";
@@ -32,10 +33,15 @@ public interface Constants {
 
     String FIELD_CODE_OWNER     = "owner";
     String FIELD_FILE_HASH      = "file.hash";
-    String FIELD_CONTENTS       = "source";
+    String FIELD_SOURCE         = "source";
 
     String FIELD_LAST_INDEX     = "modified";
     String FIELD_REVISION       = "revision";
     String FIELD_SCM            = "scm";
 
+    String FIELD_LINES_TOTAL    = "lines.total";
+    String FIELD_LINES_CODE     = "lines.code";
+    String FIELD_LINES_BLANK    = "lines.blank";
+    String FIELD_LINES_COMMENT  = "lines.comment";
+    String FIELD_COMPLEXITY     = "complexity";
 }

@@ -1,5 +1,6 @@
 package com.gitee.search.indexer;
 
+import com.gitee.search.code.CodeFileTraveler;
 import com.gitee.search.code.CodeRepository;
 import com.gitee.search.code.FileTraveler;
 import com.gitee.search.code.RepositoryFactory;
