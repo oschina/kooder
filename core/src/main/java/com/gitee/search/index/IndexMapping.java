@@ -4,17 +4,13 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
-import com.gitee.search.queue.QueueTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 对象索引映射配置
@@ -29,15 +25,16 @@ public class IndexMapping {
     static {
         try {
             mappings = new HashMap() {{
-                put(Constants.TYPE_REPOSITORY, parseJson("/mapping-repo.json"));
-                put(Constants.TYPE_ISSUE, parseJson("/mapping-issue.json"));
-                put(Constants.TYPE_CODE, parseJson("/mapping-code.json"));
+                put(Constants.TYPE_REPOSITORY, parseJson(Constants.TYPE_REPOSITORY, "/mapping-repo.json"));
+                put(Constants.TYPE_ISSUE, parseJson(Constants.TYPE_ISSUE,           "/mapping-issue.json"));
+                put(Constants.TYPE_CODE, parseJson(Constants.TYPE_CODE,             "/mapping-code.json"));
             }};
         }catch (Exception e) {
             log.error("Failed to load mapping json", e);
         }
     }
 
+    private String type;
     private String comment;
     private Settings defaultSetting;
     private Map<String, Settings> fields;
@@ -46,6 +43,14 @@ public class IndexMapping {
 
     public final static IndexMapping get(String type) {
         return mappings.get(type);
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getComment() {
@@ -89,6 +94,9 @@ public class IndexMapping {
      * @return
      */
     public List<String> listFacetFields() {
+        if(Constants.TYPE_CODE.equals(type)){
+            return Arrays.asList(Constants.FIELD_LANGUAGE, Constants.FIELD_CODE_OWNER, Constants.FIELD_REPO_NAME, Constants.FIELD_SCM);
+        }
         List<String> facets = new ArrayList<>();
         fields.forEach((k,v) -> {
             if(v.isFacet())
@@ -99,12 +107,14 @@ public class IndexMapping {
 
     /**
      * 解析 mapping-xxx.json
+     * @param type
      * @param jsonRes
      * @return
      * @throws IOException
      */
-    private static IndexMapping parseJson(String jsonRes) throws IOException {
+    private static IndexMapping parseJson(String type, String jsonRes) throws IOException {
         IndexMapping im = new IndexMapping();
+        im.setType(type);
         try (InputStream stream = IndexMapping.class.getResourceAsStream(jsonRes)) {
             JsonNode json = new ObjectMapper().readTree(stream);
             im.comment = json.get("comment").textValue();
