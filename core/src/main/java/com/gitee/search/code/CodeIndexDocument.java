@@ -10,6 +10,7 @@ import spark.utils.StringUtils;
 
 /**
  * 代码文档对象
+ * TODO 仓库权限
  * @author Winter Lau<javayou@gmail.com>
  */
 public class CodeIndexDocument {
@@ -63,14 +64,14 @@ public class CodeIndexDocument {
             document.add(new SortedSetDocValuesFacetField(Constants.FIELD_SCM,          this.getScm()));
 
         //仓库信息
-        document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID,       this.getRepoId()));
-        document.add(new StoredField(Constants.FIELD_REPO_ID,       this.getRepoId()));
-        document.add(new StringField(Constants.FIELD_REPO_NAME,     this.getRepoName(),         Field.Store.YES));
-        document.add(new StringField(Constants.FIELD_REPO_URL,      this.getRepoURL(),          Field.Store.YES));
+        document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID, this.getRepoId()));
+        document.add(new StoredField(Constants.FIELD_REPO_ID,           this.getRepoId()));
+        document.add(new StringField(Constants.FIELD_REPO_NAME,         this.getRepoName(),     Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_REPO_URL,          this.getRepoURL(),      Field.Store.YES));
 
         //文件信息
-        document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getFileName(),         Field.Store.YES));
-        document.add(new TextField(Constants.FIELD_FILE_LOCATION,   this.getFileLocation(),     Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_FILE_NAME,     this.getFileName(),         Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getFileLocation(),     Field.Store.YES));
         document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),         Field.Store.NO));
 
         //文件属性
@@ -88,7 +89,9 @@ public class CodeIndexDocument {
         document.add(new StringField(Constants.FIELD_REVISION,      this.getRevision(),         Field.Store.YES));
 
         // Extra metadata in this case when it was last indexed
-        document.add(new StoredField(Constants.FIELD_LAST_INDEX,    System.currentTimeMillis()));
+        long indexTime = System.currentTimeMillis();
+        document.add(new SortedNumericDocValuesField(Constants.FIELD_LAST_INDEX, indexTime));
+        document.add(new StoredField(Constants.FIELD_LAST_INDEX, indexTime));
 
         return document;
     }

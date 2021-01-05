@@ -4,6 +4,7 @@ import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.GiteeSearchConfig;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Properties;
+
+import static com.gitee.search.core.Constants.TYPE_CODE;
 
 /**
  * 磁盘索引管理器
@@ -60,7 +63,7 @@ public class DiskIndexStorage implements IndexStorage {
 
     @Override
     public IndexWriter getWriter(String type) throws IOException {
-        return new IndexWriter(getDirectory(type, false), getWriterConfig());
+        return new IndexWriter(getDirectory(type, false), getWriterConfig(type));
     }
 
     @Override
@@ -112,8 +115,9 @@ public class DiskIndexStorage implements IndexStorage {
      * 索引配置
      * @return
      */
-    private IndexWriterConfig getWriterConfig() {
-        IndexWriterConfig writerConfig = new IndexWriterConfig(AnalyzerFactory.getInstance(true));
+    private IndexWriterConfig getWriterConfig(String type) {
+        Analyzer analyzer = TYPE_CODE.equals(type)?AnalyzerFactory.getCodeAnalyzer():AnalyzerFactory.getInstance(true);
+        IndexWriterConfig writerConfig = new IndexWriterConfig(analyzer);
         writerConfig.setUseCompoundFile(Boolean.valueOf(props.getProperty("disk.use_compound_file", "true")));
         writerConfig.setMaxBufferedDocs(NumberUtils.toInt(props.getProperty("disk.max_buffered_docs"), -1));
         writerConfig.setRAMBufferSizeMB(NumberUtils.toInt(props.getProperty("disk.ram_buffer_size_mb"), 16));

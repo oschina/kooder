@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import static com.gitee.search.index.ObjectMapping.FIELD_ID;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +58,7 @@ public class IndexManager {
      * @return
      * @throws IOException
      */
-    public static String search(String type, Query query, Map<String,String> facets, Sort sort, int page, int pageSize) throws IOException {
+    public static String search(String type, Query query, Map<String,String[]> facets, Sort sort, int page, int pageSize) throws IOException {
 
         long ct = System.currentTimeMillis();
 
@@ -87,11 +88,11 @@ public class IndexManager {
             if( needFacetQuery ) {
                 BooleanQuery.Builder builder = new BooleanQuery.Builder();
                 builder.add(query, BooleanClause.Occur.MUST);
-                DrillDownQuery q = new DrillDownQuery(facetsConfig);
-                facets.forEach((k,v) -> {
-                    q.add(k, v);
-                    builder.add(q, BooleanClause.Occur.FILTER);
-                });
+                DrillDownQuery ddq = new DrillDownQuery(facetsConfig);
+                facets.forEach((k, values) ->
+                    Arrays.stream(values).forEach( v -> ddq.add(k,v))
+                );
+                builder.add(ddq, BooleanClause.Occur.MUST);
                 thisQuery = builder.build();
                 //TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,true, new FacetsCollector(false));
                 docs = searcher.search(thisQuery, page * pageSize, sort,true);

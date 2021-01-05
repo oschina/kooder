@@ -10,16 +10,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
 import org.eclipse.jgit.annotations.NonNull;
-import org.eclipse.jgit.api.BlameCommand;
-import org.eclipse.jgit.api.CloneCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -71,15 +69,25 @@ public class GitRepositoryProvider implements RepositoryProvider {
 
                 if (repo.useCredentials())
                     cloneCommand.setCredentialsProvider(repo.getCredential());
+                cloneCommand.setCloneSubmodules(false);
+                cloneCommand.setBare(true);
+                //cloneCommand.setProgressMonitor(new TextProgressMonitor());
                 git = cloneCommand.call();
                 isNewRepository = true;
             }
-            else {//目录存在就 pull
+            else {//目录存在就 pull，如果使用 bare 模式克隆仓库，对应的是 git fetch
                 git = Git.open(repoFile);
+                /*
                 PullCommand pullCmd = git.pull();
+                pullCmd.setStrategy(MergeStrategy.THEIRS)
                 if (repo.useCredentials())
                     pullCmd.setCredentialsProvider(repo.getCredential());
                 pullCmd.call();
+                */
+                FetchCommand fetchCmd = git.fetch();
+                if (repo.useCredentials())
+                    fetchCmd.setCredentialsProvider(repo.getCredential());
+                fetchCmd.call();
             }
 
             boolean needRebuildIndexes = true;
@@ -113,6 +121,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                         traveler.deleteDocument(doc);
                     } else {
                         String path = entry.getNewPath();
+                        //TODO 二进制文件可以参与索引，但不索引内容
                         boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
                         if(!isBinaryFile) { //二进制文件不参与索引
                             CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
@@ -302,18 +311,26 @@ public class GitRepositoryProvider implements RepositoryProvider {
     public static void main(String[] args) throws IOException {
         GitRepositoryProvider grp = new GitRepositoryProvider();
 
-        CodeRepository repo = new CodeRepository();
-        repo.setName("j2cache");
-        repo.setUrl("https://gitee.com/ld/J2Cache");
-        repo.setPath("D:\\j2cache");
-        //repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");//2
+        int id = 1000;
+        String[] repos = {"https://gitee.com/vnpy/vnpy", "https://gitee.com/ld/J2Cache", "https://gitee.com/DogGodGit/FlaxEngine"};
 
         try(
             IndexWriter writer = StorageFactory.getIndexWriter("code");
-            TaxonomyWriter twriter = StorageFactory.getTaxonomyWriter("code")
-            ) {
-            CodeFileTraveler traveler = new CodeFileTraveler(writer, twriter);
-            grp.pull(repo, traveler);
+            TaxonomyWriter twriter = StorageFactory.getTaxonomyWriter("code"))
+        {
+            for(String repoUrl : repos) {
+                CodeRepository repo = new CodeRepository();
+                String repoName = repoUrl.substring(repoUrl.lastIndexOf('/')+1);
+                repo.setId(id++);
+                repo.setName(repoName);
+                repo.setUrl(repoUrl);
+                repo.setScm("git");
+                repo.setPath("D:\\temp_git\\"+repoName);
+                //repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");//2
+
+                CodeFileTraveler traveler = new CodeFileTraveler(writer, twriter);
+                grp.pull(repo, traveler);
+            }
         }
     }
 }

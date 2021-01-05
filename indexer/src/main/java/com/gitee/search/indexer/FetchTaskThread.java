@@ -97,7 +97,7 @@ public class FetchTaskThread extends Thread {
     }
 
     /**
-     * TODO 处理代码索引任务
+     * 处理代码索引任务
      * 由于代码的索引任务繁重，因此从 QueueTask 中将逻辑剥离开来
      * @param task
      * @param writer
@@ -105,11 +105,13 @@ public class FetchTaskThread extends Thread {
      */
     private void handleCodeTask(QueueTask task, IndexWriter writer, TaxonomyWriter taxonomyWriter) {
         List<CodeRepository> repos = RepositoryFactory.getRepositoryFromTask(task);
-        //1. 在数据库中检查每一个 CodeRepository 是否已存在
-        //2. 依次对每个 CodeRepository 进行索引
+        //1. TODO 在数据库中检查每一个 CodeRepository 是否已存在(从 persistent storage 加载对象)
+        //2. TODO 分配临时项目存储路径
+        //3. TODO 依次对每个 CodeRepository 进行索引
         FileTraveler fileTraveler = new CodeFileTraveler(writer, taxonomyWriter);
         for(CodeRepository repo : repos) {
             RepositoryFactory.getProvider(repo.getScm()).pull(repo, fileTraveler);
+            //TODO write repository status to persistent storage
         }
     }
 }

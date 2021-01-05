@@ -2,7 +2,6 @@ package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
-import com.gitee.search.queue.QueueTask;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -21,7 +20,7 @@ public class IssueQuery extends QueryBase {
      */
     @Override
     public String type() {
-        return QueueTask.TYPE_ISSUE;
+        return Constants.TYPE_ISSUE;
     }
 
     /**

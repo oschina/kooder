@@ -2,9 +2,9 @@ package com.gitee.search.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.core.Constants;
 import com.gitee.search.server.Action;
-import com.gitee.search.query.QueryHelper;
-import com.gitee.search.queue.QueueTask;
+import com.gitee.search.query.QueryFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -42,17 +42,17 @@ public class IndexAction implements Action {
         if(StringUtils.isNotBlank(q)) {
             String json = null;
             switch (type) {
-                case QueueTask.TYPE_REPOSITORY:
-                    json = QueryHelper.REPOSITORY
+                case Constants.TYPE_REPOSITORY:
+                    json = QueryFactory.REPO()
                             .setSearchKey(q)
                             .setSort(sort)
                             .setPage(page)
                             .setPageSize(PAGE_SIZE)
-                            .setFacets("lang", lang)
+                            .addFacets(Constants.FIELD_LANGUAGE, lang)
                             .search();
                     break;
-                case QueueTask.TYPE_ISSUE:
-                    json = QueryHelper.ISSUE
+                case Constants.TYPE_ISSUE:
+                    json = QueryFactory.ISSUE()
                             .setSearchKey(q)
                             .setSort(sort)
                             .setPage(page)

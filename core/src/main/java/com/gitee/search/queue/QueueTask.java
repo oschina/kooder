@@ -8,6 +8,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.core.Constants;
 import com.gitee.search.index.IndexManager;
 
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -25,22 +26,14 @@ public class QueueTask {
 
     private final static JsonFactory jackson = new JsonFactory().enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
 
-    public final static String TYPE_REPOSITORY    = "repo"; //仓库
-    public final static String TYPE_ISSUE         = "issue";
-    public final static String TYPE_PR            = "pr";
-    public final static String TYPE_COMMIT        = "commit";
-    public final static String TYPE_WIKI          = "wiki";
-    public final static String TYPE_CODE          = "code";
-    public final static String TYPE_USER          = "user";
-
     public final static List<String> types = Arrays.asList(
-            TYPE_REPOSITORY,
-            TYPE_ISSUE,
-            TYPE_PR,
-            TYPE_COMMIT,
-            TYPE_WIKI,
-            TYPE_CODE,
-            TYPE_USER
+            Constants.TYPE_REPOSITORY,
+            Constants.TYPE_ISSUE,
+            Constants.TYPE_PR,
+            Constants.TYPE_COMMIT,
+            Constants.TYPE_WIKI,
+            Constants.TYPE_CODE,
+            Constants.TYPE_USER
     );
 
     public final static String ACTION_ADD            = "add"; //添加
@@ -68,7 +61,7 @@ public class QueueTask {
     }
 
     public boolean isCodeTask() {
-        return TYPE_CODE.equals(type);
+        return Constants.TYPE_CODE.equals(type);
     }
 
     public String getAction() {

@@ -1,7 +1,8 @@
 package com.gitee.search.action;
 
+import com.gitee.search.core.Constants;
 import com.gitee.search.server.Action;
-import com.gitee.search.query.QueryHelper;
+import com.gitee.search.query.QueryFactory;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang.StringUtils;
@@ -30,13 +31,13 @@ public class SearchAction implements Action {
         String sort = param(request, "sort");
         int page = Math.max(1, param(request,"p", 1));
         String lang = param(request, "lang");
-        String json = QueryHelper.REPOSITORY
-                                    .setSearchKey(q)
-                                    .setSort(sort)
-                                    .setPage(page)
-                                    .setPageSize(PAGE_SIZE)
-                                    .setFacets("lang", lang)
-                                    .search();
+        String json = QueryFactory.REPO()
+                                .setSearchKey(q)
+                                .setSort(sort)
+                                .setPage(page)
+                                .setPageSize(PAGE_SIZE)
+                                .addFacets(Constants.FIELD_LANGUAGE, lang)
+                                .search();
         this.json(context.response(), json);
     }
 
@@ -55,12 +56,12 @@ public class SearchAction implements Action {
             this.json(context.response(), "{}");
             return ;
         }
-        String json = QueryHelper.ISSUE
-                                    .setSearchKey(q)
-                                    .setSort(sort)
-                                    .setPage(page)
-                                    .setPageSize(PAGE_SIZE)
-                                    .search();
+        String json = QueryFactory.ISSUE()
+                                .setSearchKey(q)
+                                .setSort(sort)
+                                .setPage(page)
+                                .setPageSize(PAGE_SIZE)
+                                .search();
         this.json(context.response(), json);
     }
 

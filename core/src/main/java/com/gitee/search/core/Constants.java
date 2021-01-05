@@ -6,6 +6,16 @@ package com.gitee.search.core;
  */
 public interface Constants {
 
+    String EMPTYSTRING          = "";
+
+    String TYPE_REPOSITORY      = "repo";     //仓库
+    String TYPE_ISSUE           = "issue";    //Issue
+    String TYPE_PR              = "pr";       //Pull Requests
+    String TYPE_COMMIT          = "commit";   //Commits
+    String TYPE_WIKI            = "wiki";     //WIKI
+    String TYPE_CODE            = "code";     //Source Code
+    String TYPE_USER            = "user";     //Users
+
     byte RECOMM_NONE            = 0x00; //未被推荐项目（推荐级别定义必须递增）
     byte RECOMM                 = 0x01; //推荐项目
     byte RECOMM_GVP             = 0x02; //GVP推荐项目

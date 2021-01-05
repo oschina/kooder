@@ -3,6 +3,7 @@ package com.gitee.search.index;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.core.Constants;
 import com.gitee.search.queue.QueueTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +29,9 @@ public class IndexMapping {
     static {
         try {
             mappings = new HashMap() {{
-                put(QueueTask.TYPE_REPOSITORY, parseJson("/mapping-repo.json"));
-                put(QueueTask.TYPE_ISSUE, parseJson("/mapping-issue.json"));
-                put(QueueTask.TYPE_CODE, parseJson("/mapping-code.json"));
+                put(Constants.TYPE_REPOSITORY, parseJson("/mapping-repo.json"));
+                put(Constants.TYPE_ISSUE, parseJson("/mapping-issue.json"));
+                put(Constants.TYPE_CODE, parseJson("/mapping-code.json"));
             }};
         }catch (Exception e) {
             log.error("Failed to load mapping json", e);

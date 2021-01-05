@@ -1,13 +1,12 @@
 package com.gitee.search.storage;
 
-import com.gitee.search.queue.QueueTask;
+import com.gitee.search.core.Constants;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Properties;
 
 /**
@@ -20,13 +19,13 @@ public interface IndexStorage {
      * 对象类型和存储目录的对应关系
      */
     Properties MAPPING_TYPES = new Properties(){{
-        setProperty(QueueTask.TYPE_REPOSITORY, "repos");
-        setProperty(QueueTask.TYPE_CODE, "code");
-        setProperty(QueueTask.TYPE_COMMIT, "commits");
-        setProperty(QueueTask.TYPE_ISSUE, "issues");
-        setProperty(QueueTask.TYPE_PR, "pulls");
-        setProperty(QueueTask.TYPE_WIKI, "wikis");
-        setProperty(QueueTask.TYPE_USER, "users");
+        setProperty(Constants.TYPE_REPOSITORY,  "repos");
+        setProperty(Constants.TYPE_CODE,        "code");
+        setProperty(Constants.TYPE_COMMIT,      "commits");
+        setProperty(Constants.TYPE_ISSUE,       "issues");
+        setProperty(Constants.TYPE_PR,          "pulls");
+        setProperty(Constants.TYPE_WIKI,        "wikis");
+        setProperty(Constants.TYPE_USER,        "users");
     }};
 
     /**

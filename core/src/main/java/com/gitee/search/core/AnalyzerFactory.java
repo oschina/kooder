@@ -1,5 +1,6 @@
 package com.gitee.search.core;
 
+import com.gitee.search.code.CodeAnalyzer;
 import com.gitee.search.jcseg.JcsegAnalyzer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
@@ -34,6 +35,7 @@ public class AnalyzerFactory {
     private static ADictionary dic;
     private static SegmenterConfig config;
     private static SegmenterConfig configForSplit;
+    private static CodeAnalyzer codeAnalyzer = new CodeAnalyzer();
 
     static {
         config = new SegmenterConfig(true);
@@ -65,6 +67,14 @@ public class AnalyzerFactory {
      */
     public final static Analyzer getHighlightInstance() {
         return new JcsegAnalyzer(ISegment.Type.COMPLEX, configForSplit, dic);
+    }
+
+    /**
+     * 代码分词器
+     * @return
+     */
+    public final static Analyzer getCodeAnalyzer() {
+        return codeAnalyzer;
     }
 
     /**

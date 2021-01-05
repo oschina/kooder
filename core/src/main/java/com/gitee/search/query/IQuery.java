@@ -1,6 +1,7 @@
 package com.gitee.search.query;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * 查询接口
@@ -49,12 +50,18 @@ public interface IQuery {
     IQuery setPageSize(int pageSize);
 
     /**
-     * 扩展属性
+     * 添加扩展属性
      * @param name
-     * @param key
+     * @param value
      * @return
      */
-    IQuery setFacets(String name, String key);
+    IQuery addFacets(String name, String value);
+
+    /**
+     * 获取扩展属性
+     * @return
+     */
+    Map<String, String[]> getFacets();
 
     /**
      * 搜索

@@ -3,6 +3,7 @@ package com.gitee.search.query;
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.index.IndexManager;
 import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
@@ -22,7 +23,7 @@ public abstract class QueryBase implements IQuery {
     protected String sort;
     protected int page = 1;
     protected int pageSize = 20;
-    protected Map<String, String> facets = new HashMap();
+    protected Map<String, String[]> facets = new HashMap();
 
     /**
      * 搜索
@@ -97,18 +98,34 @@ public abstract class QueryBase implements IQuery {
     }
 
     /**
-     * 扩展属性
-     * @param key
+     * 添加扩展属性
+     * @param name
      * @param value
      * @return
      */
-    @Override
-    public IQuery setFacets(String key, String value) {
+    public IQuery addFacets(String name, String value) {
         if(StringUtils.isBlank(value))
-            this.facets.remove(key);
-        else
-            this.facets.put(key, value);
+            return this;
+        String[] values = facets.get(name);
+        if(values == null)
+            facets.put(name, new String[]{value});
+        else {
+            String[] newValues = new String[values.length + 1];
+            System.arraycopy(values, 0, newValues, 0, values.length);
+            newValues[values.length] = value;
+            facets.put(name, newValues);
+        }
         return this;
+    }
+
+    /**
+     * 获取扩展属性
+     *
+     * @return
+     */
+    @Override
+    public Map<String, String[]> getFacets() {
+        return facets;
     }
 
     /**
@@ -119,13 +136,22 @@ public abstract class QueryBase implements IQuery {
      * @return
      */
     protected BoostQuery makeBoostQuery(String field, String q, float boost) {
-        QueryParser parser = new QueryParser(field, AnalyzerFactory.getInstance(false));
+        QueryParser parser = new QueryParser(field, getAnalyzer(false));
         parser.setDefaultOperator(QueryParser.Operator.AND);
         try {
             return new BoostQuery(parser.parse(q), boost);
         } catch (ParseException e) {
             throw new QueryException(String.format("Failed to build field query(%s,%s,%.2f)", field, q, boost), e);
         }
+    }
+
+    /**
+     * 自定义分词器
+     * @param forIndex
+     * @return
+     */
+    protected Analyzer getAnalyzer(boolean forIndex) {
+        return AnalyzerFactory.getInstance(false);
     }
 
 }

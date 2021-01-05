@@ -2,7 +2,6 @@ package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
-import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.expressions.Expression;
@@ -42,7 +41,7 @@ public class RepoQuery extends QueryBase {
 
     @Override
     public String type() {
-        return QueueTask.TYPE_REPOSITORY;
+        return Constants.TYPE_REPOSITORY;
     }
 
     /**
@@ -70,7 +69,8 @@ public class RepoQuery extends QueryBase {
         //不搜索被屏蔽的仓库
         builder.add(NumericDocValuesField.newSlowExactQuery("block", Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
 
-        int recomm = NumberUtils.toInt(facets.get("recomm"), Constants.RECOMM_NONE);
+        String sRecomm = (facets.get("recomm")!=null&&facets.get("recomm").length>0)?facets.get("recomm")[0]:null;
+        int recomm = NumberUtils.toInt(sRecomm, Constants.RECOMM_NONE);
         if(recomm >= Constants.RECOMM_GVP)//搜索范围
             builder.add(NumericDocValuesField.newSlowExactQuery("recomm", Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
         else if(recomm > Constants.RECOMM_NONE)
@@ -84,7 +84,7 @@ public class RepoQuery extends QueryBase {
         qbuilder.add(makeBoostQuery("description", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("detail", q, 0.5f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("lang", q, 2.0f), BooleanClause.Occur.SHOULD);
+        //qbuilder.add(makeBoostQuery("lang", q, 2.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("owner.name", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("namespace.path", q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.add(makeBoostQuery("namespace.name", q, 1.0f), BooleanClause.Occur.SHOULD);
@@ -97,6 +97,7 @@ public class RepoQuery extends QueryBase {
 
     /**
      * 对搜索加权
+     * TODO 是否启用的仓库名的泛匹配
      * @param field
      * @param q
      * @param boost
