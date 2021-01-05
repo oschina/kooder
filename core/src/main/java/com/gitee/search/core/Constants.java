@@ -32,6 +32,9 @@ public interface Constants {
 
     byte ISSUE_PUBLIC           = 1;
 
+    /* 仓库相关字段定义 */
+    String FIELD_LICENSE        = "license";
+
     /* 代码相关的字段定义 */
     String FIELD_UUID           = "uuid";
     String FIELD_LANGUAGE       = "lang";
