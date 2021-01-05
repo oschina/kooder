@@ -45,15 +45,24 @@ public class IndexAction implements Action {
                 case Constants.TYPE_REPOSITORY:
                     json = QueryFactory.REPO()
                             .setSearchKey(q)
+                            .addFacets(Constants.FIELD_LANGUAGE, lang)
                             .setSort(sort)
                             .setPage(page)
                             .setPageSize(PAGE_SIZE)
-                            .addFacets(Constants.FIELD_LANGUAGE, lang)
                             .search();
                     break;
                 case Constants.TYPE_ISSUE:
                     json = QueryFactory.ISSUE()
                             .setSearchKey(q)
+                            .setSort(sort)
+                            .setPage(page)
+                            .setPageSize(PAGE_SIZE)
+                            .search();
+                    break;
+                case Constants.TYPE_CODE:
+                    json = QueryFactory.CODE()
+                            .setSearchKey(q)
+                            .addFacets(Constants.FIELD_LANGUAGE, lang)
                             .setSort(sort)
                             .setPage(page)
                             .setPageSize(PAGE_SIZE)

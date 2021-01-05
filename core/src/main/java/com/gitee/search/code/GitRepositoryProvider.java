@@ -103,10 +103,12 @@ public class GitRepositoryProvider implements RepositoryProvider {
             }
 
             if(needRebuildIndexes) {
-                log.warn("Rebuilding '{}:{}' indexes", repo.getId(), repo.getName());
+                long ct = System.currentTimeMillis();
                 traveler.resetRepository(repo.getId());
                 //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
-                return this.indexAllFiles(repo, git, traveler);
+                int fc = this.indexAllFiles(repo, git, traveler);
+                log.warn("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis()-ct);
+                return fc;
             }
 
             int fileCount = 0;

@@ -3,6 +3,9 @@ package com.gitee.search.index;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.gitee.search.core.Constants;
+import com.gitee.search.query.IQuery;
+import com.gitee.search.query.QueryFactory;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
@@ -45,7 +48,7 @@ public class IndexManager {
     private final static QueryCache queryCache = new LRUQueryCache(maxNumberOfCachedQueries, maxRamBytesUsed);
     private final static QueryCachingPolicy defaultCachingPolicy = new UsageTrackingQueryCachingPolicy();
 
-    private final static FacetsConfig facetsConfig = new FacetsConfig();
+    public final static FacetsConfig facetsConfig = new FacetsConfig();
 
     /**
      * 执行搜索
@@ -90,7 +93,7 @@ public class IndexManager {
                 builder.add(query, BooleanClause.Occur.MUST);
                 DrillDownQuery ddq = new DrillDownQuery(facetsConfig);
                 facets.forEach((k, values) ->
-                    Arrays.stream(values).forEach( v -> ddq.add(k,v))
+                    Arrays.stream(values).forEach( v -> ddq.add(k, v))
                 );
                 builder.add(ddq, BooleanClause.Occur.MUST);
                 thisQuery = builder.build();
@@ -118,7 +121,7 @@ public class IndexManager {
 
             readTaxonomy(type, result, taxoReader, fc);
 
-            return result.toString();
+            return result.toPrettyString();
         }
     }
 
@@ -173,7 +176,7 @@ public class IndexManager {
 
             readTaxonomy(type, result, taxoReader, fc);
 
-            return result.toString();
+            return result.toPrettyString();
         }
     }
 
@@ -191,6 +194,7 @@ public class IndexManager {
 
         ObjectNode taxs = json.putObject("facets");
         Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+
         for(String facetField : facetFields) {
             FacetResult facetResult = facets.getTopChildren(Integer.MAX_VALUE, facetField);
             if(facetResult != null) {
@@ -200,6 +204,17 @@ public class IndexManager {
                 }
             }
         }
+    }
+
+    /**
+     * FIXME 单独运行会无响应
+     * @param args
+     * @throws IOException
+     */
+    public static void main(String[] args) throws IOException {
+        IQuery query = QueryFactory.CODE().setSearchKey("cache").setPage(1).setPageSize(20);
+        query.addFacets(Constants.FIELD_LANGUAGE, "Java");
+        String json = query.search();
     }
 
     /**

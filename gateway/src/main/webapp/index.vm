@@ -45,6 +45,8 @@
             #parse('vms/render_repo.vm')
         #elseif($type=='issue')
             #parse('vms/render_issue.vm')
+        #elseif($type=='code')
+            #parse('vms/render_code.vm')
         #end
         <div class="pager">
             #foreach($page in [1..$result.get("totalPages")])
@@ -55,6 +57,7 @@
     </div>
     #if($result && $result.get('facets'))
     <div class="sidebar pure-u-1 pure-u-md-1-4">
+        <strong>编程语言</strong>
         <ul>
         #foreach($lang in $result.get('facets').get('lang'))
         <li><span><a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>

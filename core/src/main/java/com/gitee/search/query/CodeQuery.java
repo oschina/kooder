@@ -3,6 +3,7 @@ package com.gitee.search.query;
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
@@ -32,7 +33,7 @@ public class CodeQuery extends QueryBase {
     protected Query buildQuery() {
         String q = QueryParser.escape(searchKey);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        builder.add(makeBoostQuery(Constants.FIELD_FILE_NAME,  q, 5.0f), BooleanClause.Occur.SHOULD);
+        builder.add(new BoostQuery(new WildcardQuery(new Term(Constants.FIELD_FILE_NAME, "*"+q+"*")), 100.0f), BooleanClause.Occur.SHOULD);
         builder.add(makeBoostQuery(Constants.FIELD_SOURCE,     q, 1.0f), BooleanClause.Occur.SHOULD);
         builder.setMinimumNumberShouldMatch(1);
         return builder.build();

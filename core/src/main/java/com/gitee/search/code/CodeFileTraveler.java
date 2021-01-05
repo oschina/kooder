@@ -1,6 +1,7 @@
 package com.gitee.search.code;
 
 import com.gitee.search.core.Constants;
+import com.gitee.search.index.IndexManager;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.FacetsConfig;
@@ -76,12 +77,8 @@ public class CodeFileTraveler implements FileTraveler {
         }
     }
 
-    public Document buildFacetDocument(Document doc) throws IOException {
-        FacetsConfig facetsConfig = new FacetsConfig();
-        facetsConfig.setIndexFieldName(Constants.FIELD_LANGUAGE, Constants.FIELD_LANGUAGE);
-        facetsConfig.setIndexFieldName(Constants.FIELD_REPO_NAME, Constants.FIELD_REPO_NAME);
-        facetsConfig.setIndexFieldName(Constants.FIELD_CODE_OWNER, Constants.FIELD_CODE_OWNER);
-        facetsConfig.setIndexFieldName(Constants.FIELD_SCM, Constants.FIELD_SCM);
+    private Document buildFacetDocument(Document doc) throws IOException {
+        FacetsConfig facetsConfig = IndexManager.facetsConfig;
         return facetsConfig.build(taxonomyWriter, doc);
     }
 }

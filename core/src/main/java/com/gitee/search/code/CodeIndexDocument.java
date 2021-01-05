@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.lucene.document.*;
+import org.apache.lucene.facet.FacetField;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
 import spark.utils.StringUtils;
 
@@ -55,13 +56,13 @@ public class CodeIndexDocument {
 
         //文档维度
         if (StringUtils.isNotBlank(language))
-            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_LANGUAGE,     this.getLanguage()));
+            document.add(new FacetField(Constants.FIELD_LANGUAGE,     this.getLanguage()));
         if (StringUtils.isNotBlank(repoName))
-            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_REPO_NAME,    this.getRepoName()));
+            document.add(new FacetField(Constants.FIELD_REPO_NAME,    this.getRepoName()));
         if (StringUtils.isNotBlank(codeOwner))
-            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_CODE_OWNER,   this.getCodeOwner()));
+            document.add(new FacetField(Constants.FIELD_CODE_OWNER,   this.getCodeOwner()));
         if(StringUtils.isNotBlank(scm))
-            document.add(new SortedSetDocValuesFacetField(Constants.FIELD_SCM,          this.getScm()));
+            document.add(new FacetField(Constants.FIELD_SCM,          this.getScm()));
 
         //仓库信息
         document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID, this.getRepoId()));
