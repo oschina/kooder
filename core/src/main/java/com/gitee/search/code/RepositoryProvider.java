@@ -14,9 +14,9 @@ public interface RepositoryProvider {
      * 更新仓库
      * @param repo
      * @param traveler
-     * @return
+     * @return 返回索引的文件数
      */
-    void pull(CodeRepository repo, FileTraveler traveler);
+    int pull(CodeRepository repo, FileTraveler traveler);
 
     /**
      * 删除仓库

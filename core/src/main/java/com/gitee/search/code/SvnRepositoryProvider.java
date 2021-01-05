@@ -21,8 +21,8 @@ public class SvnRepositoryProvider implements RepositoryProvider {
      * @return
      */
     @Override
-    public void pull(CodeRepository repo, FileTraveler traveler) {
-
+    public int pull(CodeRepository repo, FileTraveler traveler) {
+        return -1;
     }
 
     /**

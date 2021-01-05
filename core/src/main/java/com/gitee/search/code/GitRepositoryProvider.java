@@ -52,10 +52,10 @@ public class GitRepositoryProvider implements RepositoryProvider {
     /**
      * 更新仓库
      * @param repo
-     * @return
+     * @return 返回索引的文件数
      */
     @Override
-    public void pull(CodeRepository repo, FileTraveler traveler) {
+    public int pull(CodeRepository repo, FileTraveler traveler) {
         Git git = null;
         try {
             boolean isNewRepository = false;
@@ -106,10 +106,10 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 log.warn("Rebuilding '{}:{}' indexes", repo.getId(), repo.getName());
                 traveler.resetRepository(repo.getId());
                 //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
-                this.indexAllFiles(repo, git, traveler);
-                return ;
+                return this.indexAllFiles(repo, git, traveler);
             }
 
+            int fileCount = 0;
             Ref newHeadRef = git.getRepository().findRef(Constants.HEAD);
             ObjectId newId = newHeadRef.getObjectId();
 
@@ -127,17 +127,20 @@ public class GitRepositoryProvider implements RepositoryProvider {
                             CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
                             if (doc != null) {
                                 traveler.updateDocument(doc);
+                                fileCount ++;
                             }
                         }
                     }
                 }
             }
+            return fileCount;
         } catch (IOException | GitAPIException ex) {
             log.error("Failed to pull & index from '" + repo.getUrl() + "'", ex);
         } finally {
             if(git != null)
                 git.close();
         }
+        return -1;
     }
 
     /**
@@ -148,7 +151,8 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * @throws IOException
      * @throws GitAPIException
      */
-    private void indexAllFiles(CodeRepository repo, Git git, FileTraveler traveler) throws IOException, GitAPIException {
+    private int indexAllFiles(CodeRepository repo, Git git, FileTraveler traveler) throws IOException, GitAPIException {
+        int fileCount = 0;
         Ref head = git.getRepository().findRef(Constants.HEAD);
         repo.setLastCommitId(head.getObjectId().name());//回调最新 commit id 信息
         RevCommit commit = git.getRepository().parseCommit(head.getObjectId());
@@ -162,10 +166,12 @@ public class GitRepositoryProvider implements RepositoryProvider {
                     CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
                     if (doc != null) {
                         traveler.updateDocument(doc);
+                        fileCount ++;
                     }
                 }
             }
         }
+        return fileCount;
     }
 
     private static @NonNull
