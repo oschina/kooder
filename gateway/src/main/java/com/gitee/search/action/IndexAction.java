@@ -63,6 +63,8 @@ public class IndexAction implements Action {
                     json = QueryFactory.CODE()
                             .setSearchKey(q)
                             .addFacets(Constants.FIELD_LANGUAGE, lang)
+                            .addFacets(Constants.FIELD_REPO_NAME, param(request, Constants.FIELD_REPO_NAME))
+                            .addFacets(Constants.FIELD_CODE_OWNER, param(request, Constants.FIELD_CODE_OWNER))
                             .setSort(sort)
                             .setPage(page)
                             .setPageSize(PAGE_SIZE)

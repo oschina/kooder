@@ -6,19 +6,17 @@
     "type": "text"
   },
   "fields": {
-    "repository": {
-      "type": "integer"
-    },
-    "path": {
-      "type": "text"
-    },
-    "code": {
-      "type": "text",
-      "index": true,
-      "store": false
-    },
     "lang": {
-      "type": "text"
+      "type": "facet"
+    },
+    "repo.name": {
+      "type": "facet"
+    },
+    "owner": {
+      "type": "facet"
+    },
+    "scm": {
+      "type": "facet"
     }
   }
 }

@@ -63,6 +63,22 @@
         <li><span><a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
         #end
         </ul>
+        #if($result.get('facets').get('repo.name'))
+        <strong>仓库</strong>
+        <ul>
+            #foreach($lang in $result.get('facets').get('repo.name'))
+            <li><span><a href="$tool.uri('repo.name',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
+            #end
+        </ul>
+        #end
+        #if($result.get('facets').get('owner'))
+        <strong>开发者</strong>
+        <ul>
+            #foreach($lang in $result.get('facets').get('owner'))
+            <li><span><a href="$tool.uri('owner',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
+            #end
+        </ul>
+        #end
     </div>
     #end
 </div>
