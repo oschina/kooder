@@ -76,6 +76,8 @@ public class VelocityTool {
      * @return
      */
     public static StringBuffer hlcode(String code, String key) {
+        System.out.println(code);
+        System.out.println(key);
         return new StringBuffer(SearchHelper.hlcode(code, key));
     }
 

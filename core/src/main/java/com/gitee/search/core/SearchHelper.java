@@ -68,12 +68,13 @@ public class SearchHelper {
             Formatter fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
             Highlighter hig = new Highlighter(fmt, scorer);
             TokenStream tokens = highlight_analyzer.tokenStream(null, new StringReader(text));
-            result = hig.getBestFragment(tokens, text);
+            String[] fragments = hig.getBestFragments(tokens, text, hig.getMaxDocCharsToAnalyze());
+            result = String.join( "", fragments);
         } catch (Exception e) {
             log.error("Unabled to hightlight text("+key+"): " + text, e);
         }
 
-        return (result != null) ? result : text;
+        return StringUtils.isBlank(result) ? text : result;
     }
 
     /**
@@ -96,12 +97,13 @@ public class SearchHelper {
             Formatter fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
             Highlighter hig = new Highlighter(fmt, scorer);
             TokenStream tokens = AnalyzerFactory.getCodeAnalyzer().tokenStream(null, new StringReader(text));
-            result = hig.getBestFragment(tokens, text);
+            String[] fragments = hig.getBestFragments(tokens, text, hig.getMaxDocCharsToAnalyze());
+            result = String.join( "", fragments);
         } catch (Exception e) {
             log.error("Unabled to hightlight text("+key+"): " + text, e);
         }
 
-        return (result != null) ? result : text;
+        return StringUtils.isBlank(result) ? text : result;
     }
 
 }

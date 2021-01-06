@@ -1,14 +1,9 @@
 package com.gitee.search.code;
 
+import com.gitee.search.core.SearchHelper;
 import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.highlight.Formatter;
-import org.apache.lucene.search.highlight.Highlighter;
-import org.apache.lucene.search.highlight.QueryScorer;
-import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -26,39 +21,23 @@ public class TechCodeAnalyzer extends Analyzer {
 
     public static void main(String[] args) throws Exception {
         String text = "Hello.java: This  is a J2Cache demo of the #CodeAnalyzer .NET API. public void main(String[] args){return 0;} C# C++//我是中国人";
-        //String text = "Hello     world 你好";
+        //String text = "Hello";
         System.out.println(text);
-        /*
+
         Analyzer analyzer = new TechCodeAnalyzer();
         try (TokenStream stream = analyzer.tokenStream(null, new StringReader(text))){
             CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
             stream.reset();
             while (stream.incrementToken()) {
-                //System.out.print(termAtt.toString() + "\\");
+                System.out.print(termAtt.toString() + "\\");
             }
+            System.out.println();
             stream.end();
-        }*/
+        }
         //测试高亮
-        System.out.println(testHighlight(text, "j2cache"));
+        System.out.println("HLCODE:"+ SearchHelper.hlcode(text, "Hello"));
     }
 
-    /**
-     * 测试高亮
-     * @param code
-     * @param key
-     * @return
-     * @throws Exception
-     */
-    private static String testHighlight(String code, String key) throws Exception {
-        TechCodeAnalyzer analyzer = new TechCodeAnalyzer();
-        QueryParser parser = new QueryParser(null, analyzer);
-        Query query = parser.parse(key);
-        QueryScorer scorer = new QueryScorer(query);
-        Formatter fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
-        Highlighter hig = new Highlighter(fmt, scorer);
-        TokenStream tokens = analyzer.tokenStream(null, new StringReader(code));
-        return hig.getBestFragment(tokens, code);
-    }
 }
 
 /**
@@ -95,14 +74,14 @@ final class TechCodeTokenizer extends Tokenizer {
         termAtt.append(word.toLowerCase());
         termAtt.setLength(word.length());
         offsetAtt.setOffset(
-            correctOffset(currentPos - oldWordLen + drifts[0]),
-            correctOffset(currentPos - drifts[1])
+            correctOffset(currentPos -1- oldWordLen + drifts[0]),
+            correctOffset(currentPos -1- drifts[1])
         );
 
         //TODO 处理 xxx.xxx 的情况
         //TODO 处理同义词的情况
 
-        //System.out.printf("%s (%d->%d) (%d->%d)\n", word, offsetAtt.startOffset(), offsetAtt.endOffset(), drifts[0], drifts[1]);
+        System.out.printf("%s (%d->%d) (%d->%d)\n", word, offsetAtt.startOffset(), offsetAtt.endOffset(), drifts[0], drifts[1]);
 
         return true;
     }
@@ -115,10 +94,10 @@ final class TechCodeTokenizer extends Tokenizer {
     private String nextWord() throws IOException {
         StringBuffer word = new StringBuffer();
         do {
+            currentPos ++;
             int ch = input.read();
             if(ch == -1)
                 break;
-            currentPos ++;
             if(Character.isIdeographic(ch)) {
                 word.append((char) ch);
                 break;
