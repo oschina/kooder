@@ -70,6 +70,16 @@ public class VelocityTool {
     }
 
     /**
+     * 源码高亮，由于使用不同的 Analyzer ，所以需要不同的方法
+     * @param code
+     * @param key
+     * @return
+     */
+    public static StringBuffer hlcode(String code, String key) {
+        return new StringBuffer(SearchHelper.hlcode(code, key));
+    }
+
+    /**
      * HTML escape
      * @param content
      * @return
