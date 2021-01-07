@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class TextFileUtils {
 
-    public static final long DEFAULT_MAX_FILE_LENGTH_READ = 30000000;
+    public static final long DEFAULT_MAX_FILE_LENGTH_READ = 30_000_000;
 
     private static String[] binaryExtensions = {"png","gif","jpg","jpeg","bmp","zip","gz","tar",
                                                 "exe","bin","deb","lib","dll","so","img","rar",

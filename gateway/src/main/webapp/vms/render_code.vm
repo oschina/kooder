@@ -17,7 +17,14 @@
     #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
     <tr>
         <td valign="top">$pi</td>
-        <td valign="top" nowrap><a href="$obj.get('repo').get('url').textValue()/tree/master/$obj.get('file').get('location').textValue()" target="_blank">$tool.hlcode($obj.get('file').get('name').textValue(),$q)</a></td>
+        <td valign="top" nowrap>
+            <a href="$obj.get('repo').get('url').textValue()/tree/master/$obj.get('file').get('location').textValue()" target="_blank">$tool.hlcode($obj.get('file').get('name').textValue(),$q)</a>
+            <p>
+                #foreach($codeLine in $tool.hl_lines($obj.get('source').textValue(), $q, 10))
+                $codeLine.line : $codeLine.code<br/>
+                #end
+            </p>
+        </td>
         <td valign="top">$obj.get('_id_')</td>
         <td valign="top">$obj.get('_score_')</td>
         <td valign="top" align="right">$obj.get('lines').get('total').textValue()</td>

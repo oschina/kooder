@@ -72,7 +72,7 @@ public class CodeIndexDocument {
         //文件信息
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getFileName(),         Field.Store.YES));
         document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getFileLocation(),     Field.Store.YES));
-        document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),         Field.Store.NO));
+        document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),         Field.Store.YES));
 
         //文件属性
         document.add(new TextField(Constants.FIELD_CODE_OWNER,      this.getCodeOwner(),        Field.Store.YES));
@@ -95,7 +95,6 @@ public class CodeIndexDocument {
 
         return document;
     }
-
 
     public String generateUuid() {
         this.uuid = DigestUtils.sha1Hex(String.format("%d-%s-%s", getRepoId(), getRepoName().toLowerCase(), getFileLocation()));

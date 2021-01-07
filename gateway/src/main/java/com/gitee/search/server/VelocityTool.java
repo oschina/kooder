@@ -1,5 +1,6 @@
 package com.gitee.search.server;
 
+import com.gitee.search.code.CodeLine;
 import com.gitee.search.core.SearchHelper;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 给 vm 模板提供一些工具包
@@ -76,9 +78,18 @@ public class VelocityTool {
      * @return
      */
     public static StringBuffer hlcode(String code, String key) {
-        System.out.println(code);
-        System.out.println(key);
         return new StringBuffer(SearchHelper.hlcode(code, key));
+    }
+
+    /**
+     * 高亮标识出源码中的关键字
+     * @param code
+     * @param key
+     * @param maxLines
+     * @return
+     */
+    public static List<CodeLine> hl_lines(String code, String key, int maxLines) {
+        return SearchHelper.hl_lines(code, key, maxLines);
     }
 
     /**
