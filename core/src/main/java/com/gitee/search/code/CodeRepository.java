@@ -28,6 +28,10 @@ public class CodeRepository {
         return id;
     }
 
+    public String getIdAsString() {
+        return String.valueOf(id);
+    }
+
     public void setId(long id) {
         this.id = id;
     }
@@ -80,7 +84,6 @@ public class CodeRepository {
         return new UsernamePasswordCredentialsProvider(getUsername(), getPassword());
     }
 
-
     public String getPath() {
         return path;
     }
@@ -95,5 +98,10 @@ public class CodeRepository {
 
     public void setLastCommitId(String lastCommitId) {
         this.lastCommitId = lastCommitId;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("CodeRepository(%d,%s,%s(%s),%s)", id, name, url, scm, path);
     }
 }
