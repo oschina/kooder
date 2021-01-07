@@ -116,7 +116,7 @@ public class SearchHelper {
      * @return
      */
     public static List<CodeLine> hl_lines(String code, String key, int maxLines) {
-        if(code == null)
+        if(StringUtils.isBlank(code) || StringUtils.isBlank(key))
             return null;
 
         List<CodeLine> codeLines = new ArrayList<>();
