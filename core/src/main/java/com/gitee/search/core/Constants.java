@@ -15,6 +15,8 @@ public interface Constants {
     String TYPE_WIKI            = "wiki";     //WIKI
     String TYPE_CODE            = "code";     //Source Code
     String TYPE_USER            = "user";     //Users
+    String TYPE_METADATA        = "_metadata";
+
 
     byte RECOMM_NONE            = 0x00; //未被推荐项目（推荐级别定义必须递增）
     byte RECOMM                 = 0x01; //推荐项目
@@ -32,14 +34,20 @@ public interface Constants {
 
     byte ISSUE_PUBLIC           = 1;
 
-    /* 仓库相关字段定义 */
+    String FIELD_OBJECTS        = "objects";    //json 数据中的对象数字字段名称
+
+    String FACET_VALUE_EMPTY    = "Unknown";    //空 Facet 字段对应的默认值
+
+    /* 文档字段定义 */
     String FIELD_LICENSE        = "license";
+    String FIELD_ID             = "id";
 
     /* 代码相关的字段定义 */
     String FIELD_UUID           = "uuid";
     String FIELD_LANGUAGE       = "lang";
     String FIELD_REPO_ID        = "repo.id";
     String FIELD_REPO_NAME      = "repo.name";
+    String FIELD_REPO_PATH      = "repo.path";
     String FIELD_REPO_URL       = "repo.url";
     String FIELD_FILE_NAME      = "file.name";
     String FIELD_FILE_LOCATION  = "file.location";

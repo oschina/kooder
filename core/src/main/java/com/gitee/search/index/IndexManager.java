@@ -18,7 +18,7 @@ import org.apache.lucene.search.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.gitee.search.index.ObjectMapping.FIELD_ID;
+import static com.gitee.search.core.Constants.FIELD_ID;
 
 import java.io.IOException;
 import java.util.Arrays;
