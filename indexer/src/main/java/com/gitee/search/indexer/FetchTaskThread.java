@@ -1,15 +1,13 @@
 package com.gitee.search.indexer;
 
-import com.gitee.search.code.CodeFileTraveler;
-import com.gitee.search.code.CodeRepository;
-import com.gitee.search.code.FileTraveler;
-import com.gitee.search.code.RepositoryFactory;
+import com.gitee.search.code.*;
 import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import com.gitee.search.utils.BatchTaskRunner;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
@@ -37,9 +35,9 @@ public class FetchTaskThread extends Thread {
     public FetchTaskThread() {
         this.provider = QueueFactory.getProvider();
         Properties props = GiteeSearchConfig.getIndexerProperties();
-        this.no_task_interval = NumberUtils.toInt(props.getProperty("no_task_interval"), 1000);
-        this.batch_fetch_count = NumberUtils.toInt(props.getProperty("batch_fetch_count"), 10);
-        this.tasks_per_thread = NumberUtils.toInt(props.getProperty("tasks_per_thread"), 1);
+        this.no_task_interval   = NumberUtils.toInt(props.getProperty("no_task_interval"),  1000);
+        this.batch_fetch_count  = NumberUtils.toInt(props.getProperty("batch_fetch_count"), 10);
+        this.tasks_per_thread   = NumberUtils.toInt(props.getProperty("tasks_per_thread"),  1);
     }
 
     @Override
@@ -105,13 +103,40 @@ public class FetchTaskThread extends Thread {
      */
     private void handleCodeTask(QueueTask task, IndexWriter writer, TaxonomyWriter taxonomyWriter) {
         List<CodeRepository> repos = RepositoryFactory.getRepositoryFromTask(task);
-        //1. TODO 在数据库中检查每一个 CodeRepository 是否已存在(从 persistent storage 加载对象)
-        //2. TODO 分配临时项目存储路径
-        //3. TODO 依次对每个 CodeRepository 进行索引
-        FileTraveler fileTraveler = new CodeFileTraveler(writer, taxonomyWriter);
-        for(CodeRepository repo : repos) {
-            RepositoryFactory.getProvider(repo.getScm()).pull(repo, fileTraveler);
-            //TODO write repository status to persistent storage
+        switch(task.getAction()){
+        case QueueTask.ACTION_ADD:
+        case QueueTask.ACTION_UPDATE:
+            FileTraveler fileTraveler = new CodeFileTraveler(writer, taxonomyWriter);
+            for(CodeRepository newRepo : repos) {
+                //Read saved CodeRepository from persistent storage
+                CodeRepository repo = RepositoryManager.INSTANCE.get(newRepo.getId());
+                if (repo != null) {
+                    if(StringUtils.isNotBlank(newRepo.getName()))
+                        repo.setName(newRepo.getName());
+                    if(StringUtils.isNotBlank(newRepo.getScm()))
+                        repo.setScm(newRepo.getScm());
+                    if(StringUtils.isNotBlank(newRepo.getUrl()))
+                        repo.setUrl(newRepo.getUrl());
+                    repo.setUsername(newRepo.getUsername());
+                    repo.setPassword(newRepo.getPassword());
+                } else {
+                    repo = newRepo;
+                }
+                //pull repository from remote and build index for it
+                RepositoryFactory.getProvider(repo.getScm()).pull(repo, fileTraveler);
+                //write repository status to persistent storage
+                RepositoryManager.INSTANCE.save(repo);
+            }
+            break;
+
+        case QueueTask.ACTION_DELETE:
+            for(CodeRepository newRepo : repos) {
+                CodeRepository repo = RepositoryManager.INSTANCE.get(newRepo.getId());
+                if (repo != null) {
+                    RepositoryFactory.getProvider(repo.getScm()).delete(repo);
+                    RepositoryManager.INSTANCE.delete(repo.getId());
+                }
+            }
         }
     }
 }

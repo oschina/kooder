@@ -1,6 +1,7 @@
 package com.gitee.search.storage;
 
 import com.gitee.search.core.GiteeSearchConfig;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexReader;
@@ -9,31 +10,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Properties;
 
 /**
- * 索引存储管理工厂类
+ * 索引以及仓库存储管理工厂类
  * @author Winter Lau<javayou@gmail.com>
  */
 public class StorageFactory {
 
     private final static Logger log = LoggerFactory.getLogger(StorageFactory.class);
 
-    static IndexStorage storage;
+    private static IndexStorage storage; //index storage
+    private static Path repositoriesPath;
+    private static int  repositoriesMaxSizeInGigabyte = 100;//unit:G
 
     static {
         Properties props = GiteeSearchConfig.getStoragePropertes();
-        if("disk".equalsIgnoreCase(props.getProperty("type").trim())) {
-            try {
+        try {
+            if("disk".equalsIgnoreCase(props.getProperty("type").trim())) {
                 storage = new DiskIndexStorage(props);
-            } catch (IOException e) {
-                log.error("Failed to initialize storage manager.", e);
             }
+            String repoPath = props.getProperty("repositories.path");
+            repositoriesPath = GiteeSearchConfig.checkAndCreatePath(repoPath);
+        } catch (IOException e) {
+            log.error("Failed to initialize storage manager.", e);
         }
+        repositoriesMaxSizeInGigabyte = NumberUtils.toInt(props.getProperty("repositories.max_size_in_gigabyte"), 100);
     }
 
-    public final static IndexStorage getStorage() {
-        return storage;
+    /**
+     * 返回仓库的存储路径
+     * 1234/5678/J2Cache_12345678
+     * @param path
+     * @return
+     */
+    public static Path getRepositoryPath(String path) {
+        return repositoriesPath.resolve(path);
     }
 
     /**

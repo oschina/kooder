@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.FileSystemException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -70,10 +72,6 @@ public class GiteeSearchConfig {
         return config.getIntProperty("http.port", 8080);
     }
 
-    public static int getHttpMaxContentLength() {
-        return config.getIntProperty("http.maxContentLength", 512 * 1024);
-    }
-
     /**
      * 解析配置里的路径信息，转成 Path 对象，支持相对路径，绝对路径
      * @param spath
@@ -81,6 +79,32 @@ public class GiteeSearchConfig {
      */
     public static Path getPath(String spath) {
         return Paths.get(spath).toAbsolutePath().normalize();
+    }
+
+    /**
+     * Check and Initialize directory, if no exists, create it!
+     * @param spath
+     * @throws IOException
+     */
+    public static Path checkAndCreatePath(String spath) throws IOException {
+        return checkAndCreatePath(getPath(spath));
+    }
+
+    /**
+     * Check and Initialize directory, if no exists, create it!
+     * @param p
+     * @throws IOException
+     */
+    public static Path checkAndCreatePath(Path p) throws IOException {
+        //路径已存在，但是不是一个目录，不可读写则报错
+        if(Files.exists(p) && (!Files.isDirectory(p) || !Files.isReadable(p) || !Files.isWritable(p)))
+            throw new FileSystemException("Path:" + p + " isn't available.");
+        //路径不存在，或者不是一个目录，则创建目录
+        if(!Files.exists(p) || !Files.isDirectory(p)) {
+            log.warn("Path '" + p + "' for indexes not exists, created it!");
+            Files.createDirectory(p);
+        }
+        return p;
     }
 
     /***

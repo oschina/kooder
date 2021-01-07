@@ -2,6 +2,7 @@ package com.gitee.search.code;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.core.Constants;
 import com.gitee.search.index.ObjectMapping;
 import com.gitee.search.queue.QueueTask;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class RepositoryFactory {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(ObjectMapping.FIELD_objects).elements();
+            Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(Constants.FIELD_OBJECTS).elements();
             while (objects.hasNext()) {
                 JsonNode node = objects.next();
                 CodeRepository code = new CodeRepository();

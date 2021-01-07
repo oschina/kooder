@@ -1,7 +1,5 @@
 package com.gitee.search.code;
 
-import java.io.IOException;
-
 /**
  * 代码源接口定义
  * @author Winter Lau<javayou@gmail.com>
@@ -23,6 +21,6 @@ public interface RepositoryProvider {
      * @param repo
      * @exception
      */
-    void delete(CodeRepository repo) throws IOException ;
+    void delete(CodeRepository repo) ;
 
 }

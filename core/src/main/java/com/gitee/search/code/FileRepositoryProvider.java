@@ -15,7 +15,6 @@ public class FileRepositoryProvider implements RepositoryProvider {
 
     /**
      * 更新仓库
-     *
      * @param repo
      * @param traveler
      * @return
@@ -27,12 +26,9 @@ public class FileRepositoryProvider implements RepositoryProvider {
 
     /**
      * 删除仓库
-     *
      * @param repo
-     * @throws
      */
     @Override
-    public void delete(CodeRepository repo) throws IOException {
-
+    public void delete(CodeRepository repo) {
     }
 }

@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -57,24 +58,22 @@ public class GitRepositoryProvider implements RepositoryProvider {
     public int pull(CodeRepository repo, FileTraveler traveler) {
         Git git = null;
         try {
-            boolean isNewRepository = false;
-            File repoFile = new File(repo.getPath());
+            File repoFile = StorageFactory.getRepositoryPath(repo.getRelativePath()).toFile();
             if(!repoFile.exists()) {//检查目录不存在就 clone
                 log.info("Repository '{}:{}' no exists, re-clone from '{}'", repo.getId(), repo.getName(), repo.getUrl());
                 CloneCommand cloneCommand = Git.cloneRepository()
                         .setURI(repo.getUrl())
-                        .setDirectory(new File(repo.getPath()))
+                        .setDirectory(repoFile)
                         .setCloneAllBranches(true);
 
                 if (repo.useCredentials())
                     cloneCommand.setCredentialsProvider(repo.getCredential());
                 cloneCommand.setCloneSubmodules(false);
                 cloneCommand.setBare(true);
-                //cloneCommand.setProgressMonitor(new TextProgressMonitor());
                 git = cloneCommand.call();
-                isNewRepository = true;
             }
             else {//目录存在就 pull，如果使用 bare 模式克隆仓库，对应的是 git fetch
+                //TODO 仓库地址变成另外一个不相关的仓库时候怎么处理？
                 git = Git.open(repoFile);
                 /*
                 PullCommand pullCmd = git.pull();
@@ -113,6 +112,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             int fileCount = 0;
             Ref newHeadRef = git.getRepository().findRef(Constants.HEAD);
             ObjectId newId = newHeadRef.getObjectId();
+            repo.setLastCommitId(newId.name()); //保存仓库最新提交信息
 
             if (!oldId.toString().equals(newId.toString())) {
                 List<DiffEntry> entries = diffFiles(git, oldId.name(), newId.name());
@@ -204,8 +204,13 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * @param repo
      */
     @Override
-    public void delete(CodeRepository repo) throws IOException {
-        FileUtils.forceDelete(new File(repo.getPath()));
+    public void delete(CodeRepository repo) {
+        try {
+            Path path = StorageFactory.getRepositoryPath(repo.getRelativePath());
+            FileUtils.forceDelete(path.toFile());
+        } catch (IOException e) {
+            log.error("Failed to delete repo: " + repo.getRelativePath(), e);
+        }
     }
 
     /**
@@ -315,7 +320,13 @@ public class GitRepositoryProvider implements RepositoryProvider {
         return owner;
     }
 
+    /**
+     * 测试仓库索引
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
+
         GitRepositoryProvider grp = new GitRepositoryProvider();
 
         int id = 1000;
@@ -332,11 +343,11 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 repo.setName(repoName);
                 repo.setUrl(repoUrl);
                 repo.setScm("git");
-                repo.setPath("D:\\temp_git\\"+repoName);
                 //repo.setLastCommitId("b80348427425628d8dca9b60cf69af01a5005982");//2
 
                 CodeFileTraveler traveler = new CodeFileTraveler(writer, twriter);
                 grp.pull(repo, traveler);
+                RepositoryManager.INSTANCE.save(repo);
             }
         }
     }

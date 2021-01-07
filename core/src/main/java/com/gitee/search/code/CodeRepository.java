@@ -21,8 +21,15 @@ public class CodeRepository {
     private String username;    //访问仓库的用户名
     private String password;    //访问仓库的密码
 
-    private String path;        //仓库的存放路径
     private String lastCommitId;//最后提交编号
+
+    /**
+     * 返回在仓库目录下的相对存储路径
+     * @return
+     */
+    public String getRelativePath() {
+        return String.format("%03d/%03d/%03d/%s_%d", id/1_000_000_000, id % 1_000_000_000 / 1_000_000, id % 1_000_000 / 1_000, name, id);
+    }
 
     public long getId() {
         return id;
@@ -84,14 +91,6 @@ public class CodeRepository {
         return new UsernamePasswordCredentialsProvider(getUsername(), getPassword());
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public String getLastCommitId() {
         return lastCommitId;
     }
@@ -102,6 +101,6 @@ public class CodeRepository {
 
     @Override
     public String toString() {
-        return String.format("CodeRepository(%d,%s,%s(%s),%s)", id, name, url, scm, path);
+        return String.format("CodeRepository(%d,%s,%s(%s),%s)", id, name, url, scm, this.getRelativePath());
     }
 }

@@ -44,15 +44,7 @@ public class DiskIndexStorage implements IndexStorage {
     public DiskIndexStorage(Properties props) throws IOException {
         this.props = props;
         String idxPath = props.getProperty("disk.path");
-        this.indexBasePath = GiteeSearchConfig.getPath(idxPath);
-        //路径已存在，但是不是一个目录，不可读写则报错
-        if(Files.exists(indexBasePath) && (!Files.isDirectory(indexBasePath) || !Files.isReadable(indexBasePath) || !Files.isWritable(indexBasePath)))
-            throw new FileSystemException("Path:" + idxPath + " isn't available.");
-        //路径不存在，或者不是一个目录，则创建目录
-        if(!Files.exists(indexBasePath) || !Files.isDirectory(indexBasePath)) {
-            log.warn("Path '" + this.indexBasePath.toString()+"' for indexes not exists, created it!");
-            Files.createDirectory(indexBasePath);
-        }
+        this.indexBasePath = GiteeSearchConfig.checkAndCreatePath(idxPath);
         isWindows = SystemUtils.IS_OS_WINDOWS;
     }
 
