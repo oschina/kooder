@@ -2,7 +2,7 @@ package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.index.IndexManager;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;

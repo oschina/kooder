@@ -2,7 +2,7 @@ package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;

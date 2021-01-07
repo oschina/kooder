@@ -1,7 +1,7 @@
 package com.gitee.search.queue;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,10 +66,10 @@ public class TestQueueProvider implements QueueProvider {
                 QueueTask task;
                 while(tasks.size() < count && (task = g_tasks.poll()) != null)
                     tasks.add(task);
-                for(int i=tasks.size();auto_generate_task && i< RandomUtils.nextInt(count);i++){
+                for(int i = tasks.size(); auto_generate_task && i< RandomUtils.nextInt(0, count); i++){
                     QueueTask rtask = new QueueTask();
                     rtask.setAction(QueueTask.ACTION_ADD);
-                    rtask.setType(types.get(RandomUtils.nextInt(types.size())));
+                    rtask.setType(types.get(RandomUtils.nextInt(0, types.size())));
                     rtask.setBody(body);
                     tasks.add(rtask);
                 }

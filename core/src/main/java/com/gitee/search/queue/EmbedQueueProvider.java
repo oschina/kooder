@@ -1,8 +1,8 @@
 package com.gitee.search.queue;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.infobip.lib.popout.FileQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

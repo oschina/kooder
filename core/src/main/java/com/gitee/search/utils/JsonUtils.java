@@ -1,7 +1,7 @@
 package com.gitee.search.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * JSON 工具包

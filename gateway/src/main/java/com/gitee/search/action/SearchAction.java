@@ -5,7 +5,7 @@ import com.gitee.search.server.Action;
 import com.gitee.search.query.QueryFactory;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 

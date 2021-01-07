@@ -10,7 +10,7 @@ import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import com.gitee.search.utils.BatchTaskRunner;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;

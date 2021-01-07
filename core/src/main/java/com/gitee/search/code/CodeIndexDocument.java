@@ -4,10 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
-import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
-import spark.utils.StringUtils;
 
 /**
  * 代码文档对象

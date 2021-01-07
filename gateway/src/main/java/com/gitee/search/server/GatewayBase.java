@@ -10,8 +10,8 @@ import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +51,7 @@ public abstract class GatewayBase implements Daemon {
         this.vOptions = new VertxOptions();
         this.vOptions.setWorkerPoolSize(this.workerPoolSize);
         this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
+        vOptions.getAddressResolverOptions();
 
         String logs_pattern = GiteeSearchConfig.getProperty("http.log.pattern");
         if(logs_pattern != null) {

@@ -2,8 +2,8 @@ package com.gitee.search.storage;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.GiteeSearchConfig;
-import org.apache.commons.lang.SystemUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
