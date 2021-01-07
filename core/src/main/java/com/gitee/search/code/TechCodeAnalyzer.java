@@ -119,9 +119,9 @@ final class TechCodeTokenizer extends Tokenizer {
         offsetAtt.setOffset(correctOffset(ew.startOffset),correctOffset(ew.endOffset));
 
         //处理 .xxx.xxx 的情况，处理完后由 :EXTEND_WORDS 初代码进行返回
-        //this.computeSubWords(ew);
+        this.computeSubWords(ew);
         //处理同义词
-        //this.computeSynonym(ew);
+        this.computeSynonym(ew);
 
         return true;
     }
@@ -178,6 +178,7 @@ final class TechCodeTokenizer extends Tokenizer {
      * @return
      */
     private boolean computeSubWords(IWord ew) {
+        int hasSub = 0;
         if(ew.word.indexOf('.', 1)>0) {
             String[] pics = ew.word.split("\\.");
             for(int i=0;i<pics.length;i++) {
@@ -187,9 +188,10 @@ final class TechCodeTokenizer extends Tokenizer {
                 IWord iw = new IWord(pics[i], so, so + pics[i].length());
                 iw.type = IWord.TYPE_CHILD;
                 extendWords.add(iw);
+                hasSub ++;
             }
         }
-        return extendWords.size() > 0;
+        return hasSub > 0;
     }
 
     /**
