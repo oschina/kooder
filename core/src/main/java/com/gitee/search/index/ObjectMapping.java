@@ -2,6 +2,7 @@ package com.gitee.search.index;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.core.Constants;
 import com.gitee.search.queue.QueueTask;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.*;
@@ -24,11 +25,6 @@ import java.util.stream.Collectors;
 public class ObjectMapping {
 
     private final static Logger log = LoggerFactory.getLogger(ObjectMapping.class);
-
-    public final static String FIELD_ID = "id"; //文档的唯一标识
-    public final static String FIELD_objects = "objects";
-
-    public final static String FACET_VALUE_EMPTY = "Unknown";
 
     /**
      * 文档结果返回json
@@ -100,7 +96,7 @@ public class ObjectMapping {
         List<Document> docs = new ArrayList<>();
         ObjectMapper mapper = new ObjectMapper();
         IndexMapping mapping = IndexMapping.get(task.getType());
-        Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(FIELD_objects).elements();
+        Iterator<JsonNode> objects = mapper.readTree(task.getBody()).withArray(Constants.FIELD_OBJECTS).elements();
         while(objects.hasNext()) {
             JsonNode obj = objects.next();
             Document doc = new Document();
@@ -168,7 +164,7 @@ public class ObjectMapping {
             else if(field.isTextual()) {//文本内容
                 String fnv = field.textValue();
                 if(setting.isFacet()) {
-                    doc.add(new FacetField(fn, StringUtils.isBlank(fnv)?FACET_VALUE_EMPTY:fnv));
+                    doc.add(new FacetField(fn, StringUtils.isBlank(fnv)?Constants.FACET_VALUE_EMPTY:fnv));
                     if(StringUtils.isNotBlank(fnv))
                         doc.add(new SortedDocValuesField(fn, new BytesRef(fnv)));
                     if(setting.isStore())
