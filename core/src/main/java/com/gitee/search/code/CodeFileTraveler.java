@@ -40,7 +40,10 @@ public class CodeFileTraveler implements FileTraveler {
         //log.info("updateDocument:" + codeid);
         try {
             Document doc = buildFacetDocument(codeid.buildDocument());
-            writer.updateDocument(new Term(Constants.FIELD_UUID,codeid.getUuid()), doc);
+            writer.updateDocument(new Term(Constants.FIELD_UUID, codeid.getUuid()), doc);
+        } catch (IllegalArgumentException e) {
+            System.out.println(codeid.getContents());
+            throw e;
         } catch (IOException e) {
             log.error("Failed to update ducment<code> with uuid = " + codeid.getUuid(), e);
         }

@@ -33,7 +33,7 @@ public class CodeQuery extends QueryBase {
     protected Query buildQuery() {
         String q = QueryParser.escape(searchKey);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        builder.add(new BoostQuery(new WildcardQuery(new Term(Constants.FIELD_FILE_NAME, "*"+q+"*")), 100.0f), BooleanClause.Occur.SHOULD);
+        builder.add(makeBoostQuery(Constants.FIELD_FILE_NAME,  q, 10.0f), BooleanClause.Occur.SHOULD);
         builder.add(makeBoostQuery(Constants.FIELD_SOURCE,     q, 1.0f), BooleanClause.Occur.SHOULD);
         builder.setMinimumNumberShouldMatch(1);
         return builder.build();
