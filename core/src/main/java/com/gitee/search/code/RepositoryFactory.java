@@ -3,7 +3,6 @@ package com.gitee.search.code;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
-import com.gitee.search.index.ObjectMapping;
 import com.gitee.search.queue.QueueTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,8 +55,6 @@ public class RepositoryFactory {
                 code.setName(jsonAttr(node,"name"));
                 code.setUrl(jsonAttr(node, "url"));
                 code.setScm(jsonAttr(node, "scm"));
-                code.setUsername(jsonAttr(node, "username"));
-                code.setPassword(jsonAttr(node, "password"));
                 codes.add(code);
             }
         } catch ( IOException e ) {

@@ -67,30 +67,6 @@ public class CodeRepository {
         this.url = url;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public boolean useCredentials() {
-        return StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password);
-    }
-
-    public CredentialsProvider getCredential() {
-        return new UsernamePasswordCredentialsProvider(getUsername(), getPassword());
-    }
-
     public String getLastCommitId() {
         return lastCommitId;
     }
