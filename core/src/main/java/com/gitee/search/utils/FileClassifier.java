@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -18,20 +15,20 @@ import java.util.stream.Stream;
 public class FileClassifier {
 
     public final static String UNKNOWN_LANGUAGE = "Unknown";
-    private static HashMap<String, FileClassifierResult> database;
+    private static Map<String, FileClassifierResult> database;
 
     static {
         try (InputStream stream = FileClassifier.class.getResourceAsStream("/languages.json")){
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             TypeReference<HashMap<String, FileClassifierResult>> typeRef = new TypeReference<>(){};
-            database = mapper.readValue(stream, typeRef);
+            database = Collections.unmodifiableMap(mapper.readValue(stream, typeRef));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
 
-    public static HashMap<String, FileClassifierResult> getDatabase() {
+    public static Map<String, FileClassifierResult> getDatabase() {
         return database;
     }
 

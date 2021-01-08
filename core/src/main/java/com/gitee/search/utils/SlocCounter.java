@@ -10,17 +10,14 @@
 
 package com.gitee.search.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
- * 源文件统计
+ * 源文件统计，包括总行数，代码行，注释行，空行等，还有代码复杂度评估
  */
 public class SlocCounter {
 
-    private final HashMap<String, FileClassifierResult> database;
+    private final Map<String, FileClassifierResult> database;
     private final ArrayList<List<Integer>> byteOrderMarks;
 
     public SlocCounter() {
