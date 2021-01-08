@@ -3,7 +3,6 @@ package com.gitee.search.code;
 import com.gitee.search.core.Constants;
 import com.gitee.search.index.IndexException;
 import com.gitee.search.storage.StorageFactory;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -58,7 +57,7 @@ class LuceneRepositoryManager implements RepositoryManager {
             if(docs.totalHits.value == 0)
                 return null;
             Document doc = reader.document(docs.scoreDocs[0].doc);
-            return readRepository(doc);
+            return CodeRepository.parse(doc);
         } catch (IOException e) {
             throw new IndexException("Failed to get repo in metedata db : id = " + id, e);
         }
@@ -68,7 +67,7 @@ class LuceneRepositoryManager implements RepositoryManager {
     public void save(CodeRepository repo) {
         synchronized (this){ //不支持并发写入
             try (IndexWriter writer = StorageFactory.getIndexWriter(Constants.TYPE_METADATA)) {
-                Document doc = buildDocument(repo);
+                Document doc = repo.toDocument();
                 writer.updateDocument(new Term(Constants.FIELD_REPO_ID, repo.getIdAsString()), doc);
             } catch (IOException e) {
                 throw new IndexException("Failed to save repo in metedata db : " + repo, e);
@@ -86,28 +85,6 @@ class LuceneRepositoryManager implements RepositoryManager {
             }
             return false;
         }
-    }
-
-    protected Document buildDocument(CodeRepository repo) {
-        Document doc = new Document();
-        doc.add(new StringField(Constants.FIELD_REPO_ID,        repo.getIdAsString(), Field.Store.YES));
-        doc.add(new StoredField(Constants.FIELD_REPO_URL,       repo.getUrl()));
-        doc.add(new StoredField(Constants.FIELD_REPO_NAME,      repo.getName()));
-        if(repo.getLastCommitId() != null)
-            doc.add(new StoredField(Constants.FIELD_REVISION,   repo.getLastCommitId()));
-        if(repo.getScm() != null)
-            doc.add(new StoredField(Constants.FIELD_SCM,        repo.getScm()));
-        return doc;
-    }
-
-    protected CodeRepository readRepository(Document doc) {
-        CodeRepository repo = new CodeRepository();
-        repo.setId(NumberUtils.toLong(doc.get(Constants.FIELD_REPO_ID), 0));
-        repo.setName(doc.get(Constants.FIELD_REPO_NAME));
-        repo.setUrl(doc.get(Constants.FIELD_REPO_URL));
-        repo.setLastCommitId(doc.get(Constants.FIELD_REVISION));
-        repo.setScm(doc.get(Constants.FIELD_SCM));
-        return repo;
     }
 
 }
