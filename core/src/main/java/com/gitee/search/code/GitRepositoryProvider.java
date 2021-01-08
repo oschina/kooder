@@ -1,9 +1,13 @@
 package com.gitee.search.code;
 
+import com.gitee.search.core.GiteeSearchConfig;
+import com.gitee.search.index.IndexException;
 import com.gitee.search.storage.StorageFactory;
 import com.gitee.search.utils.FileClassifier;
 import com.gitee.search.utils.SlocCounter;
 import com.gitee.search.utils.TextFileUtils;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -21,15 +25,18 @@ import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,6 +50,42 @@ public class GitRepositoryProvider implements RepositoryProvider {
 
     private final static Logger log = LoggerFactory.getLogger(GitRepositoryProvider.class);
     private final static SlocCounter slocCounter = new SlocCounter();
+    private CredentialsProvider credentialsProvider;
+    private TransportConfigCallback transportConfigCallback;
+
+    public GitRepositoryProvider() {
+        //http authenticator
+        String username = GiteeSearchConfig.getProperty("git.username");
+        String password = GiteeSearchConfig.getProperty("git.password");
+        if(StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password))
+            this.credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+
+        //ssh authenticator
+        String sshkey   = GiteeSearchConfig.getProperty("git.ssh.key");     //私钥文件
+        String keypass  = GiteeSearchConfig.getProperty("git.ssh.keypass"); //密钥对应的密码
+        if(StringUtils.isNotBlank(sshkey)) {
+            this.transportConfigCallback = new TransportConfigCallback() {
+                @Override
+                public void configure(Transport transport) {
+                    if(transport instanceof SshTransport) {
+                        SshTransport sshTransport = (SshTransport) transport;
+                        sshTransport.setSshSessionFactory(new JschConfigSessionFactory() {
+                            @Override
+                            protected JSch createDefaultJSch(FS fs) throws JSchException {
+                                JSch defaultJSch = super.createDefaultJSch(fs);
+                                String keypath = GiteeSearchConfig.getPath(sshkey).toString();
+                                if (StringUtils.isNotBlank(keypass))
+                                    defaultJSch.addIdentity(keypath, keypass.trim());
+                                else
+                                    defaultJSch.addIdentity(keypath);
+                                return defaultJSch;
+                            }
+                        });
+                    }
+                }
+            };
+        }
+    }
 
     @Override
     public String name() {
@@ -58,34 +101,40 @@ public class GitRepositoryProvider implements RepositoryProvider {
     public int pull(CodeRepository repo, FileTraveler traveler) {
         Git git = null;
         try {
+            long ct = System.currentTimeMillis();
             File repoFile = StorageFactory.getRepositoryPath(repo.getRelativePath()).toFile();
             if(!repoFile.exists()) {//检查目录不存在就 clone
-                log.info("Repository '{}:{}' no exists, re-clone from '{}'", repo.getId(), repo.getName(), repo.getUrl());
-                CloneCommand cloneCommand = Git.cloneRepository()
-                        .setURI(repo.getUrl())
-                        .setDirectory(repoFile)
-                        .setCloneAllBranches(true);
-
-                if (repo.useCredentials())
-                    cloneCommand.setCredentialsProvider(repo.getCredential());
-                cloneCommand.setCloneSubmodules(false);
-                cloneCommand.setBare(true);
-                git = cloneCommand.call();
+                git = justClone(repo.getUrl(), repoFile);
+                log.info("Repository '{}:{}' no exists, re-clone from '{}' in {}ms",
+                        repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis()-ct);
             }
             else {//目录存在就 pull，如果使用 bare 模式克隆仓库，对应的是 git fetch
-                //TODO 仓库地址变成另外一个不相关的仓库时候怎么处理？
                 git = Git.open(repoFile);
-                /*
-                PullCommand pullCmd = git.pull();
-                pullCmd.setStrategy(MergeStrategy.THEIRS)
-                if (repo.useCredentials())
-                    pullCmd.setCredentialsProvider(repo.getCredential());
-                pullCmd.call();
-                */
                 FetchCommand fetchCmd = git.fetch();
-                if (repo.useCredentials())
-                    fetchCmd.setCredentialsProvider(repo.getCredential());
-                fetchCmd.call();
+                List<RemoteConfig> remotes = git.remoteList().call();
+                boolean needReClone = false;
+                for(RemoteConfig remote : remotes) {
+                    if(remote.getName().equals(fetchCmd.getRemote())) {
+                        if(remote.getURIs().get(0).toString().equals(repo.getUrl())) {
+                            //remote url no changed, just fetch it
+                            this.autoSetCredential(fetchCmd);
+                            fetchCmd.call();
+                            log.info("Repository '{}:{}' mismatch local objects, re-clone from '{}' in {}ms",
+                                    repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis()-ct);
+                            break;
+                        }
+                        else
+                            needReClone = true;
+                    }
+                }
+                if(needReClone) {//仓库地址变成另外一个不相关的仓库时候重新克隆？
+                    git.close();
+                    FileUtils.forceDelete(repoFile);
+                    git = justClone(repo.getUrl(), repoFile);
+                    log.info("Repository '{}:{}' mismatch local objects, re-clone from '{}' in {}ms",
+                            repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis()-ct);
+                }
+                //fetchCmd.setForceUpdate(true);
             }
 
             boolean needRebuildIndexes = true;
@@ -93,19 +142,22 @@ public class GitRepositoryProvider implements RepositoryProvider {
             if(StringUtils.isNotBlank(repo.getLastCommitId())) {
                 //Check last commit ref
                 try (RevWalk revWalk = new RevWalk(git.getRepository())) {
+                    revWalk.setRetainBody(false);
                     oldId = ObjectId.fromString(repo.getLastCommitId());
-                    RevCommit commit = revWalk.parseCommit(oldId);
+                    revWalk.parseCommit(oldId); //check if last commit id exists
+                    revWalk.dispose();
                     needRebuildIndexes = false;
                 } catch (InvalidObjectIdException | MissingObjectException e) {
                 }
             }
 
             if(needRebuildIndexes) {
-                long ct = System.currentTimeMillis();
-                traveler.resetRepository(repo.getId());
+                long cti = System.currentTimeMillis();
+                if(traveler != null)
+                    traveler.resetRepository(repo.getId());
                 //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
                 int fc = this.indexAllFiles(repo, git, traveler);
-                log.warn("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis()-ct);
+                log.warn("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis()-cti);
                 return fc;
             }
 
@@ -117,7 +169,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             if (!oldId.toString().equals(newId.toString())) {
                 List<DiffEntry> entries = diffFiles(git, oldId.name(), newId.name());
                 for (DiffEntry entry : entries) {
-                    if (entry.getChangeType() == DiffEntry.ChangeType.DELETE) {
+                    if (entry.getChangeType() == DiffEntry.ChangeType.DELETE && traveler != null) {
                         CodeIndexDocument doc = new CodeIndexDocument(repo.getId(), repo.getName(), entry.getOldPath());
                         traveler.deleteDocument(doc);
                     } else {
@@ -126,7 +178,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                         boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
                         if(!isBinaryFile) { //二进制文件不参与索引
                             CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
-                            if (doc != null) {
+                            if (doc != null && traveler != null) {
                                 traveler.updateDocument(doc);
                                 fileCount ++;
                             }
@@ -142,6 +194,35 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 git.close();
         }
         return -1;
+    }
+
+    /**
+     * Auto set credential for git
+     * @param command
+     */
+    private void autoSetCredential(TransportCommand command) {
+        if(this.credentialsProvider != null)
+            command.setCredentialsProvider(this.credentialsProvider);
+        if(this.transportConfigCallback != null)
+            command.setTransportConfigCallback(this.transportConfigCallback);
+    }
+
+    /**
+     * clone git repository
+     * @param fromUrl
+     * @param toPath
+     * @return
+     * @throws GitAPIException
+     */
+    private Git justClone(String fromUrl, File toPath) throws GitAPIException {
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setURI(fromUrl)
+                .setDirectory(toPath)
+                .setCloneAllBranches(true);
+        this.autoSetCredential(cloneCommand);
+        cloneCommand.setCloneSubmodules(false);
+        cloneCommand.setBare(true);//只克隆 git 数据库，不克隆文件
+        return cloneCommand.call();
     }
 
     /**
@@ -165,7 +246,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
                 if(!isBinaryFile) { //二进制文件不参与索引
                     CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
-                    if (doc != null) {
+                    if (doc != null && traveler != null) {
                         traveler.updateDocument(doc);
                         fileCount ++;
                     }
@@ -330,7 +411,10 @@ public class GitRepositoryProvider implements RepositoryProvider {
         GitRepositoryProvider grp = new GitRepositoryProvider();
 
         int id = 1000;
-        String[] repos = {"https://gitee.com/vnpy/vnpy", "https://gitee.com/ld/J2Cache", "https://gitee.com/DogGodGit/FlaxEngine"};
+        String[] repos = {"https://gitee.com/ld/J2Cache",
+                          "https://gitee.com/harmonyhub/dtbutton",
+                          "https://gitee.com/DogGodGit/FlaxEngine",
+                          "https://gitee.com/vnpy/vnpy"};
 
         try(
             IndexWriter writer = StorageFactory.getIndexWriter("code");
@@ -339,6 +423,8 @@ public class GitRepositoryProvider implements RepositoryProvider {
             for(String repoUrl : repos) {
                 CodeRepository repo = new CodeRepository();
                 String repoName = repoUrl.substring(repoUrl.lastIndexOf('/')+1);
+                if(id == 1000)
+                    repoName = "J2Cache";
                 repo.setId(id++);
                 repo.setName(repoName);
                 repo.setUrl(repoUrl);
