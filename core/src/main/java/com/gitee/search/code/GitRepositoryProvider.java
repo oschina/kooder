@@ -1,7 +1,6 @@
 package com.gitee.search.code;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import com.gitee.search.index.IndexException;
 import com.gitee.search.storage.StorageFactory;
 import com.gitee.search.utils.FileClassifier;
 import com.gitee.search.utils.SlocCounter;
