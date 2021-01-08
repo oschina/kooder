@@ -1,7 +1,7 @@
 package com.gitee.search.utils;
 
 /**
- * 对用 languages.json 文件中的 quote 字段
+ * 对应 languages.json 文件中的 quote 字段
  */
 public class LanguageQuote {
 
