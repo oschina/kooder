@@ -235,19 +235,21 @@ public class GitRepositoryProvider implements RepositoryProvider {
     private int indexAllFiles(CodeRepository repo, Git git, FileTraveler traveler) throws IOException, GitAPIException {
         int fileCount = 0;
         Ref head = git.getRepository().findRef(Constants.HEAD);
-        repo.setLastCommitId(head.getObjectId().name());//回调最新 commit id 信息
-        RevCommit commit = git.getRepository().parseCommit(head.getObjectId());
-        try (TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
-            treeWalk.addTree(commit.getTree());
-            treeWalk.setRecursive(true);
-            while(treeWalk.next()) {
-                String path = treeWalk.getPathString();
-                boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-                if(!isBinaryFile) { //二进制文件不参与索引
-                    CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
-                    if (doc != null && traveler != null) {
-                        traveler.updateDocument(doc);
-                        fileCount ++;
+        if(head != null && head.getObjectId() != null) {
+            repo.setLastCommitId(head.getObjectId().name());//回调最新 commit id 信息
+            RevCommit commit = git.getRepository().parseCommit(head.getObjectId());
+            try (TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
+                treeWalk.addTree(commit.getTree());
+                treeWalk.setRecursive(true);
+                while(treeWalk.next()) {
+                    String path = treeWalk.getPathString();
+                    boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
+                    if(!isBinaryFile) { //二进制文件不参与索引
+                        CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
+                        if (doc != null && traveler != null) {
+                            traveler.updateDocument(doc);
+                            fileCount ++;
+                        }
                     }
                 }
             }
