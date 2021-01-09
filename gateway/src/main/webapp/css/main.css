@@ -1,16 +1,6 @@
-#main {padding:8px;}
-table {margin-top:20px;}
 
 em.highlight {color:red;font-style:normal;}
 
-.pager {margin-top:20px;}
-.pager a {float:left; padding:2px 4px; border:1px solid #eee;background:#f1f1f1;text-decoration:none;margin:0 4px 4px 0;}
-.pager:after {
-  content: "";
-  display: table;
-  clear: both;
-}
 
-.sidebar {padding:170px 0 0 0;}
-.sidebar ul {line-height:22px;}
-.sidebar ul li em {font-style:normal;color:grey;margin-left:5px;font-size:10.5px;}
+.facets {background:#eee;}
+.facets * {background:#eee;}

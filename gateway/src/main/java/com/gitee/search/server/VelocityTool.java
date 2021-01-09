@@ -10,6 +10,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -30,7 +31,28 @@ public class VelocityTool {
     }
 
     public int param(String name, int defValue) {
-        return NumberUtils.toInt(context.request().getParam("name"), defValue);
+        return NumberUtils.toInt(context.request().getParam(name), defValue);
+    }
+
+    /**
+     * 显示页码
+     * @param totalPage
+     * @param currentPage
+     * @param baseNum
+     * @return
+     */
+    public int[] pages(int totalPage, int currentPage, int baseNum) {
+        int base = ((currentPage - 1) / baseNum) * baseNum;
+        int from = base + 1;
+        int to = Math.min(from + baseNum, totalPage);
+        int count = Math.max(0, to - from);
+        if(count == 0)
+            return null;
+        int[] pages = new int[count];
+        for(int i=from;i<to;i++){
+            pages[i-from] = i;
+        }
+        return pages;
     }
 
     /**
