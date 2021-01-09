@@ -1,5 +1,5 @@
 ## 搜索仓库结果渲染
-<table class="pure-table pure-table-striped">
+<table class="table">
     <thead>
     <tr>
         <th>No</th>

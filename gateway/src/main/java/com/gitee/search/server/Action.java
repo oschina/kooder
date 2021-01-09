@@ -32,6 +32,10 @@ public interface Action {
         context.response().putHeader("Content-Type", "text/html; charset=UTF-8").send(content);
     }
 
+    default void vm(RoutingContext context, String vm) {
+        vm(context, vm, null);
+    }
+
     /**
      * 从参数中解析对象类型字段，并判断值是否有效
      * @param context

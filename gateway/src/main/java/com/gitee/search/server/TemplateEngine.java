@@ -2,6 +2,7 @@ package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import io.vertx.ext.web.RoutingContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.event.EventCartridge;
@@ -25,6 +26,9 @@ public class TemplateEngine {
 
     public final static String ENCODING = "utf-8";
     private final static EventCartridge eventCartridge = new EventCartridge();
+    private final static String VAR_LAYOUT          = "layout";
+    private final static String VAR_PAGE_TITLE      = "page_title";
+    private final static String VAR_SCREEN_CONTENT  = "screen_content";
 
     static {
         //Initialize velocity engine
@@ -61,6 +65,14 @@ public class TemplateEngine {
             params.forEach((k,v) -> context.put(k.toString(), v));
         StringWriter w = new StringWriter();
         Velocity.mergeTemplate(vm, ENCODING, context, w);
+        String vm_layout = (String)context.get(VAR_LAYOUT);
+        if(StringUtils.isNotBlank(vm_layout)) {
+            vm_layout = "layout/" + vm_layout;
+            context.put(VAR_SCREEN_CONTENT, w);
+            StringWriter html = new StringWriter();
+            Velocity.mergeTemplate(vm_layout, ENCODING, context, html);
+            return html.toString();
+        }
         return w.toString();
     }
 

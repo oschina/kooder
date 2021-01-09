@@ -1,86 +1,20 @@
-<html>
-<head>
-    <meta charset='utf-8'>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>#if($q)$q - #{end}Gitee Search</title>
-    <link href="/css/main.css" media="all" rel="stylesheet" />
-    <link href="/css/pure-min.css" media="all" rel="stylesheet" />
-    <link href="/css/grids-responsive-min.css" media="all" rel="stylesheet" />
-    <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
-</head>
-<body>
-<div id="main" class="pure-g">
-    <div class="content pure-u-1 pure-u-md-3-4">
-        <form class="pure-form pure-form-aligned">
-            <fieldset>
-                <label for="i_query">搜索 :</label>
-                <input type="text" name="q" value="$!q" id="i_query" size="50">
-                <select name="type">
-                    <option value="repo" #if($type=='repo')selected#end>Repository</option>
-                    <option value="issue" #if($type=='issue')selected#end>Issue</option>
-                    <option value="commit" #if($type=='commit')selected#end>Commit</option>
-                    <option value="pr" #if($type=='pr')selected#end>PR</option>
-                    <option value="user" #if($type=='user')selected#end>User</option>
-                    <option value="code" #if($type=='code')selected#end>Code</option>
-                </select>
-                <select name="sort">
-                    <option value="score" #if($sort=='score')selected#end>最佳匹配</option>
-                    <option value="stars" #if($sort=='stars')selected#end>最多 Star 数</option>
-                    <option value="forks" #if($sort=='forks')selected#end>最多 Fork 数</option>
-                    <option value="update" #if($sort=='update')selected#end>最近更新</option>
-                </select>
-                <button type="submit" class="pure-button pure-button-primary">Search</button>
-            </fieldset>
-        </form>
-    </div>
-    <div class="content pure-u-1 pure-u-md-3-4">
-        #if($result)
-        <p>
-        query: <code>$result.get("query").textValue()</code><br/>
-        totalHits: <em>$result.get("totalHits")</em><br/>
-        totalPages: <em>$result.get("totalPages")</em><br/>
-        timeUsed: <em>$result.get("timeUsed")ms</em><br/>
-        </p>
-        #if($type=='repo')
-            #parse('vms/render_repo.vm')
-        #elseif($type=='issue')
-            #parse('vms/render_issue.vm')
-        #elseif($type=='code')
-            #parse('vms/render_code.vm')
-        #end
-        <div class="pager">
-            #foreach($page in [1..$result.get("totalPages")])
-            <a href="$tool.uri('p',$page)">$page</a>
-            #end
+#set($layout = 'html.vm')
+<div class="columns text-center">
+    <div class="column col-4 col-mx-auto">
+        <div class="hero hero-lg">
+            <div class="hero-body">
+                <h1>Gitee Search</h1>
+                <form class="form-group" action="search">
+                    <fieldset class="input-group">
+                        <input class="form-input input-lg" name="q" type="text" style="width:400px;" id="txt_q">
+                        <button class="btn btn-primary input-group-btn btn-lg" type="submit">Search</button>
+                    </fieldset>
+                </form>
+                <p>Powerred by <a href="https://gitee.com/" target="_blank">Gitee.com</a></p>
+            </div>
         </div>
-        #end
     </div>
-    #if($result && $result.get('facets'))
-    <div class="sidebar pure-u-1 pure-u-md-1-4">
-        <strong>编程语言</strong>
-        <ul>
-        #foreach($lang in $result.get('facets').get('lang'))
-        <li><span><a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
-        #end
-        </ul>
-        #if($result.get('facets').get('repo.name'))
-        <strong>仓库</strong>
-        <ul>
-            #foreach($lang in $result.get('facets').get('repo.name'))
-            <li><span><a href="$tool.uri('repo.name',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
-            #end
-        </ul>
-        #end
-        #if($result.get('facets').get('owner'))
-        <strong>开发者</strong>
-        <ul>
-            #foreach($lang in $result.get('facets').get('owner'))
-            <li><span><a href="$tool.uri('owner',$lang.get('label').textValue())">$lang.get('label').textValue()</a><em>($lang.get('value'))</em></span></li>
-            #end
-        </ul>
-        #end
-    </div>
-    #end
 </div>
-</body>
-</html>
+<script type="text/javascript">
+    document.getElementById('txt_q').focus();
+</script>

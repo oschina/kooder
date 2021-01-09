@@ -1,0 +1,147 @@
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>#if($q)$q - #{end}Gitee Search</title>
+    <link href="css/main.css" media="all" rel="stylesheet" />
+    <link rel="stylesheet" href="css/spectre.min.css">
+    <link rel="stylesheet" href="css/spectre-exp.min.css">
+    <link rel="stylesheet" href="css/spectre-icons.min.css">
+    <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
+</head>
+<body>
+<div id="main">
+    <header class="navbar">
+        <section class="navbar-section">
+            <form class="form-group">
+                <fieldset class="input-group">
+                    <label class="input-group-addon addon-sm" for="txt_q">GSearch</label>
+                    <input class="form-input input-sm" name="q" value="$!q" type="text" style="width:400px;" id="txt_q">
+                    <select name="type" class="form-select select-sm">
+                        <option value="repo" #if($type=='repo')selected#end>Repository</option>
+                        <option value="issue" #if($type=='issue')selected#end>Issue</option>
+                        <option value="code" #if($type=='code')selected#end>Code</option>
+                    </select>
+                    <select name="sort" class="form-select select-sm">
+                        <option value="score" #if($sort=='score')selected#end>Best Matched</option>
+                        <option value="stars" #if($sort=='stars')selected#end>By Stars</option>
+                        <option value="forks" #if($sort=='forks')selected#end>By Forks</option>
+                        <option value="update" #if($sort=='update')selected#end>Last Updated</option>
+                    </select>
+                    <button class="btn btn-primary input-group-btn btn-sm" type="submit">Search</button>
+                </fieldset>
+            </form>
+        </section>
+    </header>
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                #if($result)
+                <span class="search_summary"><em>$result.get("totalHits")</em> Results , in <em>$result.get("timeUsed")</em> ms</span>
+                #if($type=='repo')
+                #parse('vms/render_repo.vm')
+                #elseif($type=='issue')
+                #parse('vms/render_issue.vm')
+                #elseif($type=='code')
+                #parse('vms/render_code.vm')
+                #end
+                #end
+            </div>
+            <div class="column col-auto facets">
+                #if($result && $result.get('facets'))
+
+                <!-- Programming Language -->
+                <div class="accordion">
+                    <input type="checkbox" id="accordion-langs" name="langs-checkbox" checked="checked" hidden>
+                    <label class="accordion-header" for="accordion-langs">
+                        <i class="icon icon-arrow-right mr-1"></i>
+                        Programming Language
+                    </label>
+                    <div class="accordion-body">
+                        <!-- Accordions content -->
+                        <ul class="menu menu-nav">
+                            #foreach($lang in $result.get('facets').get('lang'))
+                            <li class="menu-item">
+                                <a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a>
+                                <div class="menu-badge">
+                                    <label class="label">$lang.get('value')</label>
+                                </div>
+                            </li>
+                            #end
+                        </ul>
+                    </div>
+                </div>
+
+                #if($result.get('facets').get('repo.name'))
+                <div class="accordion">
+                    <input type="checkbox" id="accordion-repos" name="repos-checkbox" checked="checked" hidden>
+                    <label class="accordion-header" for="accordion-repos">
+                        <i class="icon icon-arrow-right mr-1"></i>
+                        Repositories
+                    </label>
+                    <div class="accordion-body">
+                        <!-- Accordions content -->
+                        <ul class="menu menu-nav">
+                            #foreach($lang in $result.get('facets').get('repo.name'))
+                            <li class="menu-item">
+                                <a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a>
+                                <div class="menu-badge">
+                                    <label class="label">$lang.get('value')</label>
+                                </div>
+                            </li>
+                            #end
+                        </ul>
+                    </div>
+                </div>
+                #end
+
+                #if($result.get('facets').get('owner'))
+                <div class="accordion">
+                    <input type="checkbox" id="accordion-developers" name="developers-checkbox" checked="checked" hidden>
+                    <label class="accordion-header" for="accordion-developers">
+                        <i class="icon icon-arrow-right mr-1"></i>
+                        Developers
+                    </label>
+                    <div class="accordion-body">
+                        <!-- Accordions content -->
+                        <ul class="menu menu-nav">
+                            #foreach($lang in $result.get('facets').get('owner'))
+                            <li class="menu-item">
+                                <a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a>
+                                <div class="menu-badge">
+                                    <label class="label">$lang.get('value')</label>
+                                </div>
+                            </li>
+                            #end
+                        </ul>
+                    </div>
+                </div>
+                #end
+
+                #end
+            </div>
+        </div>
+        <div class="columns text-center">
+            <div class="column col-4 col-mx-auto">
+                <div class="text-primary docs-block">
+
+                    <ul class="pagination">
+                        <li class="page-item disabled">
+                            <a href="#" tabindex="-1">Prev</a>
+                        </li>
+                        #foreach($page in [1..$result.get("totalPages")])
+                        <li class="page-item">
+                            <a href="$tool.uri('p',$page)">$page</a>
+                        </li>
+                        #end
+                        <li class="page-item">
+                            <a href="#">Next</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div><!-- end of container //-->
+</div>
+</body>
+</html>
