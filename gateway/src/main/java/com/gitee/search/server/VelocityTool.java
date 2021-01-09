@@ -1,6 +1,7 @@
 package com.gitee.search.server;
 
 import com.gitee.search.code.CodeLine;
+import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.core.SearchHelper;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -8,9 +9,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +33,30 @@ public class VelocityTool {
         return context;
     }
 
+    /**
+     * 静态资源自动增加时间戳参数
+     * @param uri
+     * @return
+     */
+    public String static_with_timestamp(String uri) {
+        StringBuffer url = new StringBuffer();
+        url.append(uri);
+        Path path = GiteeSearchConfig.getPath("gateway/src/main/webapp/" + uri);
+        if(Files.exists(path)) {
+            try {
+                url.append("?timestamp=");
+                url.append(Files.getLastModifiedTime(path).toMillis());
+            } catch (IOException e0) {}
+        }
+        return url.toString();
+    }
+
+    /**
+     * 读取 HTTP 参数
+     * @param name
+     * @param defValue
+     * @return
+     */
     public int param(String name, int defValue) {
         return NumberUtils.toInt(context.request().getParam(name), defValue);
     }

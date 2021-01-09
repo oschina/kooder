@@ -3,11 +3,17 @@ body {padding:8px;font-size:8pt;}
 
 em.highlight {color:red;font-style:normal;}
 em.md {font-style:normal;}
+em.codeline {width:24px;text-align:right;font-style:normal;margin-right:10px;}
 
 #SearchResults {float:left;width:700px;margin-left:68px;}
 #SearchResults ul { list-style-type:none; margin:20px 0 0 0; padding:0;}
-#SearchResults ul li {}
 #SearchFacets {float:left; width:200px; }
-#SearchFacets .menu .active {font-weight:bold;}
-
 #SearchResults .facets {margin-top:20px;}
+
+blockquote.CodeResults ol {list-style-type:none;margin:0;padding:0}
+blockquote.CodeResults ol li {margin:0;padding:0}
+blockquote.CodeResults ol li:after {content: ""; display: table; clear: both;}
+blockquote.CodeResults ol li em.line {font-style:normal;float:left; width: 26px; padding-right:3px; text-align:right;background:#f2f2f2;}
+blockquote.CodeResults ol li em.code {float:left;width:590px; margin-left:6px;font-style:normal;word-wrap:break-word;}
+
+#SearchFacets .menu .active {font-weight:bold;}
