@@ -3,7 +3,7 @@
     #foreach($obj in $result.get("objects"))
     #set($thisRepoName = $obj.get('repo').get('name').textValue())
     #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
-    <li>
+    <li class="code">
         <h6>
             <a href="$obj.get('repo').get('url').textValue()/tree/master/$obj.get('file').get('location').textValue()" target="_blank">$tool.hlcode($obj.get('file').get('name').textValue(),$q)</a>
             <small class="label"><a href="$tool.uri('repo.name',$thisRepoName)" title="Search in this Repository">$thisRepoName</a></small>
@@ -17,7 +17,7 @@
             #end
             </ol>
         </blockquote>
-        <p><em class="md">$obj.get('lines').get('total').textValue()</em> Lines <em class="md">$obj.get('lang').textValue()</em> by <em class="md">$obj.get('owner').textValue()</em>. <a href="$obj.get("repo").get("url").textValue()" target="_blank">$obj.get("repo").get("url").textValue()</a></p>
+        <p><span class="label">$obj.get('lang').textValue()</span><em class="md">$obj.get('lines').get('total').textValue()</em> Lines by <em class="md">$obj.get('owner').textValue()</em>. <a href="$obj.get("repo").get("url").textValue()" target="_blank">$obj.get("repo").get("url").textValue()</a></p>
     </li>
     #end
 </ul>

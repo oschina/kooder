@@ -60,11 +60,24 @@ public class SearchHelper {
      * @return 返回格式化后的HTML文本
      */
     public static String highlight(String text, String key) {
+        return highlight(text, key, Integer.MAX_VALUE);
+    }
+
+    /**
+     * 对一段文本执行语法高亮处理
+     *
+     * @param text 要处理高亮的文本
+     * @param key  高亮的关键字
+     * @parma maxLen
+     * @return 返回格式化后的HTML文本
+     */
+    public static String highlight(String text, String key, int maxLen) {
         if (StringUtils.isBlank(key) || StringUtils.isBlank(text))
             return text;
 
         String result = null;
-
+        if(maxLen < text.length())
+            text = StringUtils.left(text, maxLen);
         try {
             QueryParser parser = new QueryParser(null, highlight_analyzer);
             Query query = parser.parse(key);

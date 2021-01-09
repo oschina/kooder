@@ -10,7 +10,7 @@
                         <button class="btn btn-primary input-group-btn btn-lg" type="submit">Search</button>
                     </fieldset>
                 </form>
-                <p>Powerred by <a href="https://gitee.com/" target="_blank">Gitee.com</a></p>
+                <p>Powered by <a href="https://gitee.com/" target="_blank">Gitee.com</a></p>
             </div>
         </div>
     </div>

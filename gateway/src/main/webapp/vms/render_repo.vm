@@ -2,13 +2,24 @@
 <ul>
     #foreach($obj in $result.get("objects"))
     #set($recomm = $obj.get('recomm').intValue())
-    <li>
+    #set($rlang = $obj.get('lang').textValue())
+    <li class="repo">
         <h6>
             <a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$tool.highlight("$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()",$q)</a>
             <small class="label">#if($recomm==2)[GVP]#elseif($recomm==1)[荐]#end</small>
         </h6>
         <blockquote>$tool.highlight($obj.get('description').textValue(), $q)</blockquote>
-        <p><span class="chip">$obj.get('lang').textValue()</span>Stars:$obj.get('count').get('star')/Forks:$obj.get('count').get('fork')/GIndex:$obj.get('count').get('gindex')</p>
+        <ul class="breadcrumb">
+            #if(!$tool.is_empty($rlang))
+            <li class="breadcrumb-item">$rlang</li>
+            #end
+            <li class="breadcrumb-item">
+                Stars: $obj.get('count').get('star')
+            </li>
+            <li class="breadcrumb-item">
+                Forks: $obj.get('count').get('fork')
+            </li>
+        </ul>
     </li>
     #end
 </ul>

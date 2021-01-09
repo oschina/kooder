@@ -61,6 +61,10 @@ public class VelocityTool {
         return NumberUtils.toInt(context.request().getParam(name), defValue);
     }
 
+    public boolean is_empty(String value) {
+        return StringUtils.isBlank(value);
+    }
+
     /**
      * 显示页码
      * @param totalPage
@@ -140,6 +144,17 @@ public class VelocityTool {
      */
     public static StringBuffer highlight(String text, String key) {
         return new StringBuffer(SearchHelper.highlight(text, key));
+    }
+
+    /**
+     * 搜索关键字高亮
+     * @param text
+     * @param key
+     * @param maxLen
+     * @return
+     */
+    public static StringBuffer highlight(String text, String key, int maxLen) {
+        return new StringBuffer(SearchHelper.highlight(text, key, maxLen));
     }
 
     /**
