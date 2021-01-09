@@ -101,10 +101,12 @@ public class IndexManager {
                 docs = searcher.search(thisQuery, page * pageSize, sort,true);
             }
 
+            int totalPages = (int) Math.ceil(docs.totalHits.value / (double) pageSize);
+
             //log.info("{} documents find, search time: {}ms", docs.totalHits.value, (System.currentTimeMillis() - ct));
             result.put("type", type);
             result.put("totalHits", docs.totalHits.value);
-            result.put("totalPages", (docs.totalHits.value + pageSize - 1) / pageSize);
+            result.put("totalPages", totalPages);
             result.put("pageIndex", page);
             result.put("pageSize", pageSize);
             result.put("timeUsed", (System.currentTimeMillis() - ct));

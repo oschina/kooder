@@ -1,6 +1,13 @@
 
+body {padding:8px;font-size:8pt;}
+
 em.highlight {color:red;font-style:normal;}
+em.md {font-style:normal;}
 
+#SearchResults {float:left;width:700px;margin-left:68px;}
+#SearchResults ul { list-style-type:none; margin:20px 0 0 0; padding:0;}
+#SearchResults ul li {}
+#SearchFacets {float:left; width:200px; }
+#SearchFacets .menu .active {font-weight:bold;}
 
-.facets {background:#eee;}
-.facets * {background:#eee;}
+#SearchResults .facets {margin-top:20px;}

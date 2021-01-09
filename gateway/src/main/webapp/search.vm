@@ -3,10 +3,10 @@
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>#if($q)$q - #{end}Gitee Search</title>
-    <link href="css/main.css" media="all" rel="stylesheet" />
     <link rel="stylesheet" href="css/spectre.min.css">
     <link rel="stylesheet" href="css/spectre-exp.min.css">
     <link rel="stylesheet" href="css/spectre-icons.min.css">
+    <link rel="stylesheet" href="css/main.css?nxdddadffddadaadfdd" />
     <link href="favicon.ico" rel="shortcut icon" type="image/vnd.microsoft.icon" />
 </head>
 <body>
@@ -35,24 +35,51 @@
     </header>
     <div class="container">
         <div class="columns">
-            <div class="column">
+            <div id="SearchResults">
+                #set($thisLang = $request.getParam('lang'))
+                #set($repo = $request.getParam('repo.name'))
+                #set($owner = $request.getParam('owner'))
                 #if($result)
-                <span class="search_summary"><em>$result.get("totalHits")</em> Results , in <em>$result.get("timeUsed")</em> ms</span>
-                #if($type=='repo')
-                #parse('vms/render_repo.vm')
-                #elseif($type=='issue')
-                #parse('vms/render_issue.vm')
-                #elseif($type=='code')
-                #parse('vms/render_code.vm')
+                #set($totalPages = $result.get("totalPages"))
+                <div>
+                    <div class="search_summary"><em>$result.get("totalHits")</em> Results , $totalPages Pages in <em>$result.get("timeUsed")</em> ms</div>
+                    #if($thisLang || $repo || $owner)
+                    <div class="facets">
+                        #if($thisLang)
+                        <span class="chip">
+                          $thisLang
+                          <a href="$tool.remove_uri_param('lang')" class="btn btn-clear" aria-label="Close" role="button"></a>
+                        </span>
+                        #end
+                        #if($repo)
+                        <span class="chip">
+                          $repo
+                          <a href="$tool.remove_uri_param('repo.name')" class="btn btn-clear" aria-label="Close" role="button"></a>
+                        </span>
+                        #end
+                        #if($owner)
+                        <span class="chip">
+                          $owner
+                          <a href="$tool.remove_uri_param('owner')" class="btn btn-clear" aria-label="Close" role="button"></a>
+                        </span>
+                        #end
+                    </div>
+                    #end
+                    #if($type=='repo')
+                        #parse('vms/render_repo.vm')
+                    #elseif($type=='issue')
+                        #parse('vms/render_issue.vm')
+                    #elseif($type=='code')
+                        #parse('vms/render_code.vm')
+                    #end
+                </div>
                 #end
-                #end
-
+                #if($totalPages > 1)
                 <div class="columns text-center">
                     <div class="column col-4 col-mx-auto">
                         <div class="text-primary docs-block">
                             #set($p = $tool.param('p',1))
                             #set($nextPage = $p + 1)
-                            #set($totalPages = $result.get("totalPages"))
                             <ul class="pagination">
                                 <li class="page-item#if($p==1) disabled#end">
                                     <a href="$tool.uri('p',1)" tabindex="-1">Prev</a>
@@ -67,80 +94,59 @@
                         </div>
                     </div>
                 </div>
+                #end
             </div>
-            <div class="column col-auto facets" style="background:#f2f2f2;">
+            <div id="SearchFacets">
                 #if($result && $result.get('facets'))
-
-                <!-- Programming Language -->
-                <div class="accordion text-primary">
-                    <input type="checkbox" id="accordion-langs" name="langs-checkbox" checked="checked" hidden>
-                    <label class="accordion-header" for="accordion-langs">
-                        <i class="icon icon-arrow-right mr-1"></i>
-                        Programming Language
-                    </label>
-                    <div class="accordion-body">
-                        <!-- Accordions content -->
-                        <ul class="menu menu-nav">
-                            #foreach($lang in $result.get('facets').get('lang'))
-                            <li class="menu-item">
-                                <a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a>
-                                <div class="menu-badge">
-                                    <label class="label">$lang.get('value')</label>
-                                </div>
-                            </li>
-                            #end
-                        </ul>
-                    </div>
-                </div>
-
+                #set($thisLang = $request.getParam('lang'))
+                <ul class="menu text-primary">
+                    <li class="divider" data-content="Programming Language"></li>
+                    #foreach($lang in $result.get('facets').get('lang'))
+                    #set($langfacet = $lang.get('label').textValue())
+                    <li class="menu-item#if($thisLang == $langfacet) active#end">
+                        <a href="$tool.uri('lang',$langfacet)">$langfacet</a>
+                        <div class="menu-badge">
+                            <label class="label">$lang.get('value')</label>
+                        </div>
+                    </li>
+                    #end
+                </ul>
                 #if($result.get('facets').get('repo.name'))
-                <div class="accordion">
-                    <input type="checkbox" id="accordion-repos" name="repos-checkbox" checked="checked" hidden>
-                    <label class="accordion-header" for="accordion-repos">
-                        <i class="icon icon-arrow-right mr-1"></i>
-                        Repositories
-                    </label>
-                    <div class="accordion-body">
-                        <!-- Accordions content -->
-                        <ul class="menu menu-nav">
-                            #foreach($lang in $result.get('facets').get('repo.name'))
-                            <li class="menu-item">
-                                <a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a>
-                                <div class="menu-badge">
-                                    <label class="label">$lang.get('value')</label>
-                                </div>
-                            </li>
-                            #end
-                        </ul>
-                    </div>
-                </div>
+                <!-- Accordions content -->
+                #set($repo = $request.getParam('repo.name'))
+                <ul class="menu text-primary">
+                    <li class="divider" data-content="Repositories"></li>
+                    #foreach($lang in $result.get('facets').get('repo.name'))
+                    #set($thisRepo = $lang.get('label').textValue())
+                    <li class="menu-item#if($repo == $thisRepo) active#end">
+                        <a href="$tool.uri('repo.name',$thisRepo)">$thisRepo</a>
+                        <div class="menu-badge">
+                            <label class="label">$lang.get('value')</label>
+                        </div>
+                    </li>
+                    #end
+                </ul>
                 #end
 
                 #if($result.get('facets').get('owner'))
-                <div class="accordion">
-                    <input type="checkbox" id="accordion-developers" name="developers-checkbox" checked="checked" hidden>
-                    <label class="accordion-header" for="accordion-developers">
-                        <i class="icon icon-arrow-right mr-1"></i>
-                        Developers
-                    </label>
-                    <div class="accordion-body">
-                        <!-- Accordions content -->
-                        <ul class="menu menu-nav">
-                            #foreach($lang in $result.get('facets').get('owner'))
-                            <li class="menu-item">
-                                <a href="$tool.uri('lang',$lang.get('label').textValue())">$lang.get('label').textValue()</a>
-                                <div class="menu-badge">
-                                    <label class="label">$lang.get('value')</label>
-                                </div>
-                            </li>
-                            #end
-                        </ul>
-                    </div>
-                </div>
+                #set($owner = $request.getParam('owner'))
+                <ul class="menu text-primary">
+                    <li class="divider" data-content="Developers"></li>
+                    #foreach($lang in $result.get('facets').get('owner'))
+                    #set($thisOwner = $lang.get('label').textValue())
+                    <li class="menu-item#if($owner == $thisOwner) active#end">
+                        <a href="$tool.uri('owner',$thisOwner)">$thisOwner</a>
+                        <div class="menu-badge">
+                            <label class="label">$lang.get('value')</label>
+                        </div>
+                    </li>
+                    #end
+                </ul>
                 #end
 
                 #end
             </div>
+            <div style="clear:both;"></div>
         </div>
     </div><!-- end of container //-->
 </div>

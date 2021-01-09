@@ -29,6 +29,11 @@ public class SearchAction implements Action {
 
         HttpServerRequest request = context.request();
         String q = param(request, "q");
+        if(StringUtils.isBlank(q)) {
+            this.redirect(context, "/");
+            return ;
+        }
+
         String type = param(request,"type", "repo");
 
         String sort = param(request, "sort");

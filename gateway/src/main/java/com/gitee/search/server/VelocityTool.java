@@ -41,15 +41,14 @@ public class VelocityTool {
      * @param baseNum
      * @return
      */
-    public int[] pages(int totalPage, int currentPage, int baseNum) {
-        int base = ((currentPage - 1) / baseNum) * baseNum;
-        int from = base + 1;
-        int to = Math.min(from + baseNum, totalPage);
-        int count = Math.max(0, to - from);
+    public static int[] pages(int totalPage, int currentPage, int baseNum) {
+        int from = currentPage - ( currentPage % baseNum ) + 1;
+        int to = Math.min(from + baseNum - 1, totalPage);
+        int count = Math.max(0, to - from + 1);
         if(count == 0)
             return null;
         int[] pages = new int[count];
-        for(int i=from;i<to;i++){
+        for(int i=from;i<=to;i++){
             pages[i-from] = i;
         }
         return pages;
@@ -80,6 +79,29 @@ public class VelocityTool {
         newUri.append(encodeURL(name));
         newUri.append('=');
         newUri.append(encodeURL(value.toString()));
+        return newUri;
+    }
+
+    /**
+     * 删除 URL 中的某个参数
+     * @param name
+     * @return
+     */
+    public StringBuffer remove_uri_param(String name) {
+        HttpServerRequest req = context.request();
+        StringBuffer newUri = new StringBuffer();
+        String path = req.path();
+        newUri.append(path);
+        req.params().forEach(e -> {
+            String k = e.getKey();
+            String v = e.getValue();
+            if(!name.equals(k)) {
+                newUri.append((newUri.length()==path.length())?'?':'&');
+                newUri.append(encodeURL(k));
+                newUri.append('=');
+                newUri.append(encodeURL(v.toString()));
+            }
+        });
         return newUri;
     }
 

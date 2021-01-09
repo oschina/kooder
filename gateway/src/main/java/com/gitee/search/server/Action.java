@@ -36,6 +36,10 @@ public interface Action {
         vm(context, vm, null);
     }
 
+    default void redirect(RoutingContext context, String newUrl) {
+        context.response().putHeader("Location", newUrl).setStatusCode(302);
+    }
+
     /**
      * 从参数中解析对象类型字段，并判断值是否有效
      * @param context
