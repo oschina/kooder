@@ -9,6 +9,7 @@
             <small class="label">#if($recomm==2)[GVP]#elseif($recomm==1)[荐]#end</small>
         </h6>
         <blockquote>$tool.highlight($obj.get('description').textValue(), $q)</blockquote>
+        <div class="meta">
         <ul class="breadcrumb">
             #if(!$tool.is_empty($rlang))
             <li class="breadcrumb-item">$rlang</li>
@@ -20,6 +21,7 @@
                 Forks: $obj.get('count').get('fork')
             </li>
         </ul>
+        </div>
     </li>
     #end
 </ul>

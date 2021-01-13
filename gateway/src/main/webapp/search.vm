@@ -1,15 +1,10 @@
-<html>
-<head>
-    <meta charset='utf-8'>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>#if($q)$q - #{end}Gitee Search</title>
-    <link rel="stylesheet" href="$tool.static_with_timestamp('css/spectre.min.css')">
-    <link rel="stylesheet" href="$tool.static_with_timestamp('css/spectre-exp.min.css')">
-    <link rel="stylesheet" href="$tool.static_with_timestamp('css/spectre-icons.min.css')">
-    <link rel="stylesheet" href="$tool.static_with_timestamp('css/main.css')" />
-    <link rel="shortcut icon" href="favicon.ico" type="image/vnd.microsoft.icon" />
-</head>
-<body>
+#set($layout = 'html.vm')
+#set($page_title = $q)
+#set($type = $tool.param('type','repo'))
+#set($thisLang = $tool.param('lang'))
+#set($repo = $tool.param('repo.name'))
+#set($owner = $tool.param('owner'))
+
 <div id="main">
     <header class="navbar">
         <section class="navbar-section">
@@ -26,9 +21,6 @@
     <div class="container">
         <div class="columns">
             <div id="SearchResults">
-                #set($thisLang = $request.getParam('lang'))
-                #set($repo = $request.getParam('repo.name'))
-                #set($owner = $request.getParam('owner'))
                 #if($result)
                 #set($totalPages = $result.get("totalPages"))
                 <div>
@@ -116,7 +108,6 @@
             </div>
             <div id="SearchFacets">
                 #if($result && $result.get('facets'))
-                #set($thisLang = $request.getParam('lang'))
                 <ul class="menu text-primary">
                     <li class="divider" data-content="Programming Language"></li>
                     #foreach($lang in $result.get('facets').get('lang'))
@@ -133,7 +124,6 @@
                 </ul>
                 #if($result.get('facets').get('repo.name'))
                 <!-- Accordions content -->
-                #set($repo = $request.getParam('repo.name'))
                 <ul class="menu text-primary">
                     <li class="divider" data-content="Repositories"></li>
                     #foreach($lang in $result.get('facets').get('repo.name'))
@@ -151,7 +141,6 @@
                 #end
 
                 #if($result.get('facets').get('owner'))
-                #set($owner = $request.getParam('owner'))
                 <ul class="menu text-primary">
                     <li class="divider" data-content="Developers"></li>
                     #foreach($lang in $result.get('facets').get('owner'))
@@ -174,5 +163,3 @@
         </div>
     </div><!-- end of container //-->
 </div>
-</body>
-</html>
