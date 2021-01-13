@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -149,6 +148,8 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 } catch (InvalidObjectIdException | MissingObjectException e) {
                 }
             }
+
+            repo.saveStatus(CodeRepository.STATUS_FETCH);
 
             if(needRebuildIndexes) {
                 long cti = System.currentTimeMillis();

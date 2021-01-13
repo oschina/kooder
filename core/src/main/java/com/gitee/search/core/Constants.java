@@ -60,6 +60,7 @@ public interface Constants {
     String FIELD_REVISION       = "revision";
     String FIELD_SCM            = "scm";
     String FIELD_STATUS         = "status";
+    String FIELD_TIMESTAMP      = "timestamp";
 
     String FIELD_LINES_TOTAL    = "lines.total";
     String FIELD_LINES_CODE     = "lines.code";

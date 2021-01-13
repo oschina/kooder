@@ -17,11 +17,15 @@ public class CodeRepository {
     public final static String SCM_SVN = "svn";
     public final static String SCM_FILE = "file";
 
+    public final static String STATUS_DONE  = "indexed";
+    public final static String STATUS_FETCH = "fetched";
+
     private long   id;          //仓库编号
     private String scm;         //代码源类型：git/svn/file
     private String name;        //仓库名称
     private String url;         //仓库地址，ex: https://gitee.com/ld/J2Cache
     private String lastCommitId;//最后提交编号
+    private long   timestamp;   //状态最后更新时间
     private String status;      //最后状态
 
     /**
@@ -76,6 +80,10 @@ public class CodeRepository {
         this.lastCommitId = lastCommitId;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -99,6 +107,7 @@ public class CodeRepository {
             doc.add(new StoredField(Constants.FIELD_SCM,        this.getScm()));
         if(this.getStatus() != null)
             doc.add(new StringField(Constants.FIELD_STATUS,     this.getStatus(),     Field.Store.YES));
+        doc.add(new StoredField(Constants.FIELD_TIMESTAMP,      System.currentTimeMillis()));
         return doc;
     }
 
@@ -115,7 +124,17 @@ public class CodeRepository {
         repo.setLastCommitId(doc.get(Constants.FIELD_REVISION));
         repo.setScm(doc.get(Constants.FIELD_SCM));
         repo.setStatus(doc.get(Constants.FIELD_STATUS));
+        repo.timestamp = NumberUtils.toLong(doc.get(Constants.FIELD_TIMESTAMP), 0);
         return repo;
+    }
+
+    /**
+     * 更新记录状态
+     * @param newStatus
+     */
+    public void saveStatus(String newStatus) {
+        this.status = newStatus;
+        RepositoryManager.INSTANCE.save(this);
     }
 
     @Override

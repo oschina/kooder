@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * 把 Gateway 底层逻辑移到 GatewayBase
@@ -51,7 +48,6 @@ public abstract class GatewayBase implements Daemon {
         this.vOptions = new VertxOptions();
         this.vOptions.setWorkerPoolSize(this.workerPoolSize);
         this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
-        vOptions.getAddressResolverOptions();
 
         String logs_pattern = GiteeSearchConfig.getProperty("http.log.pattern");
         if(logs_pattern != null) {
@@ -77,6 +73,7 @@ public abstract class GatewayBase implements Daemon {
     @Override
     public void stop() {
         this.server.close();
+        this.vertx.close();
     }
 
     @Override

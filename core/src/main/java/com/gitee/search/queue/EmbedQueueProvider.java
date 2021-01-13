@@ -1,7 +1,6 @@
 package com.gitee.search.queue;
 
 import com.gitee.search.core.GiteeSearchConfig;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.infobip.lib.popout.FileQueue;
 import org.slf4j.Logger;
@@ -22,17 +21,8 @@ public class EmbedQueueProvider implements QueueProvider {
     private final static Logger log = LoggerFactory.getLogger(EmbedQueueProvider.class);
 
     private Map<String, FileQueue<QueueTask>> fileQueues = new ConcurrentHashMap<>();
-    private String fetchUrl;
 
     public EmbedQueueProvider(Properties props) {
-        this.fetchUrl = props.getProperty("embed.url");
-        if(StringUtils.isBlank(fetchUrl)) {
-            String host = GiteeSearchConfig.getHttpBind();
-            if(host == null)
-                host = "localhost";
-            int port = GiteeSearchConfig.getHttpPort();
-            this.fetchUrl = String.format("http://%s:%d/queue/fetch", host, port);
-        }
         int batch_size = NumberUtils.toInt(props.getProperty("embed.batch_size", "10000"), 10000);
 
         Path path = checkoutPath(GiteeSearchConfig.getPath(props.getProperty("embed.path")));
