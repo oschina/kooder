@@ -1,6 +1,7 @@
 /*/target/
 data
 lib/*.jar
+lib/*.pom
 .DS_Store
 *.iml
 .idea
