@@ -17,6 +17,9 @@ em.codeline {width:24px;text-align:right;font-style:normal;margin-right:10px;}
 #SearchResults #SearchTabs li {margin-right:20px;}
 #SearchResults .breadcrumb {margin:0;}
 #SearchResults li.repo {margin-bottom:20px;}
+#SearchResults li .meta {color:#999;}
+#SearchResults li .meta a {color:#999;}
+#SearchResults li .meta .label {margin-right:10px;}
 
 blockquote.CodeResults ol {list-style-type:none;margin:0;padding:0}
 blockquote.CodeResults ol li {margin:0;padding:0}

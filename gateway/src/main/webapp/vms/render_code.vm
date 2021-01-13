@@ -17,7 +17,7 @@
             #end
             </ol>
         </blockquote>
-        <p><span class="label">$obj.get('lang').textValue()</span><em class="md">$obj.get('lines').get('total').textValue()</em> Lines by <em class="md">$obj.get('owner').textValue()</em>. <a href="$obj.get("repo").get("url").textValue()" target="_blank">$obj.get("repo").get("url").textValue()</a></p>
+        <p class="meta"><span class="label">$obj.get('lang').textValue()</span><em class="md">$obj.get('lines').get('total').textValue()</em> Lines by <em class="md">$obj.get('owner').textValue()</em>. <a href="$obj.get("repo").get("url").textValue()" target="_blank">$obj.get("repo").get("url").textValue()</a></p>
     </li>
     #end
 </ul>

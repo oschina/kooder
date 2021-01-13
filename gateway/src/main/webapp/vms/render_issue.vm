@@ -7,7 +7,7 @@
             <small class="label">$obj.get('project').get('name').textValue()</small>
         </h6>
         <blockquote>$tool.highlight($obj.get('description').textValue(), $q, 200)</blockquote>
-        <p>$tool.format('yyyy/MM/dd HH:mm',$obj.get('created_at').longValue())</p>
+        <p class="meta">$tool.format('yyyy/MM/dd HH:mm',$obj.get('created_at').longValue())</p>
     </li>
     #end
 </ul>

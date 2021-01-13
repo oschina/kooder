@@ -61,6 +61,17 @@ public class VelocityTool {
         return NumberUtils.toInt(context.request().getParam(name), defValue);
     }
 
+    /**
+     * 读取 HTTP 参数
+     * @param name
+     * @param defValue
+     * @return
+     */
+    public String param(String name, String...defValue) {
+        String value = context.request().getParam(name);
+        return (value != null) ? value : ((defValue!=null&&defValue.length>0)?defValue[0]:null);
+    }
+
     public boolean is_empty(String value) {
         return StringUtils.isBlank(value);
     }
