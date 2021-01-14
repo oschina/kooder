@@ -43,4 +43,19 @@ $ bin/gateway.sh
 
 ### 索引
 
-安装完的 Gitee Search 不包含任何索引数据，
+安装完的 Gitee Search 不包含任何索引数据，索引数据方式包括：
+
+1. HTTP 接口
+
+实例：
+
+curl "http://localhost:8080/api/task?type=xxx&action=xxx" -d {json}  
+其中 json 格式请参考 json/code.json, json/repo.json, json/issue.json
+
+2. json 文件
+
+$bin/gsimport -t repo -a add -p [json文件目录]
+
+3. 系统对接
+
+提供 gitlab 或者 gitee 的 api 接口地址，由 Gitee Search 直接从接口中获取数据
