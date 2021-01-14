@@ -43,7 +43,6 @@ public class FetchTaskThread extends Thread {
     @Override
     public void run() {
         while(!this.isInterrupted()) {
-            long startTime = System.currentTimeMillis();
             final AtomicInteger taskCount = new AtomicInteger(0);
             BatchTaskRunner.execute(provider.types(), 1, types -> {
                 String type = types.get(0);
@@ -55,6 +54,7 @@ public class FetchTaskThread extends Thread {
                     {
                         //如果 tasks_per_thread < 0 ，则单线程处理
                         int threshold = (tasks_per_thread>0)?tasks_per_thread:tasks.size();
+                        long startTime = System.currentTimeMillis();
                         BatchTaskRunner.execute(tasks, threshold, list -> handleTasks(list, writer, taxonomyWriter));
                         log.info("{} tasks<{}> finished in {} ms", tasks.size(), type, System.currentTimeMillis() - startTime);
                         taskCount.addAndGet(tasks.size());
@@ -84,7 +84,7 @@ public class FetchTaskThread extends Thread {
         tasks.forEach( task -> {
             try {
                 //代码类型的任务需要单独处理，而且需要区分对待公开和私有仓库
-                if(!task.isCodeTask())
+                if(task.isCodeTask())
                     handleCodeTask(task, writer, taxonomyWriter);
                 else
                     task.write(writer, taxonomyWriter);
