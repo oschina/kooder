@@ -44,7 +44,7 @@ public class Gateway extends GatewayBase {
             writeAccessLog(context.request(), System.currentTimeMillis() - ct);
         });
 
-        this.server.requestHandler(router).listen(port).onSuccess(server -> {
+        this.server.requestHandler(router).listen(port, bind).onSuccess(server -> {
             Runtime.getRuntime().addShutdownHook(new Thread(() ->{
                 super.stop();
                 for(Thread task : startupTasks.values()){
@@ -52,7 +52,7 @@ public class Gateway extends GatewayBase {
                 }
                 super.destroy();
             }));
-            log.info("READY (:{})!", port);
+            log.info("READY ({}:{})!", this.bind, this.port);
         });
 
         this.startInitTasks();

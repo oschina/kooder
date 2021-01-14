@@ -42,6 +42,8 @@ public abstract class GatewayBase implements Daemon {
 
     public GatewayBase() {
         this.bind = GiteeSearchConfig.getHttpBind();
+        if(this.bind == null)
+            this.bind = "127.0.0.1";
         this.port = GiteeSearchConfig.getHttpPort();
         this.workerPoolSize = NumberUtils.toInt(GiteeSearchConfig.getProperty("http.worker.pool.size"), 16);
 
