@@ -1,6 +1,7 @@
 package com.gitee.search.server;
 
 import com.gitee.search.queue.QueueTask;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -32,12 +33,22 @@ public interface Action {
         context.response().putHeader("Content-Type", "text/html; charset=UTF-8").send(content);
     }
 
+    /**
+     * Render velocity template
+     * @param context
+     * @param vm
+     */
     default void vm(RoutingContext context, String vm) {
         vm(context, vm, null);
     }
 
+    /**
+     * Redirect to a new url
+     * @param context
+     * @param newUrl
+     */
     default void redirect(RoutingContext context, String newUrl) {
-        context.response().putHeader("Location", newUrl).setStatusCode(302);
+        context.response().setStatusCode(HttpResponseStatus.FOUND.code()).putHeader("Location", newUrl);
     }
 
     /**

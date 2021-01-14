@@ -24,11 +24,17 @@ public class TemplateEngine {
 
     private final static Logger log = LoggerFactory.getLogger(TemplateEngine.class);
 
-    public final static String ENCODING = "utf-8";
-    private final static EventCartridge eventCartridge = new EventCartridge();
+    public final static String ENCODING     = "utf-8";
+    public final static String VAR_CONTEXT  = "context";
+    public final static String VAR_REQUEST  = "request";
+    public final static String VAR_RESPONSE = "response";
+    public final static String VAR_TOOL     = "tool";
+
     private final static String VAR_LAYOUT          = "layout";
     private final static String VAR_PAGE_TITLE      = "page_title";
     private final static String VAR_SCREEN_CONTENT  = "screen_content";
+
+    private final static EventCartridge eventCartridge = new EventCartridge();
 
     static {
         //Initialize velocity engine
@@ -83,7 +89,10 @@ public class TemplateEngine {
     private static VelocityContext initContext(RoutingContext routingContext) {
         VelocityContext context = new VelocityContext();
         context.attachEventCartridge(eventCartridge);
-        context.put("tool", new VelocityTool(routingContext));
+        context.put(VAR_TOOL,       new VelocityTool(routingContext));
+        context.put(VAR_CONTEXT,    routingContext);
+        context.put(VAR_REQUEST,    routingContext.request());
+        context.put(VAR_RESPONSE,   routingContext.response());
         return context;
     }
 

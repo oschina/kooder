@@ -8,6 +8,7 @@
 QUERY: ${result.query.textValue()}
 TIME: ${result.timeUsed} ms
 -->
+#set($q = $tool.param('q'))
 <div id="main">
     <header class="navbar">
         <section class="navbar-section">

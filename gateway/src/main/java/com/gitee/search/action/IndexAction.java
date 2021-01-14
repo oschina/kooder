@@ -6,7 +6,7 @@ import io.vertx.ext.web.RoutingContext;
 import java.io.IOException;
 
 /**
- * Default action
+ * Default action for web
  * @author Winter Lau<javayou@gmail.com>
  */
 public class IndexAction implements Action {
