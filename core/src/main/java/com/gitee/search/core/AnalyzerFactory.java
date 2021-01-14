@@ -4,6 +4,7 @@ import com.gitee.search.code.TechCodeAnalyzer;
 import com.gitee.search.jcseg.JcsegAnalyzer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.lionsoul.jcseg.ISegment;
 import org.lionsoul.jcseg.IWord;
 import org.lionsoul.jcseg.dic.ADictionary;
@@ -36,6 +37,7 @@ public class AnalyzerFactory {
     private static SegmenterConfig config;
     private static SegmenterConfig configForSplit;
     private static TechCodeAnalyzer codeAnalyzer = new TechCodeAnalyzer();
+    private static StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
 
     static {
         config = new SegmenterConfig(true);
@@ -76,6 +78,12 @@ public class AnalyzerFactory {
     public final static Analyzer getCodeAnalyzer() {
         return codeAnalyzer;
     }
+
+    /**
+     * 用于一些简单的查询条件的解析器
+     * @return
+     */
+    public final static Analyzer getSimpleAnalyzer() { return standardAnalyzer; }
 
     /**
      * 加载扩展词库

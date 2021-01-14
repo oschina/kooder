@@ -50,7 +50,7 @@ public class RepoQuery extends QueryBase {
      * @return
      */
     @Override
-    protected Query buildQuery() {
+    protected Query buildUserQuery() {
         if(parseSearchKey) {
             QueryParser parser = new QueryParser("repo", AnalyzerFactory.getInstance(false));
             try {

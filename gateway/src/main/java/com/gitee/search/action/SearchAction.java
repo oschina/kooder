@@ -21,7 +21,7 @@ import java.util.Map;
 public class SearchAction implements Action {
 
     /**
-     * 搜索页面
+     * controller for search.vm
      * @param context
      * @throws IOException
      */
@@ -36,56 +36,20 @@ public class SearchAction implements Action {
 
         String type = param(request,"type", "repo");
 
-        String sort = param(request, "sort");
-        int page = Math.max(1, param(request,"p", 1));
-        String lang = param(request, "lang");
-
         Map<String, Object> params = new HashMap();
 
         params.putAll(params(request));
         params.put("request", request);
 
-        if(StringUtils.isNotBlank(q)) {
-            String json = null;
-            switch (type) {
-                case Constants.TYPE_REPOSITORY:
-                    json = QueryFactory.REPO()
-                            .setSearchKey(q)
-                            .addFacets(Constants.FIELD_LANGUAGE, lang)
-                            .setSort(sort)
-                            .setPage(page)
-                            .setPageSize(PAGE_SIZE)
-                            .search();
-                    break;
-                case Constants.TYPE_ISSUE:
-                    json = QueryFactory.ISSUE()
-                            .setSearchKey(q)
-                            .setSort(sort)
-                            .setPage(page)
-                            .setPageSize(PAGE_SIZE)
-                            .search();
-                    break;
-                case Constants.TYPE_CODE:
-                    json = QueryFactory.CODE()
-                            .setSearchKey(q)
-                            .addFacets(Constants.FIELD_LANGUAGE, lang)
-                            .addFacets(Constants.FIELD_REPO_NAME, param(request, Constants.FIELD_REPO_NAME))
-                            .addFacets(Constants.FIELD_CODE_OWNER, param(request, Constants.FIELD_CODE_OWNER))
-                            .setSort(sort)
-                            .setPage(page)
-                            .setPageSize(PAGE_SIZE)
-                            .search();
-                    break;
-                default:
-                    error(context.response(), HttpResponseStatus.BAD_REQUEST.code());
-                    return;
-            }
-
-            if(json != null) {
-                JsonNode node = new ObjectMapper().readTree(json);
-                params.put("result", node);
-            }
+        String json = _search(request, type);
+        if(json == null) {
+            error(context.response(), HttpResponseStatus.BAD_REQUEST.code());
+            return;
         }
+
+        JsonNode node = new ObjectMapper().readTree(json);
+        params.put("result", node);
+
         this.vm(context, "search.vm", params);
     }
 
@@ -96,47 +60,82 @@ public class SearchAction implements Action {
      * @return
      */
     public void repositories(RoutingContext context) throws IOException {
-        HttpServerRequest request = context.request();
-        String q = param(request, "q");
-        if(StringUtils.isBlank(q)) {
-            this.json(context.response(), "{}");
-            return ;
-        }
-        String sort = param(request, "sort");
-        int page = Math.max(1, param(request,"p", 1));
-        String lang = param(request, "lang");
-        String json = QueryFactory.REPO()
-                                .setSearchKey(q)
-                                .setSort(sort)
-                                .setPage(page)
-                                .setPageSize(PAGE_SIZE)
-                                .addFacets(Constants.FIELD_LANGUAGE, lang)
-                                .search();
+        String json = _search(context.request(), Constants.TYPE_REPOSITORY);
         this.json(context.response(), json);
     }
 
     /**
-     * search git issues
+     * web interface for issue search
      * https://<search-server>/search/issues?q=xxxx&sort=xxxx
      * @param context
      * @return
      */
     public void issues(RoutingContext context) throws IOException {
-        HttpServerRequest request = context.request();
-        String q = param(request, "q");
-        String sort = param(request, "sort");
-        int page = Math.max(1, param(request,"p", 1));
-        if(StringUtils.isBlank(q)) {
-            this.json(context.response(), "{}");
-            return ;
-        }
-        String json = QueryFactory.ISSUE()
-                                .setSearchKey(q)
-                                .setSort(sort)
-                                .setPage(page)
-                                .setPageSize(PAGE_SIZE)
-                                .search();
+        String json = _search(context.request(), Constants.TYPE_ISSUE);
         this.json(context.response(), json);
+    }
+
+    /**
+     * web interface for source code search
+     * https://<search-server>/search/codes?q=xxxx
+     * @param context
+     * @throws IOException
+     */
+    public void codes(RoutingContext context) throws IOException {
+        String json = _search(context.request(), Constants.TYPE_CODE);
+        this.json(context.response(), json);
+    }
+
+    /**
+     * execute search
+     * @param request
+     * @param type
+     * @return
+     * @throws IOException
+     */
+    private String _search(HttpServerRequest request, String type) throws IOException {
+        String q = param(request, "q");
+        if(StringUtils.isBlank(q))
+            return Constants.EMPTYJSON;
+
+        String json = null;
+        int page = Math.max(1, param(request,"p", 1));
+
+        String sort = param(request, "sort");
+        String lang = param(request, "lang");
+
+        switch (type) {
+            case Constants.TYPE_REPOSITORY:
+                json = QueryFactory.REPO()
+                        .setSearchKey(q)
+                        .addFacets(Constants.FIELD_LANGUAGE, lang)
+                        .setSort(sort)
+                        .setPage(page)
+                        .setPageSize(PAGE_SIZE)
+                        .search();
+                break;
+
+            case Constants.TYPE_ISSUE:
+                json = QueryFactory.ISSUE()
+                        .setSearchKey(q)
+                        .setSort(sort)
+                        .setPage(page)
+                        .setPageSize(PAGE_SIZE)
+                        .search();
+                break;
+
+            case Constants.TYPE_CODE:
+                json = QueryFactory.CODE()
+                        .setSearchKey(q)
+                        .addFacets(Constants.FIELD_LANGUAGE, lang)
+                        .addFacets(Constants.FIELD_REPO_NAME, param(request, Constants.FIELD_REPO_NAME))
+                        .addFacets(Constants.FIELD_CODE_OWNER, param(request, Constants.FIELD_CODE_OWNER))
+                        .setSort(sort)
+                        .setPage(page)
+                        .setPageSize(PAGE_SIZE)
+                        .search();
+        }
+        return json;
     }
 
 }

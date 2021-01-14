@@ -7,6 +7,7 @@ package com.gitee.search.core;
 public interface Constants {
 
     String EMPTYSTRING          = "";
+    String EMPTYJSON            = "{}";
 
     String TYPE_REPOSITORY      = "repo";     //仓库
     String TYPE_ISSUE           = "issue";    //Issue

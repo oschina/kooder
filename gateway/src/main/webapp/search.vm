@@ -4,7 +4,10 @@
 #set($thisLang = $tool.param('lang'))
 #set($repo = $tool.param('repo.name'))
 #set($owner = $tool.param('owner'))
-
+<!--
+QUERY: ${result.query.textValue()}
+TIME: ${result.timeUsed} ms
+-->
 <div id="main">
     <header class="navbar">
         <section class="navbar-section">

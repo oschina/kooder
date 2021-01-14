@@ -3,7 +3,6 @@ package com.gitee.search.query;
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
@@ -25,12 +24,10 @@ public class CodeQuery extends QueryBase {
 
     /**
      * 构建查询对象
-     * QueryString(before): cache && (rn:wookteam) && (ln:javascript || ln:php)
-     * QueryString(after): +contents:cache +rn:wookteam +(ln:javascript ln:php)
      * @return
      */
     @Override
-    protected Query buildQuery() {
+    protected Query buildUserQuery() {
         String q = QueryParser.escape(searchKey);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         builder.add(makeBoostQuery(Constants.FIELD_FILE_NAME,  q, 10.0f), BooleanClause.Occur.SHOULD);

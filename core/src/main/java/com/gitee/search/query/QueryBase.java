@@ -9,8 +9,11 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 搜索基类
@@ -24,9 +27,10 @@ public abstract class QueryBase implements IQuery {
     protected int page = 1;
     protected int pageSize = 20;
     protected Map<String, String[]> facets = new HashMap();
+    protected List<Query> filters = new ArrayList<>();
 
     /**
-     * 搜索
+     * execute query
      * @return
      * @throws IOException
      */
@@ -38,19 +42,34 @@ public abstract class QueryBase implements IQuery {
     }
 
     /**
-     * 构建查询对象
+     * Build query according to user key
      * @return
      */
-    protected abstract Query buildQuery() ;
+    protected abstract Query buildUserQuery();
 
     /**
-     * 构建排序对象
+     * Build complete query with user query and filter query
+     * @return
+     */
+    private Query buildQuery() {
+        Query query = this.buildUserQuery();
+        if(filters == null || filters.size() == 0)
+            return query;
+        BooleanQuery.Builder fBuilder = new BooleanQuery.Builder();
+        for(Query filter : filters)
+            fBuilder.add(filter, BooleanClause.Occur.FILTER);
+        fBuilder.add(query, BooleanClause.Occur.MUST);
+        return fBuilder.build();
+    }
+
+    /**
+     * build sort according to user selection
      * @return
      */
     protected abstract Sort buildSort();
 
     /**
-     * 搜索关键字
+     * set search key
      * @param key
      */
     @Override
@@ -126,6 +145,32 @@ public abstract class QueryBase implements IQuery {
     @Override
     public Map<String, String[]> getFacets() {
         return facets;
+    }
+
+    /**
+     * 添加过滤条件
+     *
+     * @param filterQueryString
+     * @return
+     */
+    @Override
+    public IQuery addFilter(String filterQueryString) {
+        try {
+            filters.add(new QueryParser(null, AnalyzerFactory.getSimpleAnalyzer()).parse(filterQueryString));
+        } catch (ParseException e) {
+            throw new QueryException("Failed to add filter: " + filterQueryString, e);
+        }
+        return this;
+    }
+
+    /**
+     * 获取所有过滤条件
+     *
+     * @return
+     */
+    @Override
+    public List<String> getFilters() {
+        return filters.stream().map(q -> q.toString()).collect(Collectors.toList());
     }
 
     /**

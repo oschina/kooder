@@ -1,6 +1,7 @@
 package com.gitee.search.query;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,6 +63,19 @@ public interface IQuery {
      * @return
      */
     Map<String, String[]> getFacets();
+
+    /**
+     * 添加过滤条件
+     * @param filterQueryString
+     * @return
+     */
+    IQuery addFilter(String filterQueryString);
+
+    /**
+     * 获取所有过滤条件
+     * @return
+     */
+    List<String> getFilters();
 
     /**
      * 搜索
