@@ -1,6 +1,8 @@
 package com.gitee.search.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
@@ -8,6 +10,8 @@ import org.apache.commons.lang3.math.NumberUtils;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class JsonUtils {
+
+    private final static ObjectMapper JSON = new ObjectMapper();
 
     /**
      * 读取文本json节点数据
@@ -31,4 +35,19 @@ public class JsonUtils {
         JsonNode f = node.get(fn);
         return (f!=null)?NumberUtils.toLong(f.textValue(), defaultValue):defaultValue;
     }
+
+    /**
+     * 对象转 JSON 字符串
+     * @param obj
+     * @return
+     */
+    public static String toJson(Object obj) {
+        try {
+            return JSON.writeValueAsString(obj);
+        } catch(JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

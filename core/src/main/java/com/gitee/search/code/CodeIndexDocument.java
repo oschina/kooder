@@ -3,6 +3,7 @@ package com.gitee.search.code;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
+import com.gitee.search.utils.JsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.document.*;
@@ -254,13 +255,7 @@ public class CodeIndexDocument {
 
     @Override
     public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        }catch(JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonUtils.toJson(this);
     }
 
 }
