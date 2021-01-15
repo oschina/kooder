@@ -3,8 +3,10 @@ package com.gitee.search.server;
 import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.indexer.FetchTaskThread;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.web.handler.BodyHandler;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +46,9 @@ public class Gateway extends GatewayBase {
             writeAccessLog(context.request(), System.currentTimeMillis() - ct);
         });
 
-        this.server.requestHandler(router).listen(port, bind).onSuccess(server -> {
+        InetSocketAddress address = (bind==null)?new InetSocketAddress(this.port):new InetSocketAddress(this.bind, this.port);
+
+        this.server.requestHandler(router).listen(SocketAddress.inetSocketAddress(address)).onSuccess(server -> {
             Runtime.getRuntime().addShutdownHook(new Thread(() ->{
                 super.stop();
                 for(Thread task : startupTasks.values()){
@@ -52,7 +56,7 @@ public class Gateway extends GatewayBase {
                 }
                 super.destroy();
             }));
-            log.info("READY ({}:{})!", this.bind, this.port);
+            log.info("READY ({}:{})!", (this.bind==null)?"*":this.bind, this.port);
         });
 
         this.startInitTasks();
