@@ -49,7 +49,7 @@ $ bin/gateway.sh
 
 实例：
 
-curl "http://localhost:8080/api/task?type=xxx&action=xxx" -d {json}  
+curl "http://localhost:8080/api/task?type=repo&action=add" -d {json}  
 其中 json 格式请参考 json/code.json, json/repo.json, json/issue.json
 
 2. json 文件
