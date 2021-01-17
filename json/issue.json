@@ -1,16 +1,16 @@
 {
-  "objects": [
-    {
-      "id": 12793,
-      "subject": "springboot 环境，并发读取的时候返回null",
-      "detail": "配置sync=true 不返回null了 但是直接查库了",
-      "user": 31337,
-      "repository": 23438,
-      "project": 83473,
-      "enterprise": 23243,
-      "created_at": 234345343434,
-      "updated_at": 234345389434,
-      "reply_count": 23
-    }
-  ]
+  "id":13323,
+  "ident":"I1",
+  "title":"但是方法",
+  "description":"发发发",
+  "url": "https://gitee.com/xxx/xxx/issue/xxx",
+  "owner":{
+    "id":2,
+    "name":"fox"
+  },
+  "project":{
+    "id":0
+  },
+  "created_at":1557203396,
+  "state":"closed"
 }
