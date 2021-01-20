@@ -1,5 +1,7 @@
 package com.gitee.search.models;
 
+import java.util.HashMap;
+
 /**
  * Relation info
  * @author Winter Lau<javayou@gmail.com>
@@ -42,5 +44,10 @@ public final class Relation {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return id == ((Relation)obj).id;
     }
 }
