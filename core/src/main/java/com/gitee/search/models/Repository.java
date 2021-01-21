@@ -1,6 +1,10 @@
 package com.gitee.search.models;
 
-import org.apache.lucene.document.Document;
+import com.gitee.search.core.Constants;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.lucene.document.*;
+import org.apache.lucene.facet.FacetField;
 import org.gitlab4j.api.models.Visibility;
 
 import java.util.List;
@@ -34,6 +38,11 @@ public final class Repository extends Searchable {
     protected int forksCount;
 
     public Repository() {}
+
+    public Repository(Document doc) {
+        setDocument(doc);
+    }
+
     public Repository(org.gitlab4j.api.models.Project p) {
         this.id = p.getId();
         this.name = p.getName();
@@ -56,12 +65,85 @@ public final class Repository extends Searchable {
 
     /**
      * generate lucene document
-     *
      * @return
      */
     @Override
     public Document getDocument() {
-        return null;
+        Document doc = new Document();
+        doc.add(new StringField(Constants.FIELD_ID,     String.valueOf(id),     Field.Store.YES));
+        doc.add(new TextField(Constants.FIELD_NAME,     this.getName(),         Field.Store.YES));
+        doc.add(new StringField(Constants.FIELD_DISPLAY_NAME, this.getDisplayName(), Field.Store.YES));
+        doc.add(new TextField(Constants.FIELD_DESC,     this.getDescription(),  Field.Store.YES));
+        doc.add(new StoredField(Constants.FIELD_URL,    this.getUrl()));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_RECOMM, recomm));
+        doc.add(new StoredField(Constants.FIELD_RECOMM, recomm));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_BLOCK, block));
+        doc.add(new StoredField(Constants.FIELD_BLOCK, block));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_VISIBILITY, visibility));
+        doc.add(new StoredField(Constants.FIELD_VISIBILITY, visibility));
+
+        if(StringUtils.isNotBlank(license)) {
+            doc.add(new FacetField(Constants.FIELD_LICENSE, license));
+            doc.add(new StringField(Constants.FIELD_LICENSE, license, Field.Store.YES));
+        }
+
+        if(StringUtils.isNotBlank(lang)) {
+            doc.add(new FacetField(Constants.FIELD_LANGUAGE, lang));
+            doc.add(new StringField(Constants.FIELD_LANGUAGE, lang, Field.Store.YES));
+        }
+
+        if(StringUtils.isNotBlank(readme))
+            doc.add(new TextField(Constants.FIELD_README, readme, Field.Store.NO));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_FORK, fork));
+        doc.add(new StoredField(Constants.FIELD_FORK, fork));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_STAR_COUNT, starsCount));
+        doc.add(new StoredField(Constants.FIELD_STAR_COUNT, starsCount));
+        doc.add(new NumericDocValuesField(Constants.FIELD_FORK_COUNT, forksCount));
+        doc.add(new StoredField(Constants.FIELD_FORK_COUNT, forksCount));
+        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
+
+        //tags
+        doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", tags), Field.Store.NO));
+        //catalogs
+        doc.add(new TextField(Constants.FIELD_CATALOGS, String.join("\n", catalogs), Field.Store.NO));
+
+        //enterprise info (just for gitee)
+        enterprise:
+        doc.add(new StringField(Constants.FIELD_ENTERPRISE_ID, String.valueOf(enterprise.id), Field.Store.YES));
+        if(StringUtils.isNotBlank(enterprise.name)) {
+            doc.add(new FacetField(Constants.FIELD_ENTERPRISE_NAME, enterprise.name));
+            doc.add(new TextField(Constants.FIELD_ENTERPRISE_NAME,  enterprise.name, Field.Store.YES));
+        }
+        if(StringUtils.isNotBlank(enterprise.url))
+            doc.add(new StoredField(Constants.FIELD_ENTERPRISE_URL, enterprise.url));
+        //program info (just for gitee)
+        program:
+        doc.add(new StringField(Constants.FIELD_PROGRAM_ID, String.valueOf(project.id), Field.Store.YES));
+        if(StringUtils.isNotBlank(project.name)) {
+            doc.add(new FacetField(Constants.FIELD_PROGRAM_NAME, project.name));
+            doc.add(new TextField(Constants.FIELD_PROGRAM_NAME,  project.name, Field.Store.YES));
+        }
+        if(StringUtils.isNotBlank(project.url))
+            doc.add(new StoredField(Constants.FIELD_PROGRAM_URL, project.url));
+        //owner info
+        owner:
+        doc.add(new StringField(Constants.FIELD_USER_ID, String.valueOf(owner.id), Field.Store.YES));
+        if(StringUtils.isNotBlank(owner.name)) {
+            doc.add(new FacetField(Constants.FIELD_USER_NAME, owner.name));
+            doc.add(new TextField(Constants.FIELD_USER_NAME,  owner.name, Field.Store.YES));
+        }
+        if(StringUtils.isNotBlank(owner.url))
+            doc.add(new StoredField(Constants.FIELD_USER_URL, owner.url));
+
+        return doc;
     }
 
     /**
@@ -70,7 +152,36 @@ public final class Repository extends Searchable {
      * @param doc
      */
     @Override
-    public Searchable setDocument(Document doc) {
+    public Repository setDocument(Document doc) {
+        this.id = NumberUtils.toInt(doc.get(Constants.FIELD_ID), 0);
+        this.name = doc.get(Constants.FIELD_NAME);
+        this.displayName = doc.get(Constants.FIELD_DISPLAY_NAME);
+        this.description = doc.get(Constants.FIELD_DESC);
+        this.url = doc.get(Constants.FIELD_URL);
+        this.recomm = NumberUtils.toInt(doc.get(Constants.FIELD_RECOMM), Constants.RECOMM_NONE);
+        this.block = NumberUtils.toInt(doc.get(Constants.FIELD_BLOCK), Constants.REPO_BLOCK_YES);//如果没有block字段，为安全计，默认是屏蔽状态
+        this.visibility = NumberUtils.toInt(doc.get(Constants.FIELD_VISIBILITY), Constants.VISIBILITY_PRIVATE);
+        this.fork = NumberUtils.toInt(doc.get(Constants.FIELD_FORK), 0);
+        this.license = doc.get(Constants.FIELD_LICENSE);
+        this.lang = doc.get(Constants.FIELD_LANGUAGE);
+        this.starsCount = NumberUtils.toInt(doc.get(Constants.FIELD_STAR_COUNT), 0);
+        this.forksCount = NumberUtils.toInt(doc.get(Constants.FIELD_FORK_COUNT), 0);
+        this.createdAt = NumberUtils.toLong(doc.get(Constants.FIELD_CREATED_AT), 0);
+        this.updatedAt = NumberUtils.toLong(doc.get(Constants.FIELD_UPDATED_AT), 0);
+
+        //enterprise
+        this.enterprise.id = NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0);
+        this.enterprise.name = doc.get(Constants.FIELD_ENTERPRISE_NAME);
+        this.enterprise.url = doc.get(Constants.FIELD_ENTERPRISE_URL);
+        //program
+        this.project.id = NumberUtils.toInt(doc.get(Constants.FIELD_PROGRAM_ID), 0);
+        this.project.name = doc.get(Constants.FIELD_PROGRAM_NAME);
+        this.project.url = doc.get(Constants.FIELD_PROGRAM_URL);
+        //owner
+        this.owner.id = NumberUtils.toInt(doc.get(Constants.FIELD_USER_ID), 0);
+        this.owner.name = doc.get(Constants.FIELD_USER_NAME);
+        this.owner.url = doc.get(Constants.FIELD_USER_URL);
+
         return this;
     }
 
@@ -157,13 +268,13 @@ public final class Repository extends Searchable {
     public void setVisibility(Visibility visibility) {
         switch(visibility) {
             case PRIVATE:
-                this.visibility = VISIBILITY_PRIVATE;
+                this.visibility = Constants.VISIBILITY_PRIVATE;
                 break;
             case PUBLIC:
-                this.visibility = VISIBILITY_PUBLIC;
+                this.visibility = Constants.VISIBILITY_PUBLIC;
                 break;
             case INTERNAL:
-                this.visibility = VISIBILITY_INTERNAL;
+                this.visibility = Constants.VISIBILITY_INTERNAL;
         }
     }
 

@@ -2,6 +2,7 @@ package com.gitee.search.models;
 
 import com.gitee.search.core.Constants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
 
@@ -12,7 +13,7 @@ import org.apache.lucene.facet.FacetField;
 public final class SourceFile extends Searchable {
 
     private String uuid;            //file unique identify
-    private Relation repository;    //repository, use this field to delete all files of repository
+    private Relation repository = Relation.EMPTY;    //repository, use this field to delete all files of repository
 
     private String name;
     private String location;        // Path to file relative to repo location
@@ -30,8 +31,34 @@ public final class SourceFile extends Searchable {
     private String revision;        //last commit id
 
     /**
+     * Read fields from document
+     * @param doc
+     */
+    @Override
+    public Searchable setDocument(Document doc) {
+        this.uuid = doc.get(Constants.FIELD_UUID);
+        this.repository.id = NumberUtils.toInt(doc.get(Constants.FIELD_REPO_ID));
+        this.repository.name = doc.get(Constants.FIELD_REPO_NAME);
+        this.repository.url = doc.get(Constants.FIELD_REPO_URL);
+        this.name = doc.get(Constants.FIELD_FILE_NAME);
+        this.location = doc.get(Constants.FIELD_FILE_LOCATION);
+        this.contents = doc.get(Constants.FIELD_SOURCE);
+        this.hash = doc.get(Constants.FIELD_FILE_HASH);
+        this.codeOwner = doc.get(Constants.FIELD_CODE_OWNER);
+        this.language = doc.get(Constants.FIELD_LANGUAGE);
+        this.revision = doc.get(Constants.FIELD_REVISION);
+
+        this.lines = getIntField(doc, Constants.FIELD_LINES_TOTAL, 0);
+        this.codeLines = getIntField(doc, Constants.FIELD_LINES_CODE, 0);
+        this.commentLines = getIntField(doc, Constants.FIELD_LINES_COMMENT, 0);
+        this.blankLines = getIntField(doc, Constants.FIELD_LINES_BLANK, 0);
+        this.complexity = getIntField(doc, Constants.FIELD_COMPLEXITY);
+
+        return this;
+    }
+
+    /**
      * generate lucene document
-     *
      * @return
      */
     @Override
@@ -41,18 +68,22 @@ public final class SourceFile extends Searchable {
         // Uuid is the primary key for documents
         document.add(new StringField(Constants.FIELD_UUID, uuid, Field.Store.YES));
 
-        //文档维度
-        if (StringUtils.isNotBlank(language))
-            document.add(new FacetField(Constants.FIELD_LANGUAGE,     this.getLanguage()));
-            document.add(new FacetField(Constants.FIELD_REPO_NAME,    this.repository.name));
-        if (StringUtils.isNotBlank(codeOwner))
-            document.add(new FacetField(Constants.FIELD_CODE_OWNER,   this.getCodeOwner()));
-
         //仓库信息
         document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID, this.repository.id));
         document.add(new StoredField(Constants.FIELD_REPO_ID,           this.repository.id));
+        document.add(new FacetField(Constants.FIELD_REPO_NAME,          this.repository.name));
         document.add(new StringField(Constants.FIELD_REPO_NAME,         this.repository.name,     Field.Store.YES));
         document.add(new StringField(Constants.FIELD_REPO_URL,          this.repository.url,      Field.Store.YES));
+
+        //文档维度
+        if (StringUtils.isNotBlank(language)) {
+            document.add(new FacetField(Constants.FIELD_LANGUAGE, this.getLanguage()));
+            document.add(new StringField(Constants.FIELD_LANGUAGE, this.getLanguage(), Field.Store.YES));
+        }
+        if (StringUtils.isNotBlank(codeOwner)) {
+            document.add(new FacetField(Constants.FIELD_CODE_OWNER, this.getCodeOwner()));
+            document.add(new TextField(Constants.FIELD_CODE_OWNER, this.getCodeOwner(), Field.Store.YES));
+        }
 
         //文件信息
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getName(),         Field.Store.YES));
@@ -60,8 +91,6 @@ public final class SourceFile extends Searchable {
         document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),     Field.Store.YES));
 
         //文件属性
-        document.add(new TextField(Constants.FIELD_CODE_OWNER,      this.getCodeOwner(),    Field.Store.YES));
-        document.add(new StringField(Constants.FIELD_LANGUAGE,      this.getLanguage(),     Field.Store.YES));
         document.add(new StoredField(Constants.FIELD_FILE_HASH,     this.getHash()));
 
         //文件统计信息
@@ -79,16 +108,6 @@ public final class SourceFile extends Searchable {
         document.add(new StoredField(Constants.FIELD_LAST_INDEX, indexTime));
 
         return document;
-    }
-
-    /**
-     * Read fields from document
-     *
-     * @param doc
-     */
-    @Override
-    public Searchable setDocument(Document doc) {
-        return null;
     }
 
     public String getUuid() {

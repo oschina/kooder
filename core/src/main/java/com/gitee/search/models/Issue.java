@@ -1,8 +1,12 @@
 package com.gitee.search.models;
 
-import org.apache.lucene.document.Document;
-import org.gitlab4j.api.Constants;
+import com.gitee.search.core.Constants;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.lucene.document.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,10 +20,10 @@ public final class Issue extends Searchable {
     public final static int STATE_REOPENED  = 0x03;
 
     protected String ident;
-    protected Relation enterprise;
-    protected Relation project;
-    protected Relation repository;
-    protected Relation owner;
+    protected Relation enterprise = Relation.EMPTY;
+    protected Relation project = Relation.EMPTY;
+    protected Relation repository = Relation.EMPTY;
+    protected Relation owner = Relation.EMPTY ;
 
     protected String title;
     protected String description;
@@ -33,6 +37,7 @@ public final class Issue extends Searchable {
     protected int visibility;       //0私有仓库，1内源仓库，2公开仓库
 
     public Issue(){}
+
     public Issue(org.gitlab4j.api.models.Issue issue) {
         this.id = issue.getId();
         this.ident = issue.getExternalId();
@@ -50,24 +55,80 @@ public final class Issue extends Searchable {
         this.setState(issue.getState());
     }
 
-    /**
-     * generate lucene document
-     *
-     * @return
-     */
-    @Override
-    public Document getDocument() {
-        return null;
+    public Issue(Document doc) {
+        setDocument(doc);
     }
 
     /**
      * Read fields from document
-     *
      * @param doc
      */
     @Override
     public Searchable setDocument(Document doc) {
+        this.id = NumberUtils.toInt(doc.get(Constants.FIELD_ID), 0);
+        this.ident = doc.get(Constants.FIELD_IDENT);
+        this.title = doc.get(Constants.FIELD_TITLE);
+        this.description = doc.get(Constants.FIELD_DESC);
+        this.url = doc.get(Constants.FIELD_URL);
+        this.labels = new ArrayList<>();
+        this.labels.addAll(Arrays.asList(StringUtils.split(doc.get(Constants.FIELD_TAGS), "\n")));
+        this.updatedAt = NumberUtils.toLong(doc.get(Constants.FIELD_UPDATED_AT));
+        this.createdAt = NumberUtils.toLong(doc.get(Constants.FIELD_CREATED_AT));
+        this.closedAt = NumberUtils.toLong(doc.get(Constants.FIELD_CLOSED_AT));
+        this.block = NumberUtils.toInt(doc.get(Constants.FIELD_BLOCK), Constants.REPO_BLOCK_NO);
+        this.visibility = NumberUtils.toInt(doc.get(Constants.FIELD_VISIBILITY), Constants.VISIBILITY_PRIVATE);
+        this.state = NumberUtils.toInt(doc.get(Constants.FIELD_STATUS), STATE_OPENED);
+        this.enterprise.id = NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0);
+        this.project.id = NumberUtils.toInt(doc.get(Constants.FIELD_PROGRAM_ID));
+        this.repository.id = NumberUtils.toInt(doc.get(Constants.FIELD_REPO_ID));
+        this.owner.id = NumberUtils.toInt(doc.get(Constants.FIELD_USER_ID));
+
         return this;
+    }
+
+    /**
+     * generate lucene document
+     * @return
+     */
+    @Override
+    public Document getDocument() {
+        Document doc = new Document();
+        doc.add(new StringField(Constants.FIELD_ID,     String.valueOf(id),     Field.Store.YES));
+        doc.add(new StringField(Constants.FIELD_IDENT,  ident,                  Field.Store.YES));
+        doc.add(new TextField(Constants.FIELD_TITLE,    title,                  Field.Store.YES));
+        doc.add(new TextField(Constants.FIELD_DESC,     description,            Field.Store.YES));
+        doc.add(new StoredField(Constants.FIELD_URL,    url));
+        doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", labels), Field.Store.NO));
+        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new NumericDocValuesField(Constants.FIELD_CLOSED_AT, closedAt));
+        doc.add(new StoredField(Constants.FIELD_CLOSED_AT, closedAt));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_BLOCK, block));
+        doc.add(new StoredField(Constants.FIELD_BLOCK, block));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_VISIBILITY, visibility));
+        doc.add(new StoredField(Constants.FIELD_VISIBILITY, visibility));
+
+        doc.add(new NumericDocValuesField(Constants.FIELD_STATUS, state));
+        doc.add(new StoredField(Constants.FIELD_STATUS, state));
+
+        //enterprise info (just for gitee)
+        enterprise:
+        doc.add(new StringField(Constants.FIELD_ENTERPRISE_ID, String.valueOf(enterprise.id), Field.Store.YES));
+        //program info (just for gitee)
+        program:
+        doc.add(new StringField(Constants.FIELD_PROGRAM_ID, String.valueOf(project.id), Field.Store.YES));
+        //repository info (just for gitee)
+        program:
+        doc.add(new StringField(Constants.FIELD_REPO_ID, String.valueOf(repository.id), Field.Store.YES));
+        //owner info
+        owner:
+        doc.add(new StringField(Constants.FIELD_USER_ID, String.valueOf(owner.id), Field.Store.YES));
+
+        return doc;
     }
 
     public String getIdent() {
@@ -174,7 +235,7 @@ public final class Issue extends Searchable {
         this.state = state;
     }
 
-    public void setState(Constants.IssueState state) {
+    public void setState(org.gitlab4j.api.Constants.IssueState state) {
         switch(state){
             case OPENED:
                 this.state = STATE_OPENED;
