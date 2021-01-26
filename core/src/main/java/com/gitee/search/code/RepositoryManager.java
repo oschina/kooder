@@ -4,6 +4,7 @@ import com.gitee.search.core.Constants;
 import com.gitee.search.index.IndexException;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.*;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
@@ -54,10 +55,12 @@ class LuceneRepositoryManager implements RepositoryManager {
         try (IndexReader reader = StorageFactory.getIndexReader(Constants.TYPE_METADATA)) {
             IndexSearcher searcher = new IndexSearcher(reader);
             TopDocs docs = searcher.search(new TermQuery(new Term(Constants.FIELD_REPO_ID, String.valueOf(id))), 1);
-            if(docs.totalHits.value == 0)
+            if (docs.totalHits.value == 0)
                 return null;
             Document doc = reader.document(docs.scoreDocs[0].doc);
-            return CodeRepository.parse(doc);
+            return new CodeRepository().setDocument(doc);
+        } catch (IndexNotFoundException e) {
+            return null;
         } catch (IOException e) {
             throw new IndexException("Failed to get repo in metedata db : id = " + id, e);
         }
@@ -67,7 +70,7 @@ class LuceneRepositoryManager implements RepositoryManager {
     public void save(CodeRepository repo) {
         synchronized (this){ //不支持并发写入
             try (IndexWriter writer = StorageFactory.getIndexWriter(Constants.TYPE_METADATA)) {
-                Document doc = repo.toDocument();
+                Document doc = repo.getDocument();
                 writer.updateDocument(new Term(Constants.FIELD_REPO_ID, repo.getIdAsString()), doc);
             } catch (IOException e) {
                 throw new IndexException("Failed to save repo in metedata db : " + repo, e);

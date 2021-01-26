@@ -4,6 +4,9 @@ import com.gitee.search.models.Issue;
 import com.gitee.search.models.Repository;
 import org.apache.commons.cli.*;
 import org.gitlab4j.api.*;
+import org.gitlab4j.api.models.SystemHook;
+import org.gitlab4j.api.systemhooks.SystemHookManager;
+import org.gitlab4j.api.webhook.WebHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +40,27 @@ public class GitlabImporter {
 
     public static void main(String[] args) throws Exception {
         long ct = System.currentTimeMillis();
+        String url = "http://localhost:8080/webhook/gitlab";
         GitLabApi gitlab = connectToGitlab(args);
+        installSystemHook(gitlab, url);
         int pc = indexAllProjects(gitlab);
         int ic = indexAllIssues(gitlab);
         log.info("{} projects and {} issues indexed in {}s", pc, ic, (System.currentTimeMillis() - ct) / 1000);
+    }
+
+    /**
+     * check and install system hook
+     * @param gitlab
+     * @param url
+     * @throws GitLabApiException
+     */
+    private static void installSystemHook(GitLabApi gitlab, String url) throws GitLabApiException {
+        SystemHooksApi api = gitlab.getSystemHooksApi();
+        for(SystemHook hook : api.getSystemHooks()){
+            if(hook.getUrl().equals(url))
+                return ;
+        }
+        gitlab.getSystemHooksApi().addSystemHook(url,"1234", true, true, false);
     }
 
     /**

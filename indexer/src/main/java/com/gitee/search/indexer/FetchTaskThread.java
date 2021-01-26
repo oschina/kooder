@@ -2,6 +2,7 @@ package com.gitee.search.indexer;
 
 import com.gitee.search.code.*;
 import com.gitee.search.core.GiteeSearchConfig;
+import com.gitee.search.models.Searchable;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueProvider;
 import com.gitee.search.queue.QueueTask;
@@ -102,12 +103,12 @@ public class FetchTaskThread extends Thread {
      * @param taxonomyWriter
      */
     private void handleCodeTask(QueueTask task, IndexWriter writer, TaxonomyWriter taxonomyWriter) {
-        List<CodeRepository> repos = RepositoryFactory.getRepositoryFromTask(task);
         switch(task.getAction()){
         case QueueTask.ACTION_ADD:
         case QueueTask.ACTION_UPDATE:
             FileTraveler fileTraveler = new CodeFileTraveler(writer, taxonomyWriter);
-            for(CodeRepository newRepo : repos) {
+            for(Searchable obj : task.getObjects()) {
+                CodeRepository newRepo = (CodeRepository)obj;
                 //Read saved CodeRepository from persistent storage
                 CodeRepository repo = RepositoryManager.INSTANCE.get(newRepo.getId());
                 if (repo != null) {
@@ -128,8 +129,8 @@ public class FetchTaskThread extends Thread {
             break;
 
         case QueueTask.ACTION_DELETE:
-            for(CodeRepository newRepo : repos) {
-                CodeRepository repo = RepositoryManager.INSTANCE.get(newRepo.getId());
+            for(Searchable obj : task.getObjects()) {
+                CodeRepository repo = RepositoryManager.INSTANCE.get(obj.getId());
                 if (repo != null) {
                     RepositoryFactory.getProvider(repo.getScm()).delete(repo);
                     RepositoryManager.INSTANCE.delete(repo.getId());

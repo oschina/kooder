@@ -98,8 +98,12 @@ public class DiskIndexStorage implements IndexStorage {
         String subPath = MAPPING_TYPES.getProperty(type, type);
         subPath += taxonomy?"_taxo":"_idxs";
         Path ipath = indexBasePath.resolve(subPath);
-        if(!Files.exists(ipath) || !Files.isDirectory(ipath))
-            Files.createDirectory(ipath);
+        if(!Files.exists(ipath) || !Files.isDirectory(ipath)) {
+            synchronized (this) {
+                if(!Files.exists(ipath) || !Files.isDirectory(ipath))
+                    Files.createDirectory(ipath);
+            }
+        }
         return ipath;
     }
 

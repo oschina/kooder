@@ -114,7 +114,7 @@ public class PathImporter {
             task.setType(type);
             task.setAction(action);
             String json = Files.readAllLines(file).stream().collect(Collectors.joining());
-            task.setBody(json);
+            //task.setBody(json);
             task.write(i_writer, t_writer);
             log.info("{} imported in {}ms. ({})", file.toString(), (System.currentTimeMillis() - ct), Thread.currentThread().getName());
 

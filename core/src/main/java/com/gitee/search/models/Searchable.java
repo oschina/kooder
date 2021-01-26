@@ -3,11 +3,13 @@ package com.gitee.search.models;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.Document;
 
+import java.io.Serializable;
+
 /**
  * Searchable object
  * @author Winter Lau<javayou@gmail.com>
  */
-public abstract class Searchable {
+public abstract class Searchable implements Serializable {
 
     protected long id;      // object id , ex: repo id, issue id
     protected int _id;      // document id

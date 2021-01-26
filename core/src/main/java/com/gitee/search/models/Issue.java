@@ -64,7 +64,7 @@ public final class Issue extends Searchable {
      * @param doc
      */
     @Override
-    public Searchable setDocument(Document doc) {
+    public Issue setDocument(Document doc) {
         this.id = NumberUtils.toInt(doc.get(Constants.FIELD_ID), 0);
         this.ident = doc.get(Constants.FIELD_IDENT);
         this.title = doc.get(Constants.FIELD_TITLE);

@@ -1,6 +1,7 @@
 package com.gitee.search.code;
 
 import com.gitee.search.core.Constants;
+import com.gitee.search.models.Searchable;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -11,7 +12,7 @@ import org.apache.lucene.document.StringField;
  * 代码源的定义
  * @author Winter Lau<javayou@gmail.com>
  */
-public class CodeRepository {
+public class CodeRepository extends Searchable {
 
     public final static String SCM_GIT = "git";
     public final static String SCM_SVN = "svn";
@@ -20,7 +21,6 @@ public class CodeRepository {
     public final static String STATUS_DONE  = "indexed";
     public final static String STATUS_FETCH = "fetched";
 
-    private long   id;          //仓库编号
     private String scm;         //代码源类型：git/svn/file
     private String name;        //仓库名称
     private String url;         //仓库地址，ex: https://gitee.com/ld/J2Cache
@@ -36,16 +36,8 @@ public class CodeRepository {
         return String.format("%03d/%03d/%03d/%s_%d", id/1_000_000_000, id % 1_000_000_000 / 1_000_000, id % 1_000_000 / 1_000, name, id);
     }
 
-    public long getId() {
-        return id;
-    }
-
     public String getIdAsString() {
         return String.valueOf(id);
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getScm() {
@@ -94,9 +86,11 @@ public class CodeRepository {
 
     /**
      * generate lucene document
+     *
      * @return
      */
-    public Document toDocument() {
+    @Override
+    public Document getDocument() {
         Document doc = new Document();
         doc.add(new StringField(Constants.FIELD_REPO_ID,        this.getIdAsString(), Field.Store.YES));
         doc.add(new StoredField(Constants.FIELD_REPO_URL,       this.getUrl()));
@@ -112,20 +106,20 @@ public class CodeRepository {
     }
 
     /**
-     * parse from lucene document
+     * Read fields from document
+     *
      * @param doc
-     * @return
      */
-    public static CodeRepository parse(Document doc) {
-        CodeRepository repo = new CodeRepository();
-        repo.setId(NumberUtils.toLong(doc.get(Constants.FIELD_REPO_ID), 0));
-        repo.setName(doc.get(Constants.FIELD_REPO_NAME));
-        repo.setUrl(doc.get(Constants.FIELD_REPO_URL));
-        repo.setLastCommitId(doc.get(Constants.FIELD_REVISION));
-        repo.setScm(doc.get(Constants.FIELD_SCM));
-        repo.setStatus(doc.get(Constants.FIELD_STATUS));
-        repo.timestamp = NumberUtils.toLong(doc.get(Constants.FIELD_TIMESTAMP), 0);
-        return repo;
+    @Override
+    public CodeRepository setDocument(Document doc) {
+        this.setId(NumberUtils.toLong(doc.get(Constants.FIELD_REPO_ID), 0));
+        this.setName(doc.get(Constants.FIELD_REPO_NAME));
+        this.setUrl(doc.get(Constants.FIELD_REPO_URL));
+        this.setLastCommitId(doc.get(Constants.FIELD_REVISION));
+        this.setScm(doc.get(Constants.FIELD_SCM));
+        this.setStatus(doc.get(Constants.FIELD_STATUS));
+        this.timestamp = NumberUtils.toLong(doc.get(Constants.FIELD_TIMESTAMP), 0);
+        return this;
     }
 
     /**

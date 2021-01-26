@@ -36,7 +36,7 @@ public final class SourceFile extends Searchable {
      * @param doc
      */
     @Override
-    public Searchable setDocument(Document doc) {
+    public SourceFile setDocument(Document doc) {
         this.uuid = doc.get(Constants.FIELD_UUID);
         this.repository.id = NumberUtils.toInt(doc.get(Constants.FIELD_REPO_ID));
         this.repository.name = doc.get(Constants.FIELD_REPO_NAME);

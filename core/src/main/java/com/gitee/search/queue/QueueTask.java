@@ -1,48 +1,65 @@
 package com.gitee.search.queue;
 
 import java.io.IOException;
-import java.io.StringWriter;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
 import com.gitee.search.index.IndexManager;
 
+import com.gitee.search.models.Issue;
+import com.gitee.search.models.Repository;
+import com.gitee.search.models.Searchable;
+import com.gitee.search.models.SourceFile;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.Query;
+
 /**
  * 队列中的任务
  * @author Winter Lau<javayou@gmail.com>
  */
-public class QueueTask {
+public class QueueTask implements Serializable {
 
-    private final static Logger log = LoggerFactory.getLogger(QueueTask.class);
+    private transient final static Logger log = LoggerFactory.getLogger(QueueTask.class);
 
-    private final static JsonFactory jackson = new JsonFactory().enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
+    private transient final static JsonFactory jackson = new JsonFactory().enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
 
-    public final static List<String> types = Arrays.asList(
+    public transient final static List<String> types = Arrays.asList(
+            Constants.TYPE_CODE,
             Constants.TYPE_REPOSITORY,
             Constants.TYPE_ISSUE,
             Constants.TYPE_PR,
             Constants.TYPE_COMMIT,
             Constants.TYPE_WIKI,
-            Constants.TYPE_CODE,
             Constants.TYPE_USER
     );
 
-    public final static String ACTION_ADD            = "add"; //添加
-    public final static String ACTION_UPDATE         = "update"; //修改
-    public final static String ACTION_DELETE         = "delete"; //删除
+    public transient final static String ACTION_ADD            = "add"; //添加
+    public transient final static String ACTION_UPDATE         = "update"; //修改
+    public transient final static String ACTION_DELETE         = "delete"; //删除
 
     private String type;    //对象类型
     private String action;  //动作（添加、删除、修改）
-    private String body;    //操作详情
+    private List<Searchable> objects = new ArrayList<>();    //objects list
+
+    public QueueTask(){}
+
+    public static void add(String type, Searchable...obj) {
+        QueueTask task = new QueueTask();
+        task.action = ACTION_ADD;
+        task.type = type;
+        task.objects.addAll(Arrays.asList(obj));
+        QueueFactory.getProvider().queue(type).push(Arrays.asList(task));
+    }
 
     public String getType() {
         return type;
@@ -72,72 +89,35 @@ public class QueueTask {
         this.action = action;
     }
 
-    public String getBody() {
-        return body;
+    public List<Searchable> getObjects() {
+        return objects;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setObjects(List<Searchable> objects) {
+        this.objects = objects;
     }
 
-    /**
-     * 检查参数是否有效
-     * @return
-     */
-    public boolean check() {
-        if(isAvailAction(action) && isAvailType(type))
-            return isValidJSON(body);
-        return false;
+    public void addObject(Searchable obj) {
+        objects.add(obj);
     }
 
-    /**
-     * 合并 JSON
-     * @return
-     * @exception
-     */
-    public String json() {
-        StringWriter str = new StringWriter();
-        JsonGenerator json = null;
-        try {
-            json = jackson.createGenerator(str);
-            json.writeStartObject();
-            //json.useDefaultPrettyPrinter(); // enable indentation just to make debug/t
-            json.writeStringField("type", this.type);
-            json.writeStringField("action", this.action);
-            if(body != null) {
-                json.writeFieldName("body");
-                json.writeRaw(":");
-                json.writeRaw(body);
-            }
-            json.writeEndObject();
-        } catch(IOException e) {
-            log.error("Failed to generate json", e);
-        } finally {
-            try {
-                json.close();
-            } catch (IOException e) {}
+    public void setObjects(String json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        TypeReference typeRefer;
+        switch(type) {
+            case Constants.TYPE_CODE:
+                typeRefer = new TypeReference<List<SourceFile>>(){};
+                break;
+            case Constants.TYPE_REPOSITORY:
+                typeRefer = new TypeReference<List<Repository>>() {};
+                break;
+            case Constants.TYPE_ISSUE:
+                typeRefer = new TypeReference<List<Issue>>() {};
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal task type: " + type);
         }
-        return str.toString();
-    }
-
-    /**
-     * 解析 JSON 为 Task
-     * @param json
-     * @return
-     */
-    public static QueueTask parse(String json) {
-        try {
-            QueueTask task = new QueueTask();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode node = mapper.readTree(json);
-            task.setType(node.get("type").textValue());
-            task.setAction(node.get("action").textValue());
-            task.setBody(node.get("body").toString());
-            return task;
-        } catch (IOException e) {
-            log.error("Failed to parse json:\n"+json, e);
-        }
-        return null;
+        this.setObjects((List<Searchable>)mapper.readValue(json, typeRefer));
     }
 
     /**
@@ -160,14 +140,23 @@ public class QueueTask {
         return IndexManager.write(this, i_writer, t_writer);
     }
 
-    public static boolean isValidJSON(final String json) {
-        boolean valid = true;
-        try{
-            new ObjectMapper().readTree(json);
-        } catch(JsonProcessingException e){
-            valid = false;
+    /**
+     * 生成 json
+     * @return
+     */
+    public String json() {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
-        return valid;
+        return null;
+    }
+
+    public static QueueTask parse(String json) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(json, QueueTask.class);
     }
 
 }
