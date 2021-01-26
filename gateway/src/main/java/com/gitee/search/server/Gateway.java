@@ -2,9 +2,11 @@ package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.indexer.FetchTaskThread;
+import com.gitee.search.indexer.GitlabIndexThread;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -19,6 +21,7 @@ public class Gateway extends GatewayBase {
     private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)";
     private final static Map<String, Thread> startupTasks = new HashMap<>(){{
         put("indexer", new FetchTaskThread());
+        put("gitlab", new GitlabIndexThread());
     }};
 
     private Gateway() {
@@ -72,17 +75,19 @@ public class Gateway extends GatewayBase {
         String[] taskNames = tasks.split(",");
         int tc = 0;
         for(String taskName : taskNames) {
-            Thread thread = startupTasks.computeIfAbsent(taskName, key -> {
-                try {
-                    return (Thread) Class.forName(key).getDeclaredConstructor().newInstance();
-                } catch(Exception e) {
-                    log.error("Failed to load startup task named: " + taskName, e);
+            if(StringUtils.isNotBlank(taskName)) {
+                Thread thread = startupTasks.computeIfAbsent(taskName, key -> {
+                    try {
+                        return (Thread) Class.forName(key).getDeclaredConstructor().newInstance();
+                    } catch (Exception e) {
+                        log.error("Failed to load startup task named: " + taskName, e);
+                    }
+                    return null;
+                });//.get(taskName);
+                if (thread != null) {
+                    thread.start();
+                    tc++;
                 }
-                return null;
-            });//.get(taskName);
-            if(thread != null) {
-                thread.start();
-                tc++;
             }
         }
         if(tc > 0)

@@ -1,7 +1,6 @@
 package com.gitee.search.action;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gitee.search.models.QueryResult;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -42,15 +41,14 @@ public class IndexAction implements SearchActionBase {
 
         String type = param(request,"type", "repo");
 
-        String json = _search(request, type);
-        if(json == null) {
+        QueryResult result = _search(request, type);
+        if(result == null) {
             error(context.response(), HttpResponseStatus.BAD_REQUEST.code(), "Illegal parameter 'type' value.");
             return;
         }
 
         Map<String, Object> params = new HashMap();
-        JsonNode node = new ObjectMapper().readTree(json);
-        params.put("result", node);
+        params.put("result", result);
 
         this.vm(context, "search.vm", params);
     }

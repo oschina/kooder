@@ -5,7 +5,7 @@
             <div class="hero-body">
                 <h1>Gitee Search</h1>
                 <form class="form-group" action="search">
-                    <input type="hidden" name="type" value="repo"/>
+                    <input type="hidden" name="type" value="code"/>
                     <fieldset class="input-group">
                         <input class="form-input input-lg" name="q" type="text" style="width:400px;" id="txt_q">
                         <button class="btn btn-primary input-group-btn btn-lg" type="submit">Search</button>

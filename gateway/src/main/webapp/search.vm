@@ -1,6 +1,7 @@
 #set($layout = 'html.vm')
+#set($q = $tool.param('q'))
 #set($page_title = $q)
-#set($type = $tool.param('type','repo'))
+#set($type = $tool.param('type','code'))
 #set($thisLang = $tool.param('lang'))
 #set($repo = $tool.param('repo.name'))
 #set($owner = $tool.param('owner'))
@@ -8,7 +9,6 @@
 QUERY: ${result.query.textValue()}
 TIME: ${result.timeUsed} ms
 -->
-#set($q = $tool.param('q'))
 <div id="main">
     <header class="navbar">
         <section class="navbar-section">
@@ -26,17 +26,17 @@ TIME: ${result.timeUsed} ms
         <div class="columns">
             <div id="SearchResults">
                 #if($result)
-                #set($totalPages = $result.get("totalPages"))
+                #set($totalPages = ${result.totalPages})
                 <div>
                     <ul class="tab" id="SearchTabs">
-                        <li class="tab-item#if($type=='repo') active#end">
-                            <a href="$tool.uri('type','repo')">
-                                Repository
-                            </a>
-                        </li>
                         <li class="tab-item#if($type=='code') active#end">
                             <a href="$tool.uri('type','code')">
                                 Code
+                            </a>
+                        </li>
+                        <li class="tab-item#if($type=='repo') active#end">
+                            <a href="$tool.uri('type','repo')">
+                                Repository
                             </a>
                         </li>
                         <li class="tab-item#if($type=='issue') active#end">
@@ -55,7 +55,7 @@ TIME: ${result.timeUsed} ms
                                 <li class="menu-item#if($sort=='update') active#end"><a href="$tool.uri('sort','update')">Last Updated</a></li>
                             </ul>
                         </div>
-                        <p><span>$result.get("totalHits")</span> results#if($sort) sorted by <span>$sort</span>#end in <span>$result.get("timeUsed")</span> ms</p>
+                        <p><span>${result.totalHits}</span> results#if($sort) sorted by <span>$sort</span>#end in <span>${result.timeUsed}</span> ms</p>
                     </div>
                     #if($thisLang || $repo || $owner)
                     <div class="facets">
@@ -98,7 +98,7 @@ TIME: ${result.timeUsed} ms
                                 <li class="page-item#if($p==1) disabled#end">
                                     <a href="$tool.uri('p',1)" tabindex="-1">Prev</a>
                                 </li>
-                                #foreach($i in $tool.pages($totalPages.intValue(), $p, 10))
+                                #foreach($i in $tool.pages($totalPages, $p, 10))
                                 <li class="page-item#if($p == $i) active#end"><a href="$tool.uri('p',$i)">$i</a></li>
                                 #end
                                 <li class="page-item#if($p>=$totalPages) disabled#end">
@@ -111,16 +111,16 @@ TIME: ${result.timeUsed} ms
                 #end
             </div>
             <div id="SearchFacets">
-                #if($result && $result.get('facets'))
+                #if($result && $result.facets.size()>0)
                 <ul class="menu text-primary">
                     <li class="divider" data-content="Programming Language"></li>
-                    #foreach($lang in $result.get('facets').get('lang'))
+                    #foreach($lang in $result.facets.get('lang'))
                     #if(${foreach.count} <= 20)
-                    #set($langfacet = $lang.get('label').textValue())
+                    #set($langfacet = ${lang.label})
                     <li class="menu-item#if($thisLang == $langfacet) active#end">
                         <a href="$tool.uri('lang',$langfacet)">$langfacet</a>
                         <div class="menu-badge">
-                            <label class="label">$lang.get('value')</label>
+                            <label class="label">${lang.value}</label>
                         </div>
                     </li>
                     #end
@@ -132,11 +132,11 @@ TIME: ${result.timeUsed} ms
                     <li class="divider" data-content="Repositories"></li>
                     #foreach($lang in $result.get('facets').get('repo.name'))
                     #if(${foreach.count} <= 20)
-                    #set($thisRepo = $lang.get('label').textValue())
+                    #set($thisRepo = ${lang.label})
                     <li class="menu-item#if($repo == $thisRepo) active#end">
                         <a href="$tool.uri('repo.name',$thisRepo)">$thisRepo</a>
                         <div class="menu-badge">
-                            <label class="label">$lang.get('value')</label>
+                            <label class="label">${lang.value}</label>
                         </div>
                     </li>
                     #end
@@ -149,11 +149,11 @@ TIME: ${result.timeUsed} ms
                     <li class="divider" data-content="Developers"></li>
                     #foreach($lang in $result.get('facets').get('owner'))
                     #if(${foreach.count} <= 20)
-                    #set($thisOwner = $lang.get('label').textValue())
+                    #set($thisOwner = ${lang.label})
                     <li class="menu-item#if($owner == $thisOwner) active#end">
                         <a href="$tool.uri('owner',$thisOwner)">$thisOwner</a>
                         <div class="menu-badge">
-                            <label class="label">$lang.get('value')</label>
+                            <label class="label">${lang.value}</label>
                         </div>
                     </li>
                     #end

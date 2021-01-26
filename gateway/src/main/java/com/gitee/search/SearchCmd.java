@@ -2,6 +2,7 @@ package com.gitee.search;
 
 import com.gitee.search.core.Constants;
 import com.gitee.search.core.SearchHelper;
+import com.gitee.search.models.QueryResult;
 import com.gitee.search.query.IQuery;
 import com.gitee.search.query.QueryFactory;
 import jline.TerminalFactory;
@@ -27,8 +28,8 @@ public class SearchCmd {
             String q = SearchHelper.cleanupKey(line);
             IQuery query = QueryFactory.CODE().setSearchKey(q);
             query.addFacets(Constants.FIELD_LANGUAGE, "Java");
-            String json = query.search();
-            System.out.println(json);
+            QueryResult result = query.execute();
+            System.out.println(result.toString());
 
             System.out.println("total time: " + (System.currentTimeMillis() - ct) + " ms");
 

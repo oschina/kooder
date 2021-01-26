@@ -1,24 +1,24 @@
 ## 搜索仓库结果渲染
 <ul>
-    #foreach($obj in $result.get("objects"))
-    #set($recomm = $obj.get('recomm').intValue())
-    #set($rlang = $obj.get('lang').textValue())
+    #foreach($obj in $result.objects)
+    #set($recomm = $obj.recomm)
+    #set($rlang = $obj.lang)
     <li class="repo">
         <h6>
-            <a href="https://gitee.com/$obj.get('namespace').get('path').textValue()/$obj.get('path').textValue()" target="_blank">$tool.highlight("$obj.get('namespace').get('path').textValue()/$obj.get('name').textValue()",$q)</a>
+            <a href="${obj.url}" target="_blank">$tool.highlight(${obj.name},$q)</a>
             <small class="label">#if($recomm==2)[GVP]#elseif($recomm==1)[荐]#end</small>
         </h6>
-        <blockquote>$tool.highlight($obj.get('description').textValue(), $q)</blockquote>
+        <blockquote>$tool.highlight($obj.description, $q)</blockquote>
         <div class="meta">
         <ul class="breadcrumb">
             #if(!$tool.is_empty($rlang))
             <li class="breadcrumb-item">$rlang</li>
             #end
             <li class="breadcrumb-item">
-                Stars: $obj.get('count').get('star')
+                Stars: $obj.starsCount
             </li>
             <li class="breadcrumb-item">
-                Forks: $obj.get('count').get('fork')
+                Forks: $obj.forksCount
             </li>
         </ul>
         </div>

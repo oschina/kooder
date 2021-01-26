@@ -1,6 +1,7 @@
 package com.gitee.search.action;
 
 import com.gitee.search.core.Constants;
+import com.gitee.search.models.QueryResult;
 import com.gitee.search.query.QueryFactory;
 import com.gitee.search.server.Action;
 import io.vertx.core.http.HttpServerRequest;
@@ -21,12 +22,12 @@ public interface SearchActionBase extends Action {
      * @return
      * @throws IOException
      */
-    default String _search(HttpServerRequest request, String type) throws IOException {
+    default QueryResult _search(HttpServerRequest request, String type) throws IOException {
         String q = param(request, "q");
         if(StringUtils.isBlank(q))
-            return Constants.EMPTYJSON;
+            return null;
 
-        String json = null;
+        QueryResult result = null;
         int page = Math.max(1, param(request,"p", 1));
 
         String sort = param(request, "sort");
@@ -34,26 +35,26 @@ public interface SearchActionBase extends Action {
 
         switch (type) {
             case Constants.TYPE_REPOSITORY:
-                json = QueryFactory.REPO()
+                result = QueryFactory.REPO()
                         .setSearchKey(q)
                         .addFacets(Constants.FIELD_LANGUAGE, lang)
                         .setSort(sort)
                         .setPage(page)
                         .setPageSize(PAGE_SIZE)
-                        .search();
+                        .execute();
                 break;
 
             case Constants.TYPE_ISSUE:
-                json = QueryFactory.ISSUE()
+                result = QueryFactory.ISSUE()
                         .setSearchKey(q)
                         .setSort(sort)
                         .setPage(page)
                         .setPageSize(PAGE_SIZE)
-                        .search();
+                        .execute();
                 break;
 
             case Constants.TYPE_CODE:
-                json = QueryFactory.CODE()
+                result = QueryFactory.CODE()
                         .setSearchKey(q)
                         .addFacets(Constants.FIELD_LANGUAGE, lang)
                         .addFacets(Constants.FIELD_REPO_NAME, param(request, Constants.FIELD_REPO_NAME))
@@ -61,9 +62,9 @@ public interface SearchActionBase extends Action {
                         .setSort(sort)
                         .setPage(page)
                         .setPageSize(PAGE_SIZE)
-                        .search();
+                        .execute();
         }
-        return json;
+        return result;
     }
 
 }

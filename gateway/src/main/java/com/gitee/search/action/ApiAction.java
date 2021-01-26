@@ -1,5 +1,6 @@
 package com.gitee.search.action;
 
+import com.gitee.search.models.QueryResult;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -22,13 +23,13 @@ public class ApiAction implements SearchActionBase {
      */
     public void search(RoutingContext context) throws IOException {
         String type = context.request().getParam("type");
-        String result = _search(context.request(), type);
+        QueryResult result = _search(context.request(), type);
         if(result == null) {
             error(context.response(), HttpResponseStatus.BAD_REQUEST.code(),
                     "Illegal parameter 'type' value.");
             return;
         }
-        this.json(context.response(), result);
+        this.json(context.response(), result.json());
     }
 
     /**

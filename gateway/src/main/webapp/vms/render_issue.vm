@@ -1,13 +1,13 @@
 ## 搜索issue结果渲染
 <ul>
-    #foreach($obj in $result.get("objects"))
+    #foreach($obj in $result.objects)
     <li class="issue">
         <h6>
-            <a href="" target="_blank">$tool.highlight($obj.get('title').textValue(),$q)</a>
-            <small class="label">$obj.get('project').get('name').textValue()</small>
+            <a href="" target="_blank">$tool.highlight(${obj.title},$q)</a>
+            <small class="label">${obj.repository.name}</small>
         </h6>
-        <blockquote>$tool.highlight($obj.get('description').textValue(), $q, 200)</blockquote>
-        <p class="meta">$tool.format('yyyy/MM/dd HH:mm',$obj.get('created_at').longValue())</p>
+        <blockquote>$tool.highlight(${obj.description}, $q, 200)</blockquote>
+        <p class="meta">$tool.format('yyyy/MM/dd HH:mm',${obj.createdAt})</p>
     </li>
     #end
 </ul>

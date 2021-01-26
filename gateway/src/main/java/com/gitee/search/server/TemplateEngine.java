@@ -70,16 +70,18 @@ public class TemplateEngine {
         if(params != null && params.size() > 0)
             params.forEach((k,v) -> context.put(k.toString(), v));
         StringWriter w = new StringWriter();
-        Velocity.mergeTemplate(vm, ENCODING, context, w);
-        String vm_layout = (String)context.get(VAR_LAYOUT);
-        if(StringUtils.isNotBlank(vm_layout)) {
-            vm_layout = "layout/" + vm_layout;
-            context.put(VAR_SCREEN_CONTENT, w);
-            StringWriter html = new StringWriter();
-            Velocity.mergeTemplate(vm_layout, ENCODING, context, html);
-            return html.toString();
+        if(Velocity.mergeTemplate(vm, ENCODING, context, w)) {
+            String vm_layout = (String) context.get(VAR_LAYOUT);
+            if (StringUtils.isNotBlank(vm_layout)) {
+                vm_layout = "layout/" + vm_layout;
+                context.put(VAR_SCREEN_CONTENT, w);
+                StringWriter html = new StringWriter();
+                Velocity.mergeTemplate(vm_layout, ENCODING, context, html);
+                return html.toString();
+            }
+            return w.toString();
         }
-        return w.toString();
+        return null;
     }
 
     /**

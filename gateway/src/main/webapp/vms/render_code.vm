@@ -1,23 +1,23 @@
 ## 搜索代码结果渲染
 <ul>
-    #foreach($obj in $result.get("objects"))
-    #set($thisRepoName = $obj.get('repo').get('name').textValue())
+    #foreach($obj in $result.objects)
+    #set($thisRepoName = ${obj.repository.name})
     #set($pi = (($tool.param('p', 1) - 1) * 20) + ${foreach.count})
     <li class="code">
         <h6>
-            <a href="$obj.get('repo').get('url').textValue()/tree/master/$obj.get('file').get('location').textValue()" target="_blank">$tool.hlcode($obj.get('file').get('name').textValue(),$q)</a>
+            <a href="${obj.url}" target="_blank">$tool.hlcode(${obj.name},$q)</a>
             <small class="label"><a href="$tool.uri('repo.name',$thisRepoName)" title="Search in this Repository">$thisRepoName</a></small>
         </h6>
         <blockquote class="CodeResults">
             <ol>
-            #foreach($codeLine in $tool.hl_lines($obj.get('source').textValue(), $q, 10))
+            #foreach($codeLine in $tool.hl_lines(${obj.contents}, $q, 10))
             <li>
-                <em class="line">$codeLine.line</em>
-                <em class="code">$codeLine.code</em></li>
+                <em class="line">${codeLine.line}</em>
+                <em class="code">${codeLine.code}</em></li>
             #end
             </ol>
         </blockquote>
-        <p class="meta"><span class="label">$obj.get('lang').textValue()</span><em class="md">$obj.get('lines').get('total').textValue()</em> Lines by <em class="md">$obj.get('owner').textValue()</em>. <a href="$obj.get("repo").get("url").textValue()" target="_blank">$obj.get("repo").get("url").textValue()</a></p>
+        <p class="meta"><span class="label">${obj.lang|'None'}</span><em class="md">${obj.lines}</em> Lines by <em class="md">${obj.codeOwner}</em>. <a href="${obj.repository.url}" target="_blank">${obj.repository.url}</a></p>
     </li>
     #end
 </ul>

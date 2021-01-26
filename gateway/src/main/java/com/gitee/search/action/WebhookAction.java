@@ -2,11 +2,11 @@ package com.gitee.search.action;
 
 import com.gitee.search.server.Action;
 import io.vertx.ext.web.RoutingContext;
-import org.gitlab4j.api.systemhooks.SystemHookManager;
 
 /**
  * Handle webhook
- * http://localhost:8080/webhook/gitlab
+ * http://localhost:8080/webhook/gitlab_system   System hook  (new project/project updated etc)
+ * http://localhost:8080/webhook/gitlab_project  Project hook (issue\push\pr etc)
  * @author Winter Lau<javayou@gmail.com>
  */
 public class WebhookAction implements Action {
@@ -17,14 +17,6 @@ public class WebhookAction implements Action {
      */
     public void gitee(RoutingContext context) {
 
-    }
-
-    /**
-     * handle webhook from gitlab
-     * @param context
-     */
-    public void gitlab(RoutingContext context) {
-        new SystemHookManager();
     }
 
     /**
