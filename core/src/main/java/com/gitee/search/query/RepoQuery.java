@@ -13,7 +13,9 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * 仓库搜索
@@ -42,6 +44,15 @@ public class RepoQuery extends QueryBase {
     @Override
     public String type() {
         return Constants.TYPE_REPOSITORY;
+    }
+
+    /**
+     * list facet names
+     * @return
+     */
+    @Override
+    protected List<String> listFacetFields() {
+        return Arrays.asList(Constants.FIELD_LANGUAGE, Constants.FIELD_LICENSE);
     }
 
     /**

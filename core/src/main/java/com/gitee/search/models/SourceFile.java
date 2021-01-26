@@ -16,6 +16,7 @@ public final class SourceFile extends Searchable {
     private Relation repository = Relation.EMPTY;    //repository, use this field to delete all files of repository
 
     private String name;
+    private String url;             //absolute file url
     private String location;        // Path to file relative to repo location
     private String contents;
     private String hash;            //content sha1 hash
@@ -41,6 +42,7 @@ public final class SourceFile extends Searchable {
         this.repository.name = doc.get(Constants.FIELD_REPO_NAME);
         this.repository.url = doc.get(Constants.FIELD_REPO_URL);
         this.name = doc.get(Constants.FIELD_FILE_NAME);
+        this.url = doc.get(Constants.FIELD_URL);
         this.location = doc.get(Constants.FIELD_FILE_LOCATION);
         this.contents = doc.get(Constants.FIELD_SOURCE);
         this.hash = doc.get(Constants.FIELD_FILE_HASH);
@@ -67,6 +69,7 @@ public final class SourceFile extends Searchable {
 
         // Uuid is the primary key for documents
         document.add(new StringField(Constants.FIELD_UUID, uuid, Field.Store.YES));
+        document.add(new StoredField(Constants.FIELD_URL, this.url));
 
         //仓库信息
         document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID, this.repository.id));
@@ -132,6 +135,14 @@ public final class SourceFile extends Searchable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getLocation() {

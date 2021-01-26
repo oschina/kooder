@@ -77,6 +77,11 @@ public class QueryResult {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return this.json();
+    }
+
     public String getType() {
         return type;
     }

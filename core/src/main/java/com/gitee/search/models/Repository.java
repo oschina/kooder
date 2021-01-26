@@ -19,9 +19,9 @@ public final class Repository extends Searchable {
     protected String displayName;   //nameWithNamespace
     protected String description;
     protected String url;
-    protected Relation enterprise;
-    protected Relation project;
-    protected Relation owner;
+    protected Relation enterprise   = Relation.EMPTY;
+    protected Relation project      = Relation.EMPTY;
+    protected Relation owner        = Relation.EMPTY;
     protected int recomm;           //推荐级别
     protected int block;            //是否屏蔽 1屏蔽，0不屏蔽
     protected int visibility;       //0私有仓库，1内源仓库，2公开仓库
@@ -50,10 +50,12 @@ public final class Repository extends Searchable {
         this.url = p.getWebUrl();
         this.enterprise = Relation.EMPTY;
         this.project = Relation.EMPTY;
-        this.owner = new Relation(p.getOwner().getId(), p.getOwner().getName(), p.getOwner().getWebUrl());
+        if(p.getOwner() != null)
+            this.owner = new Relation(p.getOwner().getId(), p.getOwner().getName(), p.getOwner().getWebUrl());
         this.setVisibility(p.getVisibility());
-        this.setLicense(p.getLicense().getName());
-        this.setLang(null);// TODO 编程语言如何获取
+        if(p.getLicense() != null)
+            this.setLicense(p.getLicense().getName());
+        this.setLang(null);// 编程语言如何获取
         this.setReadme(null); //读取 Readme 信息
         this.setFork((p.getForkedFromProject()!=null)?p.getForkedFromProject().getId():0);
         this.setTags(p.getTagList());
@@ -72,9 +74,12 @@ public final class Repository extends Searchable {
         Document doc = new Document();
         doc.add(new StringField(Constants.FIELD_ID,     String.valueOf(id),     Field.Store.YES));
         doc.add(new TextField(Constants.FIELD_NAME,     this.getName(),         Field.Store.YES));
-        doc.add(new StringField(Constants.FIELD_DISPLAY_NAME, this.getDisplayName(), Field.Store.YES));
-        doc.add(new TextField(Constants.FIELD_DESC,     this.getDescription(),  Field.Store.YES));
-        doc.add(new StoredField(Constants.FIELD_URL,    this.getUrl()));
+        if(StringUtils.isNotBlank(this.getDisplayName()))
+            doc.add(new StringField(Constants.FIELD_DISPLAY_NAME, this.getDisplayName(), Field.Store.YES));
+        if(StringUtils.isNotBlank(this.getDescription()))
+            doc.add(new TextField(Constants.FIELD_DESC,     this.getDescription(),  Field.Store.YES));
+        if(StringUtils.isNotBlank(this.getUrl()))
+            doc.add(new StoredField(Constants.FIELD_URL,    this.getUrl()));
 
         doc.add(new NumericDocValuesField(Constants.FIELD_RECOMM, recomm));
         doc.add(new StoredField(Constants.FIELD_RECOMM, recomm));
@@ -111,9 +116,11 @@ public final class Repository extends Searchable {
         doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
 
         //tags
-        doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", tags), Field.Store.NO));
+        if(tags != null)
+            doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", tags), Field.Store.NO));
         //catalogs
-        doc.add(new TextField(Constants.FIELD_CATALOGS, String.join("\n", catalogs), Field.Store.NO));
+        if(catalogs != null)
+            doc.add(new TextField(Constants.FIELD_CATALOGS, String.join("\n", catalogs), Field.Store.NO));
 
         //enterprise info (just for gitee)
         enterprise:

@@ -1,5 +1,8 @@
 package com.gitee.search.query;
 
+import com.gitee.search.models.QueryResult;
+import com.gitee.search.models.Searchable;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +81,15 @@ public interface IQuery {
     List<String> getFilters();
 
     /**
-     * 搜索
-     * @return 返回结果 json
+     * execute query
+     * @return
+     * @throws IOException
      */
-    String search() throws IOException ;
+    QueryResult execute() throws IOException;
 
+    /**
+     * Get max object indexed
+     * @return
+     */
+    public Searchable getLastestObject() ;
 }

@@ -6,6 +6,10 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * 源码搜索
  * @author Winter Lau (javayou@gmail.com)
@@ -46,6 +50,15 @@ public class CodeQuery extends QueryBase {
         if("update".equals(sort))
             return new Sort(new SortedNumericSortField(Constants.FIELD_LAST_INDEX, SortField.Type.LONG, true));
         return Sort.RELEVANCE;
+    }
+
+    /**
+     * list facet names
+     * @return
+     */
+    @Override
+    protected List<String> listFacetFields() {
+        return Arrays.asList(Constants.FIELD_LANGUAGE, Constants.FIELD_REPO_NAME, Constants.FIELD_CODE_OWNER);
     }
 
     /**

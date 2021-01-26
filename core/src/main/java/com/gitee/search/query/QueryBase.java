@@ -1,18 +1,27 @@
 package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
-import com.gitee.search.index.IndexManager;
+import com.gitee.search.core.Constants;
+import com.gitee.search.models.QueryResult;
+import com.gitee.search.models.Searchable;
+import com.gitee.search.storage.StorageFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.facet.*;
+import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.index.IndexNotFoundException;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +29,9 @@ import java.util.stream.Collectors;
  * @author Winter Lau<javayou@gmail.com>
  */
 public abstract class QueryBase implements IQuery {
+
+    protected final static Logger log = LoggerFactory.getLogger(QueryBase.class);
+    public final static FacetsConfig facetsConfig = new FacetsConfig();
 
     protected String searchKey;
     protected boolean parseSearchKey = false;
@@ -30,15 +42,109 @@ public abstract class QueryBase implements IQuery {
     protected List<Query> filters = new ArrayList<>();
 
     /**
-     * execute query
+     * Get max object indexed .
+     * @return
+     */
+    public Searchable getLastestObject() {
+        try (IndexReader reader = StorageFactory.getIndexReader(this.type())) {
+            IndexSearcher searcher = new IndexSearcher(reader);
+            Query thisQuery = new MatchAllDocsQuery();
+            TopFieldDocs docs = searcher.search(thisQuery, 1, this.getLastestObjectSort());
+            if (docs.totalHits.value > 0) {
+                QueryResult result = new QueryResult(this.type());
+                Document doc = searcher.doc(docs.scoreDocs[0].doc);
+                result.addDocument(doc, docs.scoreDocs[0]);
+                return result.getObjects().get(0);
+            }
+        }catch(IndexNotFoundException e) {
+        }catch(Exception e) {
+            log.error("Failed to get lastest object from index[" + type() + "]", e);
+        }
+        return null;
+    }
+
+    protected Sort getLastestObjectSort() {
+        return new Sort(new SortField(Constants.FIELD_ID, SortField.Type.LONG, true));
+    }
+
+    /**
+     * execute search
      * @return
      * @throws IOException
      */
-    @Override
-    public String search() throws IOException {
+    public final QueryResult execute() throws IOException {
+
+        if(StringUtils.isBlank(searchKey))
+            throw new IllegalArgumentException("SearchKey must not be empty");
+
         Query query = buildQuery();
-        Sort nSort = buildSort();
-        return IndexManager.search(type(), query, facets, nSort, page, pageSize);
+        Sort sort = buildSort();
+
+        QueryResult result = new QueryResult(this.type());
+
+        boolean needFacetQuery = (facets != null) && (facets.size() > 0);
+        Query thisQuery = query;
+
+        if ( needFacetQuery ) { // 避免二次执行 FunctionScoreQuery ，比较耗时
+            if(query instanceof FunctionScoreQuery)
+                thisQuery = ((FunctionScoreQuery)query).getWrappedQuery();
+        }
+
+        long ct = System.currentTimeMillis();
+
+        try (IndexReader reader = StorageFactory.getIndexReader(this.type())) {
+            IndexSearcher searcher = new IndexSearcher(reader);
+            TaxonomyReader taxoReader = StorageFactory.getTaxonomyReader(this.type());
+            // Aggregates the facet values
+            FacetsCollector fc = new FacetsCollector(false);
+            //如果 n 传 0 ，则 search 方法 100% 报 ClassCastException 异常，这是 Lucene 的 bug
+            TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,true, fc); //fetch all facets
+
+            if( needFacetQuery ) {
+                BooleanQuery.Builder builder = new BooleanQuery.Builder();
+                builder.add(query, BooleanClause.Occur.MUST);
+                DrillDownQuery ddq = new DrillDownQuery(facetsConfig);
+                facets.forEach((k, values) ->
+                        Arrays.stream(values).forEach(v -> ddq.add(k, v))
+                );
+                builder.add(ddq, BooleanClause.Occur.MUST);
+                thisQuery = builder.build();
+                //TopDocs docs = FacetsCollector.search(searcher, thisQuery, page * pageSize, sort,true, new FacetsCollector(false));
+                docs = searcher.search(thisQuery, page * pageSize, sort,true);
+            }
+
+            int totalPages = (int) Math.ceil(docs.totalHits.value / (double) pageSize);
+
+            //read objects
+            result.setTotalHits((int)docs.totalHits.value);
+            result.setTotalPages(totalPages);
+            result.setPageIndex(page);
+            result.setPageSize(pageSize);
+            result.setTimeUsed(System.currentTimeMillis() - ct);
+            result.setQuery(thisQuery.toString());
+
+            for(int i = (page-1) * pageSize; i < page * pageSize && i < docs.totalHits.value ; i++) {
+                Document doc = searcher.doc(docs.scoreDocs[i].doc);
+                result.addDocument(doc, docs.scoreDocs[i]);
+            }
+
+            //read facets
+            List<String> facetFields = this.listFacetFields();
+            if(facetFields.size() > 0) {
+                Facets facets = new FastTaxonomyFacetCounts(taxoReader, facetsConfig, fc);
+
+                for (String facetField : facetFields) {
+                    FacetResult facetResult = facets.getTopChildren(Integer.MAX_VALUE, facetField);
+                    if (facetResult != null) {
+                        for (LabelAndValue lav : facetResult.labelValues) {
+                            result.addFacet(facetField, lav);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 
     /**
@@ -48,10 +154,18 @@ public abstract class QueryBase implements IQuery {
     protected abstract Query buildUserQuery();
 
     /**
+     * list facet names
+     * @return
+     */
+    protected List<String> listFacetFields() {
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
      * Build complete query with user query and filter query
      * @return
      */
-    private Query buildQuery() {
+    protected final Query buildQuery() {
         Query query = this.buildUserQuery();
         if(filters == null || filters.size() == 0)
             return query;
@@ -74,7 +188,12 @@ public abstract class QueryBase implements IQuery {
      */
     @Override
     public IQuery setSearchKey(String key) {
+        return setSearchKey(key, parseSearchKey);
+    }
+
+    public IQuery setSearchKey(String key, boolean parseSearchKey) {
         this.searchKey = key;
+        this.parseSearchKey = parseSearchKey;
         return this;
     }
 

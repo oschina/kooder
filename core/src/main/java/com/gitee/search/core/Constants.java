@@ -22,6 +22,7 @@ public interface Constants {
     String TYPE_USER            = "user";     //Users
     String TYPE_METADATA        = "_metadata";
 
+    String GITLAB_SECRET_TOKEN  = "gitee";
 
     byte RECOMM_NONE            = 0x00; //未被推荐项目（推荐级别定义必须递增）
     byte RECOMM                 = 0x01; //推荐项目

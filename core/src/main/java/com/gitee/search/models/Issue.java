@@ -71,7 +71,9 @@ public final class Issue extends Searchable {
         this.description = doc.get(Constants.FIELD_DESC);
         this.url = doc.get(Constants.FIELD_URL);
         this.labels = new ArrayList<>();
-        this.labels.addAll(Arrays.asList(StringUtils.split(doc.get(Constants.FIELD_TAGS), "\n")));
+        String tags = doc.get(Constants.FIELD_TAGS);
+        if(tags != null)
+            this.labels.addAll(Arrays.asList(StringUtils.split(doc.get(Constants.FIELD_TAGS), "\n")));
         this.updatedAt = NumberUtils.toLong(doc.get(Constants.FIELD_UPDATED_AT));
         this.createdAt = NumberUtils.toLong(doc.get(Constants.FIELD_CREATED_AT));
         this.closedAt = NumberUtils.toLong(doc.get(Constants.FIELD_CLOSED_AT));
@@ -99,8 +101,8 @@ public final class Issue extends Searchable {
         doc.add(new TextField(Constants.FIELD_DESC,     description,            Field.Store.YES));
         doc.add(new StoredField(Constants.FIELD_URL,    url));
         doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", labels), Field.Store.NO));
-        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
-        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new NumericDocValuesField(Constants.FIELD_CREATED_AT, createdAt));
+        doc.add(new StoredField(Constants.FIELD_CREATED_AT, createdAt));
         doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
         doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
         doc.add(new NumericDocValuesField(Constants.FIELD_CLOSED_AT, closedAt));

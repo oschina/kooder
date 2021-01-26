@@ -24,6 +24,15 @@ public class IssueQuery extends QueryBase {
     }
 
     /**
+     * Last issue based on created_at field
+     * @return
+     */
+    @Override
+    protected Sort getLastestObjectSort() {
+        return new Sort(new SortField(Constants.FIELD_CREATED_AT, SortField.Type.LONG, true));
+    }
+
+    /**
      * 构建查询对象
      *
      * @return

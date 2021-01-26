@@ -121,7 +121,6 @@ public class QueueTask {
     }
 
     /**
-     *
      * 解析 JSON 为 Task
      * @param json
      * @return
