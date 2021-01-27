@@ -32,6 +32,7 @@ public class GitlabIndexThread extends Thread {
     private String gsearch_url;
     private String system_hook_url;
     private String project_hook_url;
+    private String secret_token;
 
     public static void main(String[] args) {
         new GitlabIndexThread().start();
@@ -44,6 +45,7 @@ public class GitlabIndexThread extends Thread {
         this.gsearch_url = GiteeSearchConfig.getProperty("http.url");
         this.system_hook_url = gsearch_url + "/gitlab/system";
         this.project_hook_url = gsearch_url + "/gitlab/project";
+        this.secret_token = GiteeSearchConfig.getProperty("gitlab.secret_token", "gsearch");
     }
 
     /**
@@ -88,7 +90,7 @@ public class GitlabIndexThread extends Thread {
             if(hook.getUrl().equals(system_hook_url))
                 return ;
         }
-        gitlab.getSystemHooksApi().addSystemHook(system_hook_url, Constants.GITLAB_SECRET_TOKEN, true, true, false);
+        gitlab.getSystemHooksApi().addSystemHook(system_hook_url, secret_token, true, true, false);
         log.info("Gitlab system hook : {} installed.", system_hook_url);
     }
 
@@ -110,7 +112,7 @@ public class GitlabIndexThread extends Thread {
         hook.setRepositoryUpdateEvents(true);
         hook.setTagPushEvents(true);
         hook.setWikiPageEvents(true);
-        gitlab.getProjectApi().addHook(p.getId(), this.project_hook_url, hook, true, Constants.GITLAB_SECRET_TOKEN);
+        gitlab.getProjectApi().addHook(p.getId(), this.project_hook_url, hook, true, secret_token);
     }
 
     /**
