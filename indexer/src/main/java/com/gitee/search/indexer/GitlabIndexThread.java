@@ -178,11 +178,13 @@ public class GitlabIndexThread extends Thread {
         Pager<org.gitlab4j.api.models.Issue> issues = api.getIssues(new IssueFilter().withCreatedAfter(lastDate), itemsPerPage);
         while(issues.hasNext()) {
             for(org.gitlab4j.api.models. Issue gitlab_issue : issues.next()) {
-                //index issue info
-                Issue issue = new Issue(gitlab_issue);
-                //write to lucene index
-                QueueTask.add(Constants.TYPE_ISSUE, issue);
-                pc ++;
+                if(gitlab_issue.getCreatedAt().after(lastDate)) {
+                    //index issue info
+                    Issue issue = new Issue(gitlab_issue);
+                    //write to lucene index
+                    QueueTask.add(Constants.TYPE_ISSUE, issue);
+                    pc++;
+                }
             }
         }
 
