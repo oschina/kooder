@@ -33,10 +33,6 @@ $ git clone https://gitee.com/oschina/gitee-search.git
 $ cd gitee-search
 ```
 
-### 配置
-
-详情请看 [configuration.md](configuration.md)
-
 ### 运行前准备工作
 
 配置 Gitee Search 的网址 `http.url` ，该地址用于像 Git 服务注入 Webhook 的链接地址，
@@ -45,6 +41,8 @@ $ cd gitee-search
 ```
 http.url = http://<gitee-search-host>:8080
 ```
+
+更多配置项请看 [configuration.md](configuration.md)
 
 **对接 Gitlab**
 
