@@ -41,21 +41,37 @@ $ bin/gateway.sh
 
 详情请看 [configuration.md](configuration.md)
 
-### 索引
+### 运行前准备工作
 
-安装完的 Gitee Search 不包含任何索引数据，索引数据方式包括：
+配置 Gitee Search 的网址 `http.url` ，该地址用于像 Git 服务注入 Webhook 的链接地址，
+必须是 Git 服务可访问的地址，例如：
 
-1. HTTP 接口
+```
+http.url = http://<gitee-search-host>:8080
+```
 
-实例：
+**一. 对接 Gitlab**
 
-curl "http://localhost:8080/api/task?type=repo&action=add" -d {json}  
-其中 json 格式请参考 json/code.json, json/repo.json, json/issue.json
+需配置如下几项：
 
-2. json 文件
+```
+gitlab.url = http://154.85.53.95:10080/  
+gitlab.personal_access_token = <root user personal access token>  
+git.username = root  
+git.password =  
+```
 
-$bin/gsimport -t repo -a add -p [json文件目录]
+如果不填写密码，则 Gitee Search 会自动使用 access token 作为密码。
 
-3. 系统对接
+**二. 对接 Gitee**
 
-提供 gitlab 或者 gitee 的 api 接口地址，由 Gitee Search 直接从接口中获取数据
+需配置如下几项：
+
+```
+gitee.url = https://gitee.com/  
+gitee.personal_access_token = <root user personal access token>  
+git.username = root  
+git.password =  
+```
+
+如果不填写密码，则 Gitee Search 会自动使用 access token 作为密码。

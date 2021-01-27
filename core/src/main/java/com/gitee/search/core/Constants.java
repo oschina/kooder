@@ -28,10 +28,6 @@ public interface Constants {
     byte RECOMM                 = 0x01; //推荐项目
     byte RECOMM_GVP             = 0x02; //GVP推荐项目
 
-    byte REPO_TYPE_PRIVATE      = 0x00; //私有仓库
-    byte REPO_TYPE_PUBLIC       = 0x01; //公开仓库
-    byte REPO_TYPE_INNER        = 0x02; //企业内源仓库
-
     byte REPO_BLOCK_YES         = 0x01;
     byte REPO_BLOCK_NO          = 0x00;
 

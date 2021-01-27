@@ -6,7 +6,7 @@
 #set($repo = $tool.param('repo.name'))
 #set($owner = $tool.param('owner'))
 <!--
-QUERY: ${result.query.textValue()}
+QUERY: ${result.query}
 TIME: ${result.timeUsed} ms
 -->
 <div id="main">

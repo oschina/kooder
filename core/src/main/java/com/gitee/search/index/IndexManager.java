@@ -1,5 +1,6 @@
 package com.gitee.search.index;
 
+import com.gitee.search.core.Constants;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
@@ -105,11 +106,10 @@ public class IndexManager {
      * @throws IOException
      */
     public static long update(List<Document> docs, IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
-        //update documents
-        Query[] queries = docs.stream().map(d -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, d.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
-        i_writer.deleteDocuments(queries);
-        //re-add documents
-        return i_writer.addDocuments(docs.stream().map(d -> buildFacetDocument(t_writer, d)).collect(Collectors.toList()));
+        for(Document doc : docs) {
+            i_writer.updateDocument(new Term(FIELD_ID, doc.get(FIELD_ID)), buildFacetDocument(t_writer, doc));
+        }
+        return docs.size();
     }
 
     /**

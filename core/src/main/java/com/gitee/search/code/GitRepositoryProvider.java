@@ -16,6 +16,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.eclipse.jgit.annotations.NonNull;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
@@ -55,6 +56,11 @@ public class GitRepositoryProvider implements RepositoryProvider {
         //http authenticator
         String username = GiteeSearchConfig.getProperty("git.username");
         String password = GiteeSearchConfig.getProperty("git.password");
+        if(StringUtils.isBlank(password)) {
+            password = GiteeSearchConfig.getProperty("gitlab.personal_access_token");
+            if(StringUtils.isBlank(password))
+                password = GiteeSearchConfig.getProperty("gitee.personal_access_token");
+        }
         if(StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password))
             this.credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
 
@@ -101,43 +107,41 @@ public class GitRepositoryProvider implements RepositoryProvider {
         try {
             long ct = System.currentTimeMillis();
             File repoFile = StorageFactory.getRepositoryPath(repo.getRelativePath()).toFile();
-            if(!repoFile.exists()) {//检查目录不存在就 clone
+            if (!repoFile.exists()) {//检查目录不存在就 clone
                 git = justClone(repo.getUrl(), repoFile);
                 log.info("Repository '{}:{}' no exists, re-clone from '{}' in {}ms",
-                        repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis()-ct);
-            }
-            else {//目录存在就 pull，如果使用 bare 模式克隆仓库，对应的是 git fetch
+                        repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis() - ct);
+            } else {//目录存在就 pull，如果使用 bare 模式克隆仓库，对应的是 git fetch
                 git = Git.open(repoFile);
                 FetchCommand fetchCmd = git.fetch();
                 List<RemoteConfig> remotes = git.remoteList().call();
                 boolean needReClone = false;
-                for(RemoteConfig remote : remotes) {
-                    if(remote.getName().equals(fetchCmd.getRemote())) {
-                        if(remote.getURIs().get(0).toString().equals(repo.getUrl())) {
+                for (RemoteConfig remote : remotes) {
+                    if (remote.getName().equals(fetchCmd.getRemote())) {
+                        if (remote.getURIs().get(0).toString().equals(repo.getUrl())) {
                             //remote url no changed, just fetch it
                             this.autoSetCredential(fetchCmd);
                             fetchCmd.call();
                             log.info("Repository '{}:{}' mismatch local objects, re-clone from '{}' in {}ms",
-                                    repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis()-ct);
+                                    repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis() - ct);
                             break;
-                        }
-                        else
+                        } else
                             needReClone = true;
                     }
                 }
-                if(needReClone) {//仓库地址变成另外一个不相关的仓库时候重新克隆？
+                if (needReClone) {//仓库地址变成另外一个不相关的仓库时候重新克隆？
                     git.close();
                     FileUtils.forceDelete(repoFile);
                     git = justClone(repo.getUrl(), repoFile);
                     log.info("Repository '{}:{}' mismatch local objects, re-clone from '{}' in {}ms",
-                            repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis()-ct);
+                            repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis() - ct);
                 }
                 //fetchCmd.setForceUpdate(true);
             }
 
             boolean needRebuildIndexes = true;
             ObjectId oldId = null;
-            if(StringUtils.isNotBlank(repo.getLastCommitId())) {
+            if (StringUtils.isNotBlank(repo.getLastCommitId())) {
                 //Check last commit ref
                 try (RevWalk revWalk = new RevWalk(git.getRepository())) {
                     revWalk.setRetainBody(false);
@@ -151,13 +155,13 @@ public class GitRepositoryProvider implements RepositoryProvider {
 
             repo.saveStatus(CodeRepository.STATUS_FETCH);
 
-            if(needRebuildIndexes) {
+            if (needRebuildIndexes) {
                 long cti = System.currentTimeMillis();
-                if(traveler != null)
+                if (traveler != null)
                     traveler.resetRepository(repo.getId());
                 //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
                 int fc = this.indexAllFiles(repo, git, traveler);
-                log.warn("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis()-cti);
+                log.warn("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis() - cti);
                 return fc;
             }
 
@@ -176,11 +180,11 @@ public class GitRepositoryProvider implements RepositoryProvider {
                         String path = entry.getNewPath();
                         //TODO 二进制文件可以参与索引，但不索引内容
                         boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-                        if(!isBinaryFile) { //二进制文件不参与索引
+                        if (!isBinaryFile) { //二进制文件不参与索引
                             CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
                             if (doc != null && traveler != null) {
                                 traveler.updateDocument(doc);
-                                fileCount ++;
+                                fileCount++;
                             }
                         }
                     }

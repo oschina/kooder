@@ -2,7 +2,6 @@ package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
@@ -74,31 +73,22 @@ public class RepoQuery extends QueryBase {
 
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //只搜索公开仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("type", Constants.REPO_TYPE_PUBLIC), BooleanClause.Occur.FILTER);
+        //builder.add(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_VISIBILITY, Constants.VISIBILITY_PUBLIC), BooleanClause.Occur.FILTER);
         //不搜索fork仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("fork", Constants.REPO_FORK_NO), BooleanClause.Occur.FILTER);
+        builder.add(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_FORK, Constants.REPO_FORK_NO), BooleanClause.Occur.FILTER);
         //不搜索被屏蔽的仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery("block", Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
-
-        String sRecomm = (facets.get("recomm")!=null&&facets.get("recomm").length>0)?facets.get("recomm")[0]:null;
-        int recomm = NumberUtils.toInt(sRecomm, Constants.RECOMM_NONE);
-        if(recomm >= Constants.RECOMM_GVP)//搜索范围
-            builder.add(NumericDocValuesField.newSlowExactQuery("recomm", Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
-        else if(recomm > Constants.RECOMM_NONE)
-            builder.add(NumericDocValuesField.newSlowRangeQuery("recomm", Constants.RECOMM, Constants.RECOMM_GVP), BooleanClause.Occur.FILTER);
+        builder.add(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_BLOCK, Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
 
         //BoostQuery
         //如果调整  boost 就要调整 ScoreHelper 中的 SCORE_FACTOR
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        qbuilder.add(makeBoostQuery("catalogs", q, 10.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("name", q, SCORE_FACTOR), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("description", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("detail", q, 0.5f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("tags", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_CATALOGS, q, 10.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_NAME, q, SCORE_FACTOR), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_DESC, q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_README, q, 0.5f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_TAGS, q, 1.0f), BooleanClause.Occur.SHOULD);
         //qbuilder.add(makeBoostQuery("lang", q, 2.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("owner.name", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("namespace.path", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("namespace.name", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_USER_NAME, q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.setMinimumNumberShouldMatch(1);
 
         builder.add(qbuilder.build(), BooleanClause.Occur.MUST);

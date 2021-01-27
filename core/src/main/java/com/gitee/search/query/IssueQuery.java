@@ -2,7 +2,6 @@ package com.gitee.search.query;
 
 import com.gitee.search.core.AnalyzerFactory;
 import com.gitee.search.core.Constants;
-import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -50,16 +49,12 @@ public class IssueQuery extends QueryBase {
         String q = QueryParser.escape(searchKey);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //filter
-        builder.add(NumericDocValuesField.newSlowExactQuery("public", Constants.ISSUE_PUBLIC), BooleanClause.Occur.FILTER);
         //search
         BooleanQuery.Builder qbuilder = new BooleanQuery.Builder();
-        qbuilder.add(makeBoostQuery("ident", q, 100.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("subject", q, 10.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("description", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("author.name", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("author.path", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("project.path", q, 1.0f), BooleanClause.Occur.SHOULD);
-        qbuilder.add(makeBoostQuery("project.name", q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_IDENT, q, 100.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_TITLE, q, 10.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_TAGS, q, 1.0f), BooleanClause.Occur.SHOULD);
+        qbuilder.add(makeBoostQuery(Constants.FIELD_DESC, q, 1.0f), BooleanClause.Occur.SHOULD);
         qbuilder.setMinimumNumberShouldMatch(1);
 
         builder.add(qbuilder.build(), BooleanClause.Occur.MUST);

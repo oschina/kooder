@@ -40,7 +40,7 @@ public final class Issue extends Searchable {
 
     public Issue(org.gitlab4j.api.models.Issue issue) {
         this.id = issue.getId();
-        this.ident = issue.getExternalId();
+        this.ident = issue.getProjectId() + "_" + issue.getId();
         this.enterprise = Relation.EMPTY;
         this.project = Relation.EMPTY;
         this.repository = new Relation(issue.getProjectId(), null, null);
@@ -94,8 +94,8 @@ public final class Issue extends Searchable {
      */
     @Override
     public Document getDocument() {
-        Document doc = new Document();
-        doc.add(new StringField(Constants.FIELD_ID,     String.valueOf(id),     Field.Store.YES));
+        Document doc = super.newDocument();
+
         doc.add(new StringField(Constants.FIELD_IDENT,  ident,                  Field.Store.YES));
         doc.add(new TextField(Constants.FIELD_TITLE,    title,                  Field.Store.YES));
         doc.add(new TextField(Constants.FIELD_DESC,     description,            Field.Store.YES));

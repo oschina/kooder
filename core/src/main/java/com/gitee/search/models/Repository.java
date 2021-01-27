@@ -63,6 +63,7 @@ public final class Repository extends Searchable {
         this.setUpdatedAt((p.getLastActivityAt()!=null)?p.getLastActivityAt().getTime():0);
         this.setStarsCount(p.getStarCount());
         this.setForksCount(p.getForksCount());
+        this.setBlock(Constants.REPO_BLOCK_NO);
     }
 
     /**
@@ -71,8 +72,7 @@ public final class Repository extends Searchable {
      */
     @Override
     public Document getDocument() {
-        Document doc = new Document();
-        doc.add(new StringField(Constants.FIELD_ID,     String.valueOf(id),     Field.Store.YES));
+        Document doc = super.newDocument();
         doc.add(new TextField(Constants.FIELD_NAME,     this.getName(),         Field.Store.YES));
         if(StringUtils.isNotBlank(this.getDisplayName()))
             doc.add(new StringField(Constants.FIELD_DISPLAY_NAME, this.getDisplayName(), Field.Store.YES));
@@ -110,8 +110,8 @@ public final class Repository extends Searchable {
         doc.add(new StoredField(Constants.FIELD_STAR_COUNT, starsCount));
         doc.add(new NumericDocValuesField(Constants.FIELD_FORK_COUNT, forksCount));
         doc.add(new StoredField(Constants.FIELD_FORK_COUNT, forksCount));
-        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
-        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
+        doc.add(new NumericDocValuesField(Constants.FIELD_CREATED_AT, createdAt));
+        doc.add(new StoredField(Constants.FIELD_CREATED_AT, createdAt));
         doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
         doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
 

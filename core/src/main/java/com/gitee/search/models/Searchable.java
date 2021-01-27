@@ -1,7 +1,8 @@
 package com.gitee.search.models;
 
+import com.gitee.search.core.Constants;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.lucene.document.Document;
+import org.apache.lucene.document.*;
 
 import java.io.Serializable;
 
@@ -37,6 +38,13 @@ public abstract class Searchable implements Serializable {
 
     public void set_score(float _score) {
         this._score = _score;
+    }
+
+    protected Document newDocument() {
+        Document doc = new Document();
+        doc.add(new StringField(Constants.FIELD_ID, String.valueOf(id), Field.Store.YES));
+        doc.add(new NumericDocValuesField(Constants.FIELD_ID, id));
+        return doc;
     }
 
     /**
