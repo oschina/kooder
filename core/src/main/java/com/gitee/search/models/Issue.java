@@ -4,10 +4,13 @@ import com.gitee.search.core.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
+import org.gitlab4j.api.webhook.EventIssue;
+import org.gitlab4j.api.webhook.IssueEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Issue info
@@ -53,6 +56,22 @@ public final class Issue extends Searchable {
         this.updatedAt = (issue.getUpdatedAt() != null) ? issue.getUpdatedAt().getTime() : 0;
         this.closedAt = (issue.getClosedAt() != null) ? issue.getClosedAt().getTime() : 0;
         this.setState(issue.getState());
+    }
+
+    public Issue(IssueEvent e) {
+        this.id = e.getObjectAttributes().getId();
+        this.ident = e.getProject().getId() + "_" + this.id;
+        this.enterprise = Relation.EMPTY;
+        this.project = Relation.EMPTY;
+        this.repository = new Relation(e.getProject().getId(), e.getProject().getName(), e.getProject().getUrl());
+        this.owner = new Relation(e.getUser().getId(), e.getUser().getName(), e.getUser().getWebUrl());
+        this.title = e.getObjectAttributes().getTitle();
+        this.description = e.getObjectAttributes().getDescription();
+        this.url = e.getObjectAttributes().getUrl();
+        this.labels = e.getLabels().stream().map(l -> l.getTitle()).collect(Collectors.toList());
+        this.createdAt = (e.getObjectAttributes().getCreatedAt() != null) ? e.getObjectAttributes().getCreatedAt().getTime() : 0L;
+        this.updatedAt = (e.getObjectAttributes().getUpdatedAt() != null) ? e.getObjectAttributes().getUpdatedAt().getTime() : 0L;
+        this.setState(org.gitlab4j.api.Constants.IssueState.valueOf(e.getObjectAttributes().getState()));
     }
 
     public Issue(Document doc) {

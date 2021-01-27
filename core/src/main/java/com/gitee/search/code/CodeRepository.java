@@ -1,6 +1,7 @@
 package com.gitee.search.code;
 
 import com.gitee.search.core.Constants;
+import com.gitee.search.models.Repository;
 import com.gitee.search.models.Searchable;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.Document;
@@ -27,6 +28,18 @@ public class CodeRepository extends Searchable {
     private String lastCommitId;//最后提交编号
     private long   timestamp;   //状态最后更新时间
     private String status;      //最后状态
+
+    public CodeRepository(){}
+
+    public CodeRepository(long id) {
+        super.setId(id);
+    }
+
+    public CodeRepository(Repository r) {
+        this.id = r.getId();
+        this.name = r.getName();
+        this.url = r.getUrl();
+    }
 
     /**
      * 返回在仓库目录下的相对存储路径

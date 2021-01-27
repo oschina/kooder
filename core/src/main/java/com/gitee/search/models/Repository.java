@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
+import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.Visibility;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public final class Repository extends Searchable {
         setDocument(doc);
     }
 
-    public Repository(org.gitlab4j.api.models.Project p) {
+    public Repository(Project p) {
         this.id = p.getId();
         this.name = p.getName();
         this.description = p.getDescription();

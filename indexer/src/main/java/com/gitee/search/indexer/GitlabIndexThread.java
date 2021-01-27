@@ -7,7 +7,6 @@ import com.gitee.search.models.Issue;
 import com.gitee.search.models.Repository;
 import com.gitee.search.query.QueryFactory;
 import com.gitee.search.queue.QueueTask;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.gitlab4j.api.*;
 import org.gitlab4j.api.models.*;
 import org.slf4j.Logger;
@@ -26,22 +25,12 @@ public class GitlabIndexThread extends Thread {
 
     private final static int itemsPerPage = 20;
 
-    private String gitlab_url;
-    private String access_token;
-    private int version;
     private String gsearch_url;
     private String system_hook_url;
     private String project_hook_url;
     private String secret_token;
 
-    public static void main(String[] args) {
-        new GitlabIndexThread().start();
-    }
-
     public GitlabIndexThread() {
-        this.gitlab_url = GiteeSearchConfig.getProperty("gitlab.url");
-        this.access_token = GiteeSearchConfig.getProperty("gitlab.personal_access_token");
-        this.version = NumberUtils.toInt(GiteeSearchConfig.getProperty("gitlab.version"), 4);
         this.gsearch_url = GiteeSearchConfig.getProperty("http.url");
         this.system_hook_url = gsearch_url + "/gitlab/system";
         this.project_hook_url = gsearch_url + "/gitlab/project";
@@ -55,7 +44,8 @@ public class GitlabIndexThread extends Thread {
     @Override
     public void run() {
         long ct = System.currentTimeMillis();
-        try (GitLabApi gitlab = this.connect()){
+        try {
+            GitLabApi gitlab = this.connect();
             this.checkAndInstallSystemHook(gitlab);
             this.checkAndIndexProjects(gitlab);
             this.checkAndIndexIssues(gitlab);
@@ -71,10 +61,8 @@ public class GitlabIndexThread extends Thread {
      * @throws GitLabApiException
      */
     private GitLabApi connect() throws GitLabApiException {
-        GitLabApi gitlab = new GitLabApi((this.version != 3) ? GitLabApi.ApiVersion.V4 : GitLabApi.ApiVersion.V3, gitlab_url, access_token);
-        // Set the connect timeout to 1 second and the read timeout to 5 seconds
-        gitlab.setRequestTimeout(1000, 5000);
-        log.info("Connected to GitLab {} at {}" , gitlab.getVersion().getVersion(), gitlab_url);
+        GitLabApi gitlab = Gitlab.INSTANCE;
+        log.info("Connected to GitLab {} at {}" , gitlab.getVersion().getVersion(), gitlab.getGitLabServerUrl());
         return gitlab;
     }
 
@@ -130,7 +118,7 @@ public class GitlabIndexThread extends Thread {
         Pager<Project> projects = api.getProjects(new ProjectFilter().withIdAfter(maxId), itemsPerPage);
         while(projects.hasNext()) {
             for(Project p : projects.next()) {
-                //check and install webhook to this project
+                //Check and install webhook to this project (Repository hook only handle issue event)
                 this.checkAndInstallProjectHook(gitlab, p);
                 //index project info
                 Repository repo = new Repository(p);

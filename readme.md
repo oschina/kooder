@@ -2,7 +2,7 @@
 
 ### 简介
 
-Gitee Search 是 Gitee 的搜索引擎服务模块，为 Gitee/GitLab 提供仓库、Issue、代码等搜索服务。
+Gitee Search 是 Gitee 的搜索引擎服务模块，为 Gitee/GitLab/Gitea 提供代码、Issue、仓库等搜索服务。
 
 整个 Gitee Search 服务包含两个进程，分别是 gateway 和 indexer（默认配置下 indexer 被集成到 gateway 中）。
 其中 gateway 用来接受来自 HTTP 的索引任务， 对任务进行检查后存放到队列中；

@@ -53,12 +53,24 @@ public class QueueTask implements Serializable {
 
     public QueueTask(){}
 
-    public static void add(String type, Searchable...obj) {
+    public static void push(String type, String action, Searchable...obj){
         QueueTask task = new QueueTask();
-        task.action = ACTION_ADD;
         task.type = type;
+        task.action = action;
         task.objects.addAll(Arrays.asList(obj));
         QueueFactory.getProvider().queue(type).push(Arrays.asList(task));
+    }
+
+    public static void add(String type, Searchable...obj) {
+        push(type, ACTION_ADD, obj);
+    }
+
+    public static void update(String type, Searchable...obj) {
+        push(type, ACTION_UPDATE, obj);
+    }
+
+    public static void delete(String type, Searchable...obj) {
+        push(type, ACTION_DELETE, obj);
     }
 
     public String getType() {
