@@ -17,7 +17,7 @@ Gitee Search 是 Gitee 的搜索引擎服务模块，为 Gitee/GitLab/Gitea 提�
 
 ### 数据流图
 
-![Gitee Search Flow](docs/gsearch-flow.png)
+![Gitee Search Flow](docs/img/gsearch-flow.png)
 
 ### 安装
 
@@ -80,3 +80,7 @@ $ mvn install
 $ bin/gateway.sh
 ### 浏览器访问 http://localhost:8080
 ```
+
+**搜索界面效果**
+
+![Gitee Search ScreenShot](docs/img/screenshot.png)

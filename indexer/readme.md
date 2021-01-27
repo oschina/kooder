@@ -8,4 +8,4 @@ indexer 自身维护一个持久化队列，可根据实际索引任务量来配
 
 #### indexer 多线程模型
 
-![Gitee Search Indexer Flow](../docs/gsearch-indexer.png)
+![Gitee Search Indexer Flow](../docs/img/gsearch-indexer.png)
