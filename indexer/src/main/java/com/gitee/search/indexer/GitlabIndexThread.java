@@ -30,6 +30,10 @@ public class GitlabIndexThread extends Thread {
     private String project_hook_url;
     private String secret_token;
 
+    public static void main(String[] args) {
+        new GitlabIndexThread().start();
+    }
+
     public GitlabIndexThread() {
         this.gsearch_url = GiteeSearchConfig.getProperty("http.url");
         this.system_hook_url = gsearch_url + "/gitlab/system";
@@ -167,7 +171,7 @@ public class GitlabIndexThread extends Thread {
         long ct = System.currentTimeMillis();
         int pc = 0;
         Issue lastIssue = (Issue)QueryFactory.ISSUE().getLastestObject();
-        long last = (lastIssue == null) ? 0 : (int)lastIssue.getCreatedAt();
+        long last = (lastIssue == null) ? 0 : lastIssue.getCreatedAt();
         Date lastDate = new Date(last);
         //list all issues with id bigger than {maxId}
         IssuesApi api = gitlab.getIssuesApi();
