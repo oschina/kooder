@@ -26,15 +26,11 @@ Gitee Search 是 Gitee 的搜索引擎服务模块，为 Gitee/GitLab/Gitea 提�
 * openjdk >= 11
 * maven > 3
 
-2.构建并运行
+2.下载代码
 
 ```
 $ git clone https://gitee.com/oschina/gitee-search.git
 $ cd gitee-search
-$ mvn install
-### 启动 gateway
-$ bin/gateway.sh
-### 浏览器访问 http://localhost:8080
 ```
 
 ### 配置
@@ -50,7 +46,7 @@ $ bin/gateway.sh
 http.url = http://<gitee-search-host>:8080
 ```
 
-**一. 对接 Gitlab**
+**对接 Gitlab**
 
 需配置如下几项：
 
@@ -63,7 +59,7 @@ git.password =
 
 如果不填写密码，则 Gitee Search 会自动使用 access token 作为密码。
 
-**二. 对接 Gitee**
+**对接 Gitee**
 
 需配置如下几项：
 
@@ -75,3 +71,14 @@ git.password =
 ```
 
 如果不填写密码，则 Gitee Search 会自动使用 access token 作为密码。
+
+
+**构建并运行**
+
+```
+$ cd gitee-search
+$ mvn install
+### 启动 gateway
+$ bin/gateway.sh
+### 浏览器访问 http://localhost:8080
+```
