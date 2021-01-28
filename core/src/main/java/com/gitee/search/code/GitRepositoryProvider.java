@@ -122,7 +122,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                             //remote url no changed, just fetch it
                             this.autoSetCredential(fetchCmd);
                             fetchCmd.call();
-                            log.info("Repository '{}:{}' mismatch local objects, re-clone from '{}' in {}ms",
+                            log.info("Repository '{}:{}' pulled from '{}' in {}ms",
                                     repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis() - ct);
                             break;
                         } else
