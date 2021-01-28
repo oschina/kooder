@@ -2,7 +2,7 @@
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>#if($page_title)$page_title - #{end}Gitee Search</title>
+    <title>$page_title</title>
     <link rel="stylesheet" href="$tool.static_with_timestamp('css/spectre.min.css')">
     <link rel="stylesheet" href="$tool.static_with_timestamp('css/spectre-exp.min.css')">
     <link rel="stylesheet" href="$tool.static_with_timestamp('css/spectre-icons.min.css')">

@@ -39,5 +39,5 @@
 
 #### 源码包说明
 
-`com.gitee.search.action` 处理接口业务逻辑 
+`com.gitee.kooder.action` 处理接口业务逻辑 
 `com.gitee.http.server` HTTP服务  

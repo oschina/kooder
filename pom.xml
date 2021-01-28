@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.gitee.search</groupId>
-    <artifactId>gitee-search</artifactId>
+    <groupId>com.gitee.koode</groupId>
+    <artifactId>kooder</artifactId>
     <version>1.0-alpha</version>
     <packaging>pom</packaging>
 
     <description>Gitee Search Engine</description>
-    <url>https://gitee.com/oschina/gitee-search</url>
+    <url>https://gitee.com/koode/kooder</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

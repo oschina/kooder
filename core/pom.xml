@@ -4,17 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <groupId>com.gitee.search</groupId>
-        <artifactId>gitee-search</artifactId>
+        <groupId>com.gitee.koode</groupId>
+        <artifactId>kooder</artifactId>
         <version>1.0-alpha</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.gitee.search</groupId>
-    <artifactId>gitee-search-core</artifactId>
+    <artifactId>kooder-core</artifactId>
 
-    <description> Gitee Search - core </description>
+    <description> Kooder - core </description>
 
     <properties>
         <lucene.version>8.7.0</lucene.version>

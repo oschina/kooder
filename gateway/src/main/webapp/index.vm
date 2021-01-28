@@ -1,9 +1,10 @@
 #set($layout = 'html.vm')
+#set($page_title = 'Kooder -- Search in Code')
 <div class="columns text-center">
     <div class="column col-4 col-mx-auto">
         <div class="hero hero-lg">
             <div class="hero-body">
-                <h1>Gitee Search</h1>
+                <h1 style="color:#5755D9">K<span style="color:#EA4335">o</span><span style="color:#FBBC05">o</span>de<span style="color:#EA4335">r</span></h1>
                 <form class="form-group" action="search">
                     <input type="hidden" name="type" value="code"/>
                     <fieldset class="input-group">
@@ -11,7 +12,7 @@
                         <button class="btn btn-primary input-group-btn btn-lg" type="submit">Search</button>
                     </fieldset>
                 </form>
-                <p>Powered by <a href="https://gitee.com/" target="_blank">Gitee.com</a></p>
+                <p>Source @ <a href="https://gitee.com/koode/kooder" target="_blank">https://gitee.com/koode/kooder</a></p>
             </div>
         </div>
     </div>

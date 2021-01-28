@@ -1,6 +1,6 @@
 #set($layout = 'html.vm')
 #set($q = $tool.param('q'))
-#set($page_title = $q)
+#set($page_title = "$q -- Kooder")
 #set($type = $tool.param('type','code'))
 #set($thisLang = $tool.param('lang'))
 #set($repo = $tool.param('repo.name'))
@@ -15,7 +15,7 @@ TIME: ${result.timeUsed} ms
             <form class="form-group">
                 <input type="hidden" name="type" value="$type"/>
                 <fieldset class="input-group">
-                    <label class="input-group-addon addon-sm" for="INPUT_SEARCH">GSearch</label>
+                    <label class="input-group-addon addon-sm" for="INPUT_SEARCH">Kooder</label>
                     <input class="form-input input-sm" name="q" value="$!q" type="text" id="INPUT_SEARCH">
                     <button class="btn btn-primary input-group-btn btn-sm" type="submit">Search</button>
                 </fieldset>
@@ -163,7 +163,7 @@ TIME: ${result.timeUsed} ms
 
                 #end
             </div>
-            <div style="clear:both;"></div>
+            <div class="clearfix"></div>
         </div>
     </div><!-- end of container //-->
 </div>

@@ -1,10 +1,10 @@
-## Gitee Search
+## Kooder
 
 ### 简介
 
-Gitee Search 是一个开源得代码搜索服务，目标是为包括 Gitee/GitLab/Gitea 在内的代码托管系统提供代码、仓库和 Issue 的搜索服务。
+Kooder 是一个开源的代码搜索服务，目标是为包括 Gitee/GitLab/Gitea 在内的代码托管系统提供代码、仓库和 Issue 的搜索服务。
 
-整个 Gitee Search 服务包含两个模块，分别是 gateway 和 indexer（默认配置下 indexer 被集成到 gateway 中）。
+Kooder 服务包含两个模块，分别是 gateway 和 indexer（默认配置下 indexer 被集成到 gateway 中）。
 其中 gateway 用来接受来自 HTTP 的索引任务， 对任务进行检查后存放到队列中；
 同时 gateway 还接受搜索的请求，并返回搜索结果给客户端。而 indexer 进程负责监控队列中的索引任务，
 并将这些要新增、删除和修改索引的任务更新到索引库中。
@@ -17,7 +17,7 @@ Gitee Search 是一个开源得代码搜索服务，目标是为包括 Gitee/Git
 
 ### 数据流图
 
-![Gitee Search Flow](docs/img/gsearch-flow.png)
+![Kooder Flow](docs/img/gsearch-flow.png)
 
 ### 安装
 
@@ -29,17 +29,19 @@ Gitee Search 是一个开源得代码搜索服务，目标是为包括 Gitee/Git
 2.下载代码
 
 ```
-$ git clone https://gitee.com/oschina/gitee-search.git
-$ cd gitee-search
+$ git clone https://gitee.com/koode/kooder.git
+$ cd kooder
 ```
 
 ### 运行前准备工作
 
-配置 Gitee Search 的网址 `http.url` ，该地址用于像 Git 服务注入 Webhook 的链接地址，
+配置文件: `core/src/resource/kooder.properties`
+
+配置 Kooder 的网址 `http.url` ，该地址用于向 Git 服务注入 Webhook 的链接地址，
 必须是 Git 服务可访问的地址，例如：
 
 ```
-http.url = http://<gitee-search-host>:8080
+http.url = http://<kooder-host>:8080
 ```
 
 更多配置项请看 [configuration.md](configuration.md)
@@ -49,13 +51,13 @@ http.url = http://<gitee-search-host>:8080
 需配置如下几项：
 
 ```
-gitlab.url = http://154.85.53.95:10080/  
+gitlab.url = http://gitlab-host:gitlab-port/  
 gitlab.personal_access_token = <root user personal access token>  
 git.username = root  
 git.password =  
 ```
 
-如果不填写密码，则 Gitee Search 会自动使用 access token 作为密码。
+如果不填写密码，则 Kooder 会自动使用 access token 作为密码。
 
 **对接 Gitee**
 
@@ -68,13 +70,13 @@ git.username = root
 git.password =  
 ```
 
-如果不填写密码，则 Gitee Search 会自动使用 access token 作为密码。
+如果不填写密码，则 Kooder 会自动使用 access token 作为密码。
 
 
 **构建并运行**
 
 ```
-$ cd gitee-search
+$ cd Kooder
 $ mvn install
 ### 启动 gateway
 $ bin/gateway.sh
@@ -83,4 +85,4 @@ $ bin/gateway.sh
 
 **搜索界面效果**
 
-![Gitee Search ScreenShot](docs/img/screenshot.png)
+![Kooder ScreenShot](docs/img/screenshot.png)

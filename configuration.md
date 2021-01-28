@@ -1,9 +1,9 @@
-## Gitee Search 配置
+## Kooder 配置
 
-Gitee Search 配置文件位于源码中的 core/src/main/resource/gitee-search.properties 文件中。
+Kooder 配置文件位于源码中的 `core/src/main/resource/kooder.properties` 文件中。
 每次修改完该文件需要重新 `maven install` 重新打包，并重启服务。
 
-### [ gitee-search.properties ]
+### [ kooder.properties ]
 
 Web Service configurations
 
