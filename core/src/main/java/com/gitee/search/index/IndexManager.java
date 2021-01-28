@@ -1,10 +1,8 @@
 package com.gitee.search.index;
 
-import com.gitee.search.core.Constants;
 import com.gitee.search.queue.QueueTask;
 import com.gitee.search.storage.StorageFactory;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.taxonomy.*;
 import org.apache.lucene.index.*;
@@ -63,20 +61,18 @@ public class IndexManager {
      * @throws IOException
      */
     public static int write(QueueTask task, IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
-        List<Document> docs = task.getObjects().stream().map(o -> o.getDocument()).collect(Collectors.toList());
-        if(docs == null || docs.size() == 0)
+        if(task.getObjects() == null || task.getObjects().size() == 0)
             return 0;
         switch (task.getAction()) {
             case QueueTask.ACTION_ADD:
-                update(docs, i_writer, t_writer);
-                break;
             case QueueTask.ACTION_UPDATE:
+                List<Document> docs = task.getObjects().stream().map(o -> o.getDocument()).collect(Collectors.toList());
                 update(docs, i_writer, t_writer);
                 break;
             case QueueTask.ACTION_DELETE:
-                deleteByDoc(docs, i_writer);
+                deleteById(task.getObjects().stream().map(o -> o.getId()).collect(Collectors.toList()), i_writer);
         }
-        return docs.size();
+        return task.getObjects().size();
     }
 
     /**
@@ -120,19 +116,7 @@ public class IndexManager {
      * @throws IOException
      */
     public static long deleteById(List<Long> docs, IndexWriter i_writer) throws IOException {
-        Query[] queries = docs.stream().map(id -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, id)).toArray(Query[]::new);
-        return i_writer.deleteDocuments(queries);
-    }
-
-    /**
-     * 删除文档
-     * @param docs
-     * @param i_writer
-     * @return
-     * @throws IOException
-     */
-    public static long deleteByDoc(List<Document> docs, IndexWriter i_writer) throws IOException {
-        Query[] queries = docs.stream().map(doc -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, doc.getField(FIELD_ID).numericValue().longValue())).toArray(Query[]::new);
+        Query[] queries = docs.stream().map(id -> new TermQuery(new Term(FIELD_ID, String.valueOf(id)))).toArray(Query[]::new);
         return i_writer.deleteDocuments(queries);
     }
 

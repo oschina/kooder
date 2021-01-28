@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public class GitlabIndexThread extends Thread {
 
-    private final static Logger log = LoggerFactory.getLogger(GitlabIndexThread.class);
+    private final static Logger log = LoggerFactory.getLogger("[gitlab]");
 
     private final static int itemsPerPage = 20;
 
@@ -97,13 +97,13 @@ public class GitlabIndexThread extends Thread {
             if(hook.getUrl().equals(this.project_hook_url))
                 return ;
         }
-        ProjectHook hook = new ProjectHook();
+        ProjectHook hook = new ProjectHook(); //just accept issue event, other event via system hook trigger
         hook.setIssuesEvents(true);
-        hook.setPushEvents(true);
-        hook.setMergeRequestsEvents(true);
-        hook.setRepositoryUpdateEvents(true);
-        hook.setTagPushEvents(true);
-        hook.setWikiPageEvents(true);
+        hook.setPushEvents(false);
+        hook.setMergeRequestsEvents(false);
+        hook.setRepositoryUpdateEvents(false);
+        hook.setTagPushEvents(false);
+        hook.setWikiPageEvents(false);
         gitlab.getProjectApi().addHook(p.getId(), this.project_hook_url, hook, true, secret_token);
     }
 

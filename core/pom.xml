@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.gitee.search</groupId>
         <artifactId>gitee-search</artifactId>
-        <version>0.1-dev</version>
+        <version>1.0-alpha</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>

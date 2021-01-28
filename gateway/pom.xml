@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.gitee.search</groupId>
         <artifactId>gitee-search</artifactId>
-        <version>0.1-dev</version>
+        <version>1.0-alpha</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>com.gitee.search</groupId>
             <artifactId>gitee-search-core</artifactId>
-            <version>0.1-dev</version>
+            <version>1.0-alpha</version>
         </dependency>
 
         <dependency>
             <groupId>com.gitee.search</groupId>
             <artifactId>gitee-search-indexer</artifactId>
-            <version>0.1-dev</version>
+            <version>1.0-alpha</version>
         </dependency>
 
         <dependency>
