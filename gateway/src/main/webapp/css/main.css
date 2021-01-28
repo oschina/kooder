@@ -27,4 +27,6 @@ blockquote.CodeResults ol li:after {content: ""; display: table; clear: both;}
 blockquote.CodeResults ol li em.line {font-style:normal;float:left; width: 26px; padding-right:3px; text-align:right;background:#f2f2f2;}
 blockquote.CodeResults ol li em.code {float:left;width:590px; margin-left:6px;font-style:normal;word-wrap:break-word;}
 
+#SearchFacets .menu {margin-bottom:20px;}
 #SearchFacets .menu .active {font-weight:bold;}
+#SearchFacets li a {overflow: hidden;text-overflow:ellipsis;white-space: nowrap;}

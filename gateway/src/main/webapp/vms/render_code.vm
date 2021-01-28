@@ -1,4 +1,5 @@
 ## 搜索代码结果渲染
+
 <ul>
     #foreach($obj in $result.objects)
     #set($thisRepoName = ${obj.repository.name})

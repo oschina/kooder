@@ -126,11 +126,11 @@ TIME: ${result.timeUsed} ms
                     #end
                     #end
                 </ul>
-                #if($result.get('facets').get('repo.name'))
+                #if($result.facets.get('repo.name'))
                 <!-- Accordions content -->
                 <ul class="menu text-primary">
                     <li class="divider" data-content="Repositories"></li>
-                    #foreach($lang in $result.get('facets').get('repo.name'))
+                    #foreach($lang in $result.facets.get('repo.name'))
                     #if(${foreach.count} <= 20)
                     #set($thisRepo = ${lang.label})
                     <li class="menu-item#if($repo == $thisRepo) active#end">
@@ -144,10 +144,10 @@ TIME: ${result.timeUsed} ms
                 </ul>
                 #end
 
-                #if($result.get('facets').get('owner'))
+                #if($result.facets.get('owner'))
                 <ul class="menu text-primary">
                     <li class="divider" data-content="Developers"></li>
-                    #foreach($lang in $result.get('facets').get('owner'))
+                    #foreach($lang in $result.facets.get('owner'))
                     #if(${foreach.count} <= 20)
                     #set($thisOwner = ${lang.label})
                     <li class="menu-item#if($owner == $thisOwner) active#end">
