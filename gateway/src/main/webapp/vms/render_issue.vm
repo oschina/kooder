@@ -6,7 +6,7 @@
             <a href="${obj.url}" target="_blank">$tool.highlight(${obj.title},$q)</a>
             <small class="label">${obj.repository.name}</small>
         </h6>
-        <blockquote>$tool.highlight(${obj.description}, $q, 200)</blockquote>
+        <blockquote>$!tool.highlight(${obj.description}, $q, 200)</blockquote>
         <p class="meta">$tool.format('yyyy/MM/dd HH:mm',${obj.createdAt})</p>
     </li>
     #end

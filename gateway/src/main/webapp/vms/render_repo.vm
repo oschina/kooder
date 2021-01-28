@@ -8,7 +8,7 @@
             <a href="${obj.url}" target="_blank">$tool.highlight(${obj.name},$q)</a>
             <small class="label">#if($recomm==2)[GVP]#elseif($recomm==1)[荐]#end</small>
         </h6>
-        <blockquote>$tool.highlight($obj.description, $q)</blockquote>
+        <blockquote>$!tool.highlight(${obj.description}, $q)</blockquote>
         <div class="meta">
         <ul class="breadcrumb">
             #if(!$tool.is_empty($rlang))
