@@ -1,8 +1,7 @@
 package com.gitee.search.models;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
+import com.gitee.search.utils.JsonUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.facet.LabelAndValue;
 import org.apache.lucene.search.ScoreDoc;
@@ -68,13 +67,7 @@ public class QueryResult {
      * @return
      */
     public String json() {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonUtils.toJson(this);
     }
 
     @Override

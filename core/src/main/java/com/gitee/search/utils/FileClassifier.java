@@ -1,8 +1,6 @@
 package com.gitee.search.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.*;
@@ -19,10 +17,8 @@ public class FileClassifier {
 
     static {
         try (InputStream stream = FileClassifier.class.getResourceAsStream("/languages.json")){
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             TypeReference<HashMap<String, FileClassifierResult>> typeRef = new TypeReference<>(){};
-            database = Collections.unmodifiableMap(mapper.readValue(stream, typeRef));
+            database = Collections.unmodifiableMap(JsonUtils.readValue(stream, typeRef));
         } catch (IOException ex) {
             ex.printStackTrace();
         }

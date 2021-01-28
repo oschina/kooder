@@ -1,9 +1,15 @@
 package com.gitee.search.utils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.math.NumberUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * JSON 工具包
@@ -12,6 +18,11 @@ import org.apache.commons.lang3.math.NumberUtils;
 public class JsonUtils {
 
     private final static ObjectMapper JSON = new ObjectMapper();
+
+    static {
+        JSON.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JSON.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
 
     /**
      * 读取文本json节点数据
@@ -50,4 +61,37 @@ public class JsonUtils {
         return null;
     }
 
+    /**
+     * 解析 JSON 到对象
+     * @param content
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    public static <T> T readValue(String content, Class<T> valueType) {
+        try {
+            return JSON.readValue(content, valueType);
+        } catch(JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static <T> T readValue(String content, TypeReference<T> valueTypeRef) {
+        try {
+            return JSON.readValue(content, valueTypeRef);
+        } catch(JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static <T> T readValue(InputStream src, TypeReference<T> valueTypeRef) {
+        try {
+            return JSON.readValue(src, valueTypeRef);
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -1,7 +1,5 @@
 package com.gitee.search.code;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
 import com.gitee.search.utils.JsonUtils;
 import org.apache.commons.codec.digest.DigestUtils;

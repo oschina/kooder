@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gitee.search.core.Constants;
 import com.gitee.search.index.IndexManager;
 
@@ -16,12 +14,11 @@ import com.gitee.search.models.Issue;
 import com.gitee.search.models.Repository;
 import com.gitee.search.models.Searchable;
 import com.gitee.search.models.SourceFile;
+import com.gitee.search.utils.JsonUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.Query;
 
 /**
  * 队列中的任务
@@ -30,8 +27,6 @@ import javax.management.Query;
 public class QueueTask implements Serializable {
 
     private transient final static Logger log = LoggerFactory.getLogger(QueueTask.class);
-
-    private transient final static JsonFactory jackson = new JsonFactory().enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES);
 
     public transient final static List<String> types = Arrays.asList(
             Constants.TYPE_CODE,
@@ -113,8 +108,7 @@ public class QueueTask implements Serializable {
         objects.add(obj);
     }
 
-    public void setObjects(String json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
+    public void setObjects(String json) {
         TypeReference typeRefer;
         switch(type) {
             case Constants.TYPE_CODE:
@@ -129,7 +123,7 @@ public class QueueTask implements Serializable {
             default:
                 throw new IllegalArgumentException("Illegal task type: " + type);
         }
-        this.setObjects((List<Searchable>)mapper.readValue(json, typeRefer));
+        this.setObjects((List<Searchable>)JsonUtils.readValue(json, typeRefer));
     }
 
     /**
@@ -157,18 +151,11 @@ public class QueueTask implements Serializable {
      * @return
      */
     public String json() {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonUtils.toJson(this);
     }
 
-    public static QueueTask parse(String json) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(json, QueueTask.class);
+    public static QueueTask parse(String json) {
+        return JsonUtils.readValue(json, QueueTask.class);
     }
 
 }
