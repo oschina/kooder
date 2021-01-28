@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 public class FileClassifier {
 
     public final static String UNKNOWN_LANGUAGE = "Unknown";
+    public final static String BINARY_LANGUAGE  = "Binary";
+
     private static Map<String, FileClassifierResult> database;
 
     static {

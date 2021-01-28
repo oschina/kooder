@@ -6,6 +6,8 @@ package com.gitee.search.core;
  */
 public interface Constants {
 
+    String PRODUCT_NAME = "RedCode";    //产品名称
+
     String EMPTYSTRING          = "";
     String EMPTYJSON            = "{}";
 

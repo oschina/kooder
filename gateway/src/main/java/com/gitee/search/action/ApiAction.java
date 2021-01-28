@@ -1,6 +1,5 @@
 package com.gitee.search.action;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gitee.search.models.QueryResult;
 import com.gitee.search.queue.QueueFactory;
 import com.gitee.search.queue.QueueTask;
@@ -52,12 +51,7 @@ public class ApiAction implements SearchActionBase {
         QueueTask task = new QueueTask();
         task.setAction(action);
         task.setType(getType(context));
-        try {
-            task.setObjects(context.getBodyAsString());
-        } catch (JsonProcessingException e ) {
-            this.error(context.response(), HttpResponseStatus.BAD_REQUEST.code(), e.getMessage());
-            return;
-        }
+        task.setObjects(context.getBodyAsString());
         QueueFactory.getProvider().queue(task.getType()).push(Arrays.asList(task));
     }
 

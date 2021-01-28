@@ -1,6 +1,5 @@
 package com.gitee.search.queue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -97,10 +96,10 @@ public class RedisQueueProvider implements QueueProvider {
                         json = cmd.lpop(key);
                         if(json == null)
                             break;
-                        tasks.add(QueueTask.parse(json));
+                        QueueTask task = QueueTask.parse(json);
+                        if(task != null)
+                            tasks.add(task);
                     }while(tasks.size() < count);
-                } catch (JsonProcessingException e ) {
-                    log.error("Parse queue task from json failed.\n{}", json);
                 }
                 return tasks;
             }

@@ -9,7 +9,6 @@ import org.apache.lucene.facet.FacetField;
 
 /**
  * 代码文档对象
- * TODO 仓库权限
  * @author Winter Lau<javayou@gmail.com>
  */
 public class CodeIndexDocument {

@@ -2,6 +2,8 @@ package com.gitee.search.server;
 
 import com.gitee.search.core.GiteeSearchConfig;
 import com.gitee.search.indexer.FetchTaskThread;
+import com.gitee.search.indexer.GiteaIndexThread;
+import com.gitee.search.indexer.GiteeIndexThread;
 import com.gitee.search.indexer.GitlabIndexThread;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.net.SocketAddress;
@@ -22,6 +24,8 @@ public class Gateway extends GatewayBase {
     private final static Map<String, Thread> startupTasks = new HashMap<>(){{
         put("indexer", new FetchTaskThread());
         put("gitlab", new GitlabIndexThread());
+        put("gitee", new GiteeIndexThread());
+        put("gitea", new GiteaIndexThread());
     }};
 
     private Gateway() {

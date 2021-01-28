@@ -98,7 +98,6 @@ public class RepoQuery extends QueryBase {
 
     /**
      * 对搜索加权
-     * TODO 是否启用的仓库名的泛匹配
      * @param field
      * @param q
      * @param boost

@@ -4,18 +4,17 @@ import com.gitee.search.server.Action;
 import io.vertx.ext.web.RoutingContext;
 
 /**
- * Handle Gitee webhook
- * http://localhost:8080/gitee   web hook  (new project/project updated etc)
+ * Handle Gitea webhook
+ * http://localhost:8080/gitea   web hook  (new project/project updated etc)
  * @author Winter Lau<javayou@gmail.com>
  */
-public class GiteeAction implements Action {
+public class GiteaAction implements Action {
 
     /**
-     * Gitee webhook handler
+     * Gitea webhook handler
      * @param context
      */
     public void index(RoutingContext context) {
 
     }
-
 }

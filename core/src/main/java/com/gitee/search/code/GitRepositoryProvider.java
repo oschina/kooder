@@ -16,7 +16,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.eclipse.jgit.annotations.NonNull;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
@@ -178,14 +177,18 @@ public class GitRepositoryProvider implements RepositoryProvider {
                         traveler.deleteDocument(doc);
                     } else {
                         String path = entry.getNewPath();
-                        //TODO 二进制文件可以参与索引，但不索引内容
                         boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-                        if (!isBinaryFile) { //二进制文件不参与索引
+                        if (!isBinaryFile) { //文本文件
                             CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
                             if (doc != null && traveler != null) {
                                 traveler.updateDocument(doc);
                                 fileCount++;
                             }
+                        }
+                        else { //二进制文件
+                            CodeIndexDocument doc = buildBinaryDocument(repo, path, entry.getNewId().toObjectId());
+                            traveler.updateDocument(doc);
+                            fileCount++;
                         }
                     }
                 }
@@ -326,7 +329,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             doc.setFileLocation(path);                                          //完整的项目内路径
             doc.setLanguage(FileClassifier.languageGuess(path, contents));      //语言
             doc.setContents(contents);                                          //源码
-            doc.setCodeOwner(getCodeOwner(git, path));                          //开发者  TODO 应该支持多个开发者
+            doc.setCodeOwner(getCodeOwner(git, path));                          //开发者  TODO 如何能支持多个开发者
             var slocCount = slocCounter.countStats(contents, doc.getLanguage());
             doc.setLines(slocCount.linesCount);                                 //代码行统计
             doc.setCommentLines(slocCount.commentCount);
@@ -342,6 +345,33 @@ public class GitRepositoryProvider implements RepositoryProvider {
 
             return doc;
         }
+    }
+
+    /**
+     * 从二进制文件中构建文档
+     * @param repo
+     * @param path
+     * @param objectId
+     * @return
+     * @throws IOException
+     */
+    private CodeIndexDocument buildBinaryDocument(CodeRepository repo, String path, ObjectId objectId)
+    {
+        CodeIndexDocument doc = new CodeIndexDocument();
+
+        doc.setRepoId(repo.getId());
+        doc.setRepoName(repo.getName());                  //仓库名
+        doc.setRepoURL(repo.getUrl());                    //仓库地址
+        doc.setFileName(FilenameUtils.getName(path));     //文件名
+        doc.setFileLocation(path);                        //完整的项目内路径
+        doc.setLanguage(FileClassifier.BINARY_LANGUAGE);  //语言
+        doc.setRevision(objectId.name());
+        doc.setScm(repo.getScm());
+
+        //calculate document uuid
+        doc.generateUuid();
+
+        return doc;
     }
 
     /**
