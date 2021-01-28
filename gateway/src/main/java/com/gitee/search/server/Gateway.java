@@ -37,7 +37,7 @@ public class Gateway extends GatewayBase {
         //static files
         router.routeWithRegex(pattern_static_file).handler(new AutoContentTypeStaticHandler());
         //body parser
-        router.route().handler(BodyHandler.create());
+        router.route().handler(BodyHandler.create().setHandleFileUploads(false));
         //action handler
         router.route().handler(context -> {
             long ct = System.currentTimeMillis();
