@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * Gitee Search API
+ * Kooder API
  * @author Winter Lau<javayou@gmail.com>
  */
 public class ApiAction implements SearchActionBase {
@@ -25,8 +25,7 @@ public class ApiAction implements SearchActionBase {
         String type = context.request().getParam("type");
         QueryResult result = _search(context.request(), type);
         if(result == null) {
-            error(context.response(), HttpResponseStatus.BAD_REQUEST.code(),
-                    "Illegal parameter 'type' value.");
+            error(context.response(), HttpResponseStatus.BAD_REQUEST.code(),"Illegal parameter 'type' value.");
             return;
         }
         this.json(context.response(), result.json());
@@ -35,11 +34,19 @@ public class ApiAction implements SearchActionBase {
     /**
      * add/update/delete task
      * @param context
-     * @throws IOException
      */
-    public void task(RoutingContext context) throws IOException {
-        String action = context.request().getParam("action");
-        this._pushTask(action, context);
+    public void task(RoutingContext context) {
+        switch(context.request().method().name()){
+            case "POST":
+            case "PUT":
+                this._pushTask(QueueTask.ACTION_ADD, context);
+                break;
+            case "UPDATE":
+                this._pushTask(QueueTask.ACTION_UPDATE, context);
+                break;
+            case "DELETE":
+                this._pushTask(QueueTask.ACTION_DELETE, context);
+        }
     }
 
     /**
