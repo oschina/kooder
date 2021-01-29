@@ -2,6 +2,7 @@ package com.gitee.kooder.indexer;
 
 import com.gitee.kooder.code.*;
 import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Searchable;
 import com.gitee.kooder.queue.QueueFactory;
 import com.gitee.kooder.queue.QueueProvider;

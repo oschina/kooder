@@ -1,6 +1,6 @@
 package com.gitee.kooder.action;
 
-import com.gitee.kooder.code.CodeRepository;
+import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.indexer.Gitlab;

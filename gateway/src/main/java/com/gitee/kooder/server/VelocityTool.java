@@ -1,6 +1,6 @@
 package com.gitee.kooder.server;
 
-import com.gitee.kooder.code.CodeLine;
+import com.gitee.kooder.models.CodeLine;
 import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.core.SearchHelper;
 import io.vertx.core.http.HttpServerRequest;
