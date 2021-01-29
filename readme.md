@@ -4,6 +4,11 @@
 
 Kooder is a open source code search project, offering code, repositories and issues search service for code hosting platforms including Gitee, GitLab and Gitea.
 
+
+**UI**
+
+![Kooder ScreenShot](docs/img/screenshot.png)
+
 There are two modules, gateway and indexer. Gateway is integrated inside gateway under default config.
 
 Gateway: 
@@ -111,6 +116,3 @@ $ bin/gateway.sh
 ### Brower visits http://localhost:8080
 ```
 
-**UI**
-
-![Kooder ScreenShot](docs/img/screenshot.png)
