@@ -1,8 +1,7 @@
-package com.gitee.kooder.code;
+package com.gitee.kooder.models;
 
+import com.gitee.kooder.code.RepositoryManager;
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.models.Repository;
-import com.gitee.kooder.models.Searchable;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

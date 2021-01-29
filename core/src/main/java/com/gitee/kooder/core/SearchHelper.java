@@ -1,6 +1,6 @@
 package com.gitee.kooder.core;
 
-import com.gitee.kooder.code.CodeLine;
+import com.gitee.kooder.models.CodeLine;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;

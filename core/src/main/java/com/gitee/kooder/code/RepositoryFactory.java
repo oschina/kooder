@@ -1,5 +1,6 @@
 package com.gitee.kooder.code;
 
+import com.gitee.kooder.models.CodeRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -2,6 +2,7 @@ package com.gitee.kooder.code;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.index.IndexException;
+import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.storage.StorageFactory;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexNotFoundException;

@@ -1,6 +1,9 @@
 package com.gitee.kooder.code;
 
 import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.models.CodeIndexDocument;
+import com.gitee.kooder.models.CodeOwner;
+import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.storage.StorageFactory;
 import com.gitee.kooder.utils.FileClassifier;
 import com.gitee.kooder.utils.SlocCounter;

@@ -1,5 +1,7 @@
 package com.gitee.kooder.code;
 
+import com.gitee.kooder.models.CodeRepository;
+
 /**
  * 代码源接口定义
  * @author Winter Lau<javayou@gmail.com>

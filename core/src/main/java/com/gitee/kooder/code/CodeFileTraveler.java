@@ -2,6 +2,7 @@ package com.gitee.kooder.code;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.index.IndexManager;
+import com.gitee.kooder.models.CodeIndexDocument;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.FacetsConfig;
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
- * 处理代码文件索引
+ * Travel all file in repository and build index for it
  * @author Winter Lau<javayou@gmail.com>
  */
 public class CodeFileTraveler implements FileTraveler {
@@ -30,10 +31,9 @@ public class CodeFileTraveler implements FileTraveler {
     }
 
     /**
-     * 更新源码文档（新文件、更改文件）
+     * update source file index
      *
-     * @param codeid 文档信息
-     * @return true: 继续下一个文档， false 不再处理下面文档
+     * @param codeid document object
      */
     @Override
     public void updateDocument(CodeIndexDocument codeid) {
@@ -50,7 +50,7 @@ public class CodeFileTraveler implements FileTraveler {
     }
 
     /**
-     * 删除文档
+     * Delete single file document
      *
      * @param codeid
      * @return
@@ -66,7 +66,7 @@ public class CodeFileTraveler implements FileTraveler {
     }
 
     /**
-     * 清空仓库所有文件，以待重建
+     * Clear all file document belong to one repository
      *
      * @param repoId
      */
@@ -80,6 +80,12 @@ public class CodeFileTraveler implements FileTraveler {
         }
     }
 
+    /**
+     * Building facet document
+     * @param doc
+     * @return
+     * @throws IOException
+     */
     private Document buildFacetDocument(Document doc) throws IOException {
         FacetsConfig facetsConfig = IndexManager.facetsConfig;
         return facetsConfig.build(taxonomyWriter, doc);

@@ -1,5 +1,7 @@
 package com.gitee.kooder.code;
 
+import com.gitee.kooder.models.CodeIndexDocument;
+
 /**
  * 文件遍历回调接口
  * @author Winter Lau<javayou@gmail.com>

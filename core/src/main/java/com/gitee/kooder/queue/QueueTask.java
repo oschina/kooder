@@ -7,13 +7,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.index.IndexManager;
 
 import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
 import com.gitee.kooder.models.Searchable;
-import com.gitee.kooder.models.SourceFile;
 import com.gitee.kooder.utils.JsonUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
@@ -112,7 +112,7 @@ public class QueueTask implements Serializable {
         TypeReference typeRefer;
         switch(type) {
             case Constants.TYPE_CODE:
-                typeRefer = new TypeReference<List<SourceFile>>(){};
+                typeRefer = new TypeReference<List<CodeRepository>>(){};
                 break;
             case Constants.TYPE_REPOSITORY:
                 typeRefer = new TypeReference<List<Repository>>() {};

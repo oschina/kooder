@@ -1,13 +1,14 @@
-package com.gitee.kooder.code;
+package com.gitee.kooder.models;
 
 /**
- * 代码行，用于处理代码搜索结果的显示
+ * Code Line
+ * used to show results of code search
  * @author Winter Lau<javayou@gmail.com>
  */
 public class CodeLine {
 
-    private int line;
-    private String code;
+    private int line;       //Line num
+    private String code;    //Code
 
     public CodeLine(int line, String code) {
         this.code = code;

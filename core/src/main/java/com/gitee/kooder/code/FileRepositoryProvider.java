@@ -1,5 +1,7 @@
 package com.gitee.kooder.code;
 
+import com.gitee.kooder.models.CodeRepository;
+
 /**
  * TODO： 基于本地文件的仓库源
  * @author Winter Lau<javayou@gmail.com>

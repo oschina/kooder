@@ -1,7 +1,7 @@
-package com.gitee.kooder.code;
+package com.gitee.kooder.models;
 
 /**
- * 代码提交者信息
+ * The main developer of one source file
  * @author Winter Lau<javayou@gmail.com>
  */
 public class CodeOwner {
