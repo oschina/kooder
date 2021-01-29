@@ -1,8 +1,23 @@
 ## Kooder
 
-### 简介
+### 背景
 
-Kooder 是一个开源的代码搜索服务，目标是为包括 Gitee/GitLab/Gitea 在内的代码托管系统提供代码、仓库和 Issue 的搜索服务。
+一个企业里往往有大量的项目，每个项目都包含很多的代码，这些代码都是企业的核心资产。
+经过日积月累，不同的开发人员不断的修改完善，企业中很难有人能掌握所有的代码。
+于是企业全库的代码搜索就变得非常重要。
+
+例如我们可以搜索公司代码是否包含某类敏感信息，是否使用了某些不安全的方法等等。
+
+### Kooder 是什么
+
+Kooder 是一个开源的代码搜索工具，目标是为包括 Gitee/GitLab/Gitea 在内的代码托管系统提供
+自动的源码、仓库和 Issue 的搜索服务。
+
+**搜索界面效果**
+
+![Kooder ScreenShot](docs/img/screenshot.png)
+
+### Kooder 架构
 
 Kooder 服务包含两个模块，分别是 gateway 和 indexer（默认配置下 indexer 被集成到 gateway 中）。
 其中 gateway 用来接受来自 HTTP 的索引任务， 对任务进行检查后存放到队列中；
@@ -37,14 +52,31 @@ $ cd kooder
 
 配置文件: `core/src/resource/kooder.properties`
 
-配置 Kooder 的网址 `http.url` ，该地址用于向 Git 服务注入 Webhook 的链接地址，
-必须是 Git 服务可访问的地址，例如：
+1. 配置 HTTP 服务
+   
+`http.url` Kooder 的网址，该地址用于向 Git 服务注入 Webhook 的链接地址，
+必须是 Git 服务可访问的地址，例如：`http.url = http://<kooder-host>:8080`
 
-```
-http.url = http://<kooder-host>:8080
-```
+`http.port`  Kooder 运行的 HTTP 端口
+
+2. 配置 Gitlab 服务地址
+
+目前 Kooder 支持 Gitee 和 Gitlab ，其他服务正在开发中。
+
+`gitlab.url`  访问 Gitlab 的首页  
+`gitlab.personal_access_token`  Gitlab 管理员账号 root 的 Personal Access Token
 
 更多配置项请看 [configuration.md](configuration.md)
+
+3. 构建并运行
+
+```
+$ cd Kooder
+$ mvn install
+### 启动 gateway
+$ bin/gateway.sh
+### 浏览器访问 http://localhost:8080
+```
 
 ### Docker安装
 依赖
@@ -68,7 +100,6 @@ docker-compose up -d
 docker rmi imageID
 docker-compose up -d
 ```
-
 
 **对接 Gitlab**
 
@@ -95,18 +126,3 @@ git.password =
 ```
 
 如果不填写密码，则 Kooder 会自动使用 access token 作为密码。
-
-
-**构建并运行**
-
-```
-$ cd Kooder
-$ mvn install
-### 启动 gateway
-$ bin/gateway.sh
-### 浏览器访问 http://localhost:8080
-```
-
-**搜索界面效果**
-
-![Kooder ScreenShot](docs/img/screenshot.png)
