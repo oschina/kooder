@@ -1,25 +1,8 @@
 version: '3.8'
 
 services:
-  koodera:
+  kooder:
     build: ./deploy
-    expose:
-      - 8080
-  kooderb:
-    build: ./deploy
-    expose:
-      - 8080
-
-  haproxy:
-    image: haproxy:1.6
-    volumes:
-      - ./deploy/kooder.properties:/root/core/src/main/resource/kooder.properties:ro
-      - ./deploy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
-    links:
-      - koodera
-      - kooderb
+    container_name: kooder
     ports:
-      - "8080:8080"
-
-
-
+      - 8080:8080
