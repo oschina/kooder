@@ -20,7 +20,7 @@ public class TextFileUtils {
 
     private static String[] binaryExtensions = {"png","gif","jpg","jpeg","bmp","ico",
                                                 "mp4","3gp","mpeg","flv","avi","wmv","mov",
-                                                "zip","gz","tar","rar","7z",
+                                                "zip","gz","tar","rar","7z","jar",
                                                 "exe","bin","lib","dll","so","img","class","deb","rpm","msi","pch",
                                                 "pdf","doc","ppt","xls", "docx","pptx","xlsx","keynote",
                                                 "woff","ttf","eot","cur","dm","xpm","emz","db","scc","idx",
