@@ -2,7 +2,8 @@ package com.gitee.kooder.query;
 
 import com.gitee.kooder.core.AnalyzerFactory;
 import com.gitee.kooder.core.Constants;
-import org.apache.lucene.document.NumericDocValuesField;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.expressions.Expression;
 import org.apache.lucene.expressions.SimpleBindings;
 import org.apache.lucene.expressions.js.JavascriptCompiler;
@@ -54,6 +55,12 @@ public class RepoQuery extends QueryBase {
         return Arrays.asList(Constants.FIELD_LANGUAGE, Constants.FIELD_LICENSE);
     }
 
+    @Override
+    protected Query buildQuery() {
+        Query query = super.buildQuery();
+        return new FunctionScoreQuery(query, getRepoScoreExpression());
+    }
+
     /**
      * 构建查询对象
      *
@@ -73,11 +80,11 @@ public class RepoQuery extends QueryBase {
 
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
         //只搜索公开仓库
-        //builder.add(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_VISIBILITY, Constants.VISIBILITY_PUBLIC), BooleanClause.Occur.FILTER);
+        //builder.add(IntPoint.newExactQuery(Constants.FIELD_VISIBILITY, Constants.VISIBILITY_PUBLIC), BooleanClause.Occur.FILTER);
         //不搜索fork仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_FORK, Constants.REPO_FORK_NO), BooleanClause.Occur.FILTER);
+        builder.add(LongPoint.newExactQuery(Constants.FIELD_FORK, Constants.REPO_FORK_NO), BooleanClause.Occur.FILTER);
         //不搜索被屏蔽的仓库
-        builder.add(NumericDocValuesField.newSlowExactQuery(Constants.FIELD_BLOCK, Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
+        builder.add(IntPoint.newExactQuery(Constants.FIELD_BLOCK, Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
 
         //BoostQuery
         //如果调整  boost 就要调整 ScoreHelper 中的 SCORE_FACTOR
@@ -93,7 +100,7 @@ public class RepoQuery extends QueryBase {
 
         builder.add(qbuilder.build(), BooleanClause.Occur.MUST);
 
-        return new FunctionScoreQuery(builder.build(), getRepoScoreExpression());
+        return builder.build();
     }
 
     /**
@@ -127,9 +134,9 @@ public class RepoQuery extends QueryBase {
     private DoubleValuesSource getRepoScoreExpression() {
         SimpleBindings bindings = new SimpleBindings();
         bindings.add("$score", DoubleValuesSource.SCORES);
-        bindings.add("$recomm", DoubleValuesSource.fromIntField("recomm"));
-        bindings.add("$stars", DoubleValuesSource.fromIntField("count.star"));
-        bindings.add("$gindex", DoubleValuesSource.fromIntField("count.gindex"));
+        bindings.add("$recomm", DoubleValuesSource.fromIntField(Constants.FIELD_RECOMM));
+        bindings.add("$stars", DoubleValuesSource.fromIntField(Constants.FIELD_STAR_COUNT));
+        bindings.add("$gindex", DoubleValuesSource.fromIntField(Constants.FIELD_G_INDEX));
         return repoScoreExpr.getDoubleValuesSource(bindings);
     }
 
@@ -140,11 +147,11 @@ public class RepoQuery extends QueryBase {
     @Override
     protected Sort buildSort() {
         if("stars".equals(sort))
-            return new Sort(new SortedNumericSortField("count.star", SortField.Type.LONG, true));
+            return new Sort(new SortedNumericSortField(Constants.FIELD_STAR_COUNT, SortField.Type.LONG, true));
         if("forks".equals(sort))
-            return new Sort(new SortedNumericSortField("count.fork", SortField.Type.LONG, true));
+            return new Sort(new SortedNumericSortField(Constants.FIELD_FORK_COUNT, SortField.Type.LONG, true));
         if("update".equals(sort))
-            return new Sort(new SortedNumericSortField("last_push_at", SortField.Type.LONG, true));
+            return new Sort(new SortedNumericSortField(Constants.FIELD_UPDATED_AT, SortField.Type.LONG, true));
         return Sort.RELEVANCE;
     }
 

@@ -32,7 +32,7 @@ public class SearchAction implements SearchActionBase {
 
         String type = param(request,"type", "repo");
 
-        QueryResult result = _search(request, type);
+        QueryResult result = _search(context, type);
         if(result == null) {
             error(context.response(), HttpResponseStatus.BAD_REQUEST.code(), "Illegal parameter 'type' value.");
             return;
@@ -50,7 +50,7 @@ public class SearchAction implements SearchActionBase {
      * @throws IOException
      */
     public void repositories(RoutingContext context) throws IOException {
-        QueryResult result = _search(context.request(), Constants.TYPE_REPOSITORY);
+        QueryResult result = _search(context, Constants.TYPE_REPOSITORY);
         this.json(context.response(), result.json());
     }
 
@@ -60,7 +60,7 @@ public class SearchAction implements SearchActionBase {
      * @throws IOException
      */
     public void issues(RoutingContext context) throws IOException {
-        QueryResult result = _search(context.request(), Constants.TYPE_ISSUE);
+        QueryResult result = _search(context, Constants.TYPE_ISSUE);
         this.json(context.response(), result.json());
     }
 
@@ -70,7 +70,7 @@ public class SearchAction implements SearchActionBase {
      * @throws IOException
      */
     public void codes(RoutingContext context) throws IOException {
-        QueryResult result = _search(context.request(), Constants.TYPE_CODE);
+        QueryResult result = _search(context, Constants.TYPE_CODE);
         this.json(context.response(), result.json());
     }
 

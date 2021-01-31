@@ -1,6 +1,7 @@
 package com.gitee.kooder.models;
 
 import com.gitee.kooder.core.Constants;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
@@ -12,14 +13,15 @@ import org.apache.lucene.facet.FacetField;
  */
 public final class SourceFile extends Searchable {
 
-    private String uuid;            //file unique identify
+    private String uuid;            // file unique identify
     private Relation repository = Relation.EMPTY;    //repository, use this field to delete all files of repository
 
-    private String name;
-    private String url;             //absolute file url
+    private String branch;          // branch name
+    private String name;            // file name
+    private String url;             // absolute file url
     private String location;        // Path to file relative to repo location
     private String contents;
-    private String hash;            //content sha1 hash
+    private String hash;            // content sha1 hash
     private String codeOwner;
     private String language;
 
@@ -29,7 +31,28 @@ public final class SourceFile extends Searchable {
     private int blankLines;         // How many lines are blank
     private int complexity;         // Complexity calculation taken from scc
 
-    private String revision;        //last commit id
+    private String revision;        // last commit id
+
+    public SourceFile() {}
+
+    public SourceFile(long repoId, String repoName, String fileLocation) {
+        this.repository.id = repoId;
+        this.repository.name = repoName;
+        this.location = fileLocation;
+        this.generateUuid();
+    }
+
+    public String generateUuid() {
+        this.uuid = DigestUtils.sha1Hex(String.format("%d-%s-%s", repository.getId(), repository.name.toLowerCase(), location));
+        return this.uuid;
+    }
+
+    public void generateUrl() {
+        String rurl = repository.getUrl();
+        if(rurl.endsWith(".git"))
+            rurl = rurl.substring(0, rurl.length() - 4);
+        this.setUrl(rurl + "/tree/" + this.getBranch() + "/" + this.getLocation());
+    }
 
     /**
      * Read fields from document
@@ -68,27 +91,29 @@ public final class SourceFile extends Searchable {
         Document document = new Document();
 
         // Uuid is the primary key for documents
-        document.add(new StringField(Constants.FIELD_UUID, uuid, Field.Store.YES));
-        document.add(new StoredField(Constants.FIELD_URL, this.url));
+        document.add(new StringField(Constants.FIELD_UUID,      this.uuid,   Field.Store.YES));
 
-        //仓库信息
-        document.add(new NumericDocValuesField(Constants.FIELD_REPO_ID, this.repository.id));
-        document.add(new StoredField(Constants.FIELD_REPO_ID,           this.repository.id));
-        document.add(new FacetField(Constants.FIELD_REPO_NAME,          this.repository.name));
-        document.add(new StringField(Constants.FIELD_REPO_NAME,         this.repository.name,     Field.Store.YES));
-        document.add(new StringField(Constants.FIELD_REPO_URL,          this.repository.url,      Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_BRANCH,    this.branch, Field.Store.YES));
+        document.add(new StoredField(Constants.FIELD_URL,       this.url));
 
-        //文档维度
+        //repository info
+        document.add(new LongPoint(Constants.FIELD_REPO_ID,         this.repository.id));
+        document.add(new StoredField(Constants.FIELD_REPO_ID,       this.repository.id));
+        document.add(new FacetField(Constants.FIELD_REPO_NAME,      this.repository.name));
+        document.add(new StringField(Constants.FIELD_REPO_NAME,     this.repository.name,   Field.Store.YES));
+        document.add(new StringField(Constants.FIELD_REPO_URL,      this.repository.url,    Field.Store.YES));
+
+        //file meta
         if (StringUtils.isNotBlank(language)) {
-            document.add(new FacetField(Constants.FIELD_LANGUAGE, this.getLanguage()));
-            document.add(new StringField(Constants.FIELD_LANGUAGE, this.getLanguage(), Field.Store.YES));
+            document.add(new FacetField(Constants.FIELD_LANGUAGE,   this.getLanguage()));
+            document.add(new StringField(Constants.FIELD_LANGUAGE,  this.getLanguage(), Field.Store.YES));
         }
         if (StringUtils.isNotBlank(codeOwner)) {
             document.add(new FacetField(Constants.FIELD_CODE_OWNER, this.getCodeOwner()));
-            document.add(new TextField(Constants.FIELD_CODE_OWNER, this.getCodeOwner(), Field.Store.YES));
+            document.add(new TextField(Constants.FIELD_CODE_OWNER,  this.getCodeOwner(), Field.Store.YES));
         }
 
-        //文件信息
+        //file info
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getName(),         Field.Store.YES));
         document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getLocation(),     Field.Store.YES));
         document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),     Field.Store.YES));
@@ -107,7 +132,7 @@ public final class SourceFile extends Searchable {
 
         // Extra metadata in this case when it was last indexed
         long indexTime = System.currentTimeMillis();
-        document.add(new SortedNumericDocValuesField(Constants.FIELD_LAST_INDEX, indexTime));
+        document.add(new NumericDocValuesField(Constants.FIELD_LAST_INDEX, indexTime));
         document.add(new StoredField(Constants.FIELD_LAST_INDEX, indexTime));
 
         return document;
@@ -119,6 +144,14 @@ public final class SourceFile extends Searchable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 
     public Relation getRepository() {

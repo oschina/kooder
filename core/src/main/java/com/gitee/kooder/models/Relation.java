@@ -8,23 +8,23 @@ public final class Relation {
 
     public final static Relation EMPTY = new Relation(0, "NONE", null);
 
-    protected int id;
+    protected long id;
     protected String name;
     protected String url;
 
     public Relation() {}
 
-    public Relation(int id, String name, String url) {
+    public Relation(long id, String name, String url) {
         this.id = id;
         this.name = name;
         this.url = url;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

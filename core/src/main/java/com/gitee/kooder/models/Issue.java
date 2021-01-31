@@ -121,6 +121,7 @@ public final class Issue extends Searchable {
         doc.add(new TextField(Constants.FIELD_DESC,     description,            Field.Store.YES));
         doc.add(new StoredField(Constants.FIELD_URL,    url));
         doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", labels), Field.Store.NO));
+
         doc.add(new NumericDocValuesField(Constants.FIELD_CREATED_AT, createdAt));
         doc.add(new StoredField(Constants.FIELD_CREATED_AT, createdAt));
         doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
@@ -128,27 +129,31 @@ public final class Issue extends Searchable {
         doc.add(new NumericDocValuesField(Constants.FIELD_CLOSED_AT, closedAt));
         doc.add(new StoredField(Constants.FIELD_CLOSED_AT, closedAt));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_BLOCK, block));
+        doc.add(new IntPoint(Constants.FIELD_BLOCK, block));
         doc.add(new StoredField(Constants.FIELD_BLOCK, block));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_VISIBILITY, visibility));
+        doc.add(new IntPoint(Constants.FIELD_VISIBILITY, visibility));
         doc.add(new StoredField(Constants.FIELD_VISIBILITY, visibility));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_STATUS, state));
+        doc.add(new IntPoint(Constants.FIELD_STATUS, state));
         doc.add(new StoredField(Constants.FIELD_STATUS, state));
 
         //enterprise info (just for gitee)
         enterprise:
-        doc.add(new StringField(Constants.FIELD_ENTERPRISE_ID, String.valueOf(enterprise.id), Field.Store.YES));
+        doc.add(new LongPoint(Constants.FIELD_ENTERPRISE_ID, this.enterprise.id));
+        doc.add(new StoredField(Constants.FIELD_ENTERPRISE_ID, enterprise.id));
         //program info (just for gitee)
         program:
-        doc.add(new StringField(Constants.FIELD_PROGRAM_ID, String.valueOf(project.id), Field.Store.YES));
+        doc.add(new LongPoint(Constants.FIELD_PROGRAM_ID, this.project.id));
+        doc.add(new StoredField(Constants.FIELD_PROGRAM_ID, project.id));
         //repository info (just for gitee)
-        program:
-        doc.add(new StringField(Constants.FIELD_REPO_ID, String.valueOf(repository.id), Field.Store.YES));
+        repository:
+        doc.add(new LongPoint(Constants.FIELD_REPO_ID, this.repository.id));
+        doc.add(new StoredField(Constants.FIELD_REPO_ID, repository.id));
         //owner info
         owner:
-        doc.add(new StringField(Constants.FIELD_USER_ID, String.valueOf(owner.id), Field.Store.YES));
+        doc.add(new LongPoint(Constants.FIELD_USER_ID, this.owner.id));
+        doc.add(new StoredField(Constants.FIELD_USER_ID, owner.id));
 
         return doc;
     }

@@ -2,7 +2,7 @@ package com.gitee.kooder.code;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.index.IndexManager;
-import com.gitee.kooder.models.CodeIndexDocument;
+import com.gitee.kooder.models.SourceFile;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.FacetsConfig;
@@ -36,10 +36,10 @@ public class CodeFileTraveler implements FileTraveler {
      * @param codeid document object
      */
     @Override
-    public void updateDocument(CodeIndexDocument codeid) {
+    public void updateDocument(SourceFile codeid) {
         //log.info("updateDocument:" + codeid);
         try {
-            Document doc = buildFacetDocument(codeid.buildDocument());
+            Document doc = buildFacetDocument(codeid.getDocument());
             writer.updateDocument(new Term(Constants.FIELD_UUID, codeid.getUuid()), doc);
         } catch (IllegalArgumentException e) {
             log.error(codeid.getContents(), e);
@@ -56,7 +56,7 @@ public class CodeFileTraveler implements FileTraveler {
      * @return
      */
     @Override
-    public void deleteDocument(CodeIndexDocument codeid) {
+    public void deleteDocument(SourceFile codeid) {
         //log.info("deleteDocument:" + codeid);
         try {
             writer.deleteDocuments(new Term(Constants.FIELD_UUID, codeid.getUuid()));

@@ -1,9 +1,7 @@
 package com.gitee.kooder.code;
 
 import com.gitee.kooder.core.GiteeSearchConfig;
-import com.gitee.kooder.models.CodeIndexDocument;
-import com.gitee.kooder.models.CodeOwner;
-import com.gitee.kooder.models.CodeRepository;
+import com.gitee.kooder.models.*;
 import com.gitee.kooder.storage.StorageFactory;
 import com.gitee.kooder.utils.FileClassifier;
 import com.gitee.kooder.utils.SlocCounter;
@@ -49,7 +47,8 @@ import java.util.List;
  */
 public class GitRepositoryProvider implements RepositoryProvider {
 
-    private final static Logger log = LoggerFactory.getLogger(GitRepositoryProvider.class);
+    private final static Logger log = LoggerFactory.getLogger("[GIT]");
+
     private final static SlocCounter slocCounter = new SlocCounter();
     private CredentialsProvider credentialsProvider;
     private TransportConfigCallback transportConfigCallback;
@@ -163,7 +162,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                     traveler.resetRepository(repo.getId());
                 //上一次保持的 commit id 已经失效，可能是强推导致，需要重建仓库索引
                 int fc = this.indexAllFiles(repo, git, traveler);
-                log.warn("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis() - cti);
+                log.info("Rebuilding '{}<{}>' {} indexes in {}ms", repo.getName(), repo.getId(), fc, System.currentTimeMillis() - cti);
                 return fc;
             }
 
@@ -176,23 +175,11 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 List<DiffEntry> entries = diffFiles(git, oldId.name(), newId.name());
                 for (DiffEntry entry : entries) {
                     if (entry.getChangeType() == DiffEntry.ChangeType.DELETE && traveler != null) {
-                        CodeIndexDocument doc = new CodeIndexDocument(repo.getId(), repo.getName(), entry.getOldPath());
+                        SourceFile doc = new SourceFile(repo.getId(), repo.getName(), entry.getOldPath());
                         traveler.deleteDocument(doc);
                     } else {
-                        String path = entry.getNewPath();
-                        boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-                        if (!isBinaryFile) { //文本文件
-                            CodeIndexDocument doc = buildDocument(repo, git, path, entry.getNewId().toObjectId());
-                            if (doc != null && traveler != null) {
-                                traveler.updateDocument(doc);
-                                fileCount++;
-                            }
-                        }
-                        else { //二进制文件
-                            CodeIndexDocument doc = buildBinaryDocument(repo, path, entry.getNewId().toObjectId());
-                            traveler.updateDocument(doc);
-                            fileCount++;
-                        }
+                        addFileToDocument(repo, git, entry.getNewPath(), entry.getNewId().toObjectId(), traveler);
+                        fileCount++;
                     }
                 }
             }
@@ -253,19 +240,38 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
                 while(treeWalk.next()) {
-                    String path = treeWalk.getPathString();
-                    boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-                    if(!isBinaryFile) { //二进制文件不参与索引
-                        CodeIndexDocument doc = buildDocument(repo, git, path, treeWalk.getObjectId(0));
-                        if (doc != null && traveler != null) {
-                            traveler.updateDocument(doc);
-                            fileCount ++;
-                        }
-                    }
+                    addFileToDocument(repo, git, treeWalk.getPathString(), treeWalk.getObjectId(0), traveler);
+                    fileCount ++;
                 }
             }
         }
         return fileCount;
+    }
+
+    /**
+     * Index source file
+     * @param repo
+     * @param git
+     * @param path
+     * @param objectId
+     * @param traveler
+     * @throws IOException
+     * @throws GitAPIException
+     */
+    private void addFileToDocument(CodeRepository repo, Git git, String path, ObjectId objectId, FileTraveler traveler)
+            throws IOException, GitAPIException
+    {
+        boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
+        if(!isBinaryFile) { //Text file
+            SourceFile doc = buildDocument(repo, git, path, objectId);
+            if (doc != null && traveler != null) {
+                traveler.updateDocument(doc);
+            }
+        }
+        else { // Binary file
+            SourceFile doc = buildBinaryDocument(repo, git, path, objectId);
+            traveler.updateDocument(doc);
+        }
     }
 
     private static @NonNull
@@ -315,7 +321,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * @return
      * @throws IOException
      */
-    private CodeIndexDocument buildDocument(CodeRepository repo, Git git, String path, ObjectId objectId)
+    private SourceFile buildDocument(CodeRepository repo, Git git, String path, ObjectId objectId)
             throws IOException, GitAPIException
     {
         ObjectLoader loader = git.getRepository().open(objectId);
@@ -323,28 +329,25 @@ public class GitRepositoryProvider implements RepositoryProvider {
             List<String> codeLines = TextFileUtils.readFileLines(stream, 20000);
             String contents = String.join("\n", codeLines);
 
-            CodeIndexDocument doc = new CodeIndexDocument();
-
-            doc.setRepoId(repo.getId());
-            doc.setRepoName(repo.getName());                                    //仓库名
-            doc.setRepoURL(repo.getUrl());                                      //仓库地址
-            doc.setFileName(FilenameUtils.getName(path));                       //文件名
-            doc.setFileLocation(path);                                          //完整的项目内路径
-            doc.setLanguage(FileClassifier.languageGuess(path, contents));      //语言
-            doc.setContents(contents);                                          //源码
-            doc.setCodeOwner(getCodeOwner(git, path));                          //开发者  TODO 如何能支持多个开发者
+            SourceFile doc = new SourceFile();
+            doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
+            doc.setBranch(git.getRepository().getBranch());
+            doc.setName(FilenameUtils.getName(path));                       //文件名
+            doc.setLocation(path);
+            doc.setLanguage(FileClassifier.languageGuess(path, contents));  //语言
+            doc.setContents(contents);                                      //源码
+            doc.setCodeOwner(getCodeOwner(git, path));                      //开发者  TODO 如何能支持多个开发者
             var slocCount = slocCounter.countStats(contents, doc.getLanguage());
-            doc.setLines(slocCount.linesCount);                                 //代码行统计
+            doc.setLines(slocCount.linesCount);                             //代码行统计
             doc.setCommentLines(slocCount.commentCount);
             doc.setBlankLines(slocCount.blankCount);
             doc.setCodeLines(slocCount.codeCount);
             doc.setComplexity(slocCount.complexity);
-            doc.setSha1Hash(DigestUtils.sha1Hex(contents));
+            doc.setHash(DigestUtils.sha1Hex(contents));
             doc.setRevision(objectId.name());
-            doc.setScm(repo.getScm());
 
-            //calculate document uuid
-            doc.generateUuid();
+            doc.generateUuid(); //calculate file uuid
+            doc.generateUrl();  // calculate file url
 
             return doc;
         }
@@ -353,26 +356,24 @@ public class GitRepositoryProvider implements RepositoryProvider {
     /**
      * 从二进制文件中构建文档
      * @param repo
+     * @param git
      * @param path
      * @param objectId
      * @return
      * @throws IOException
      */
-    private CodeIndexDocument buildBinaryDocument(CodeRepository repo, String path, ObjectId objectId)
-    {
-        CodeIndexDocument doc = new CodeIndexDocument();
+    private SourceFile buildBinaryDocument(CodeRepository repo, Git git, String path, ObjectId objectId) throws IOException {
+        SourceFile doc = new SourceFile();
 
-        doc.setRepoId(repo.getId());
-        doc.setRepoName(repo.getName());                  //仓库名
-        doc.setRepoURL(repo.getUrl());                    //仓库地址
-        doc.setFileName(FilenameUtils.getName(path));     //文件名
-        doc.setFileLocation(path);                        //完整的项目内路径
+        doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
+        doc.setBranch(git.getRepository().getBranch());
+        doc.setName(FilenameUtils.getName(path));     //文件名
+        doc.setLocation(path);                        //完整的项目内路径
         doc.setLanguage(FileClassifier.BINARY_LANGUAGE);  //语言
         doc.setRevision(objectId.name());
-        doc.setScm(repo.getScm());
 
-        //calculate document uuid
-        doc.generateUuid();
+        doc.generateUuid(); //calculate file uuid
+        doc.generateUrl();  // calculate file url
 
         return doc;
     }

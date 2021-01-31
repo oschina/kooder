@@ -24,6 +24,7 @@ public class IssueQuery extends QueryBase {
 
     /**
      * Last issue based on created_at field
+     * Because gitlab issue api doesn't support filter by id
      * @return
      */
     @Override
@@ -72,7 +73,7 @@ public class IssueQuery extends QueryBase {
     @Override
     protected BoostQuery makeBoostQuery(String field, String q, float boost) {
         if("ident".equals(field))
-            return new BoostQuery(new TermQuery(new Term("ident", q)), boost);
+            return new BoostQuery(new TermQuery(new Term(Constants.FIELD_IDENT, q)), boost);
         return super.makeBoostQuery(field, q, boost);
     }
 
@@ -84,9 +85,9 @@ public class IssueQuery extends QueryBase {
     @Override
     protected Sort buildSort() {
         if("create".equals(sort))
-            return new Sort(new SortedNumericSortField("created_at", SortField.Type.LONG, true));
+            return new Sort(new SortedNumericSortField(Constants.FIELD_CREATED_AT, SortField.Type.LONG, true));
         if("update".equals(sort))
-            return new Sort(new SortedNumericSortField("updated_at", SortField.Type.LONG, true));
+            return new Sort(new SortedNumericSortField(Constants.FIELD_UPDATED_AT, SortField.Type.LONG, true));
         return Sort.RELEVANCE;
     }
 

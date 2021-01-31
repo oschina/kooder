@@ -18,13 +18,14 @@ public class TextFileUtils {
 
     public static final long DEFAULT_MAX_FILE_LENGTH_READ = 30_000_000;
 
-    private static String[] binaryExtensions = {"png","gif","jpg","jpeg","bmp","zip","gz","tar",
-                                                "exe","bin","deb","lib","dll","so","img","rar",
-                                                "class","rpm","tmp","msi","pdf","doc","ppt","xls",
-                                                "docx","pptx","xlsx","keynote","DS_Store","ico","pch",
-                                                "woff","eot","cur","dm","xpm","emz","db","scc","idx",
+    private static String[] binaryExtensions = {"png","gif","jpg","jpeg","bmp","ico",
+                                                "mp4","3gp","mpeg","flv","avi","wmv","mov",
+                                                "zip","gz","tar","rar","7z",
+                                                "exe","bin","lib","dll","so","img","class","deb","rpm","msi","pch",
+                                                "pdf","doc","ppt","xls", "docx","pptx","xlsx","keynote",
+                                                "woff","ttf","eot","cur","dm","xpm","emz","db","scc","idx",
                                                 "mpp","dot","pspimage","stl","dml","wmf","rvm","resources",
-                                                "tlb"
+                                                "tlb","tmp","DS_Store"
                                                 };
 
     public static boolean isBinaryFile(String filename) {
