@@ -19,7 +19,7 @@ public class TextFileUtils {
     public static final long DEFAULT_MAX_FILE_LENGTH_READ = 30_000_000;
 
     private static String[] binaryExtensions = {"png","gif","jpg","jpeg","bmp","ico",
-                                                "mp4","3gp","mpeg","flv","avi","wmv","mov",
+                                                "mp4","3gp","mpeg","flv","avi","wmv","mov","dat",
                                                 "zip","gz","tar","rar","7z","jar",
                                                 "exe","bin","lib","dll","so","img","class","deb","rpm","msi","pch",
                                                 "pdf","doc","ppt","xls", "docx","pptx","xlsx","keynote",
