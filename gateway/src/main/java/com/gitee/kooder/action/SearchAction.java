@@ -2,14 +2,16 @@ package com.gitee.kooder.action;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.models.QueryResult;
+import com.gitee.kooder.query.QueryFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Kooder search api
@@ -50,7 +52,29 @@ public class SearchAction implements SearchActionBase {
      * @throws IOException
      */
     public void repositories(RoutingContext context) throws IOException {
-        QueryResult result = _search(context, Constants.TYPE_REPOSITORY);
+        String q = param(context.request(), "q");
+        String sort = param(context.request(), "sort");
+        String lang = param(context.request(), Constants.FIELD_LANGUAGE);
+        int page = Math.max(1, param(context.request(),"p", 1));
+        int eid = param(context.request(), Constants.FIELD_ENTERPRISE_ID, 0);
+
+        //Specified repositories search
+        List<String> repos = Arrays.asList(param(context.request(), Constants.FIELD_REPO_ID, "").split(","));
+        String body = context.getBodyAsString();
+        if(body != null)
+            repos.addAll(Arrays.asList(body.split(",")));
+        List<Integer> iRepos = repos.stream().map(r -> NumberUtils.toInt(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
+
+        QueryResult result = QueryFactory.REPO()
+                .setEnterpriseId(eid)
+                .addRepositories(iRepos)
+                .setSearchKey(q)
+                .addFacets(Constants.FIELD_LANGUAGE, lang)
+                .setSort(sort)
+                .setPage(page)
+                .setPageSize(PAGE_SIZE)
+                .execute();
+
         this.json(context.response(), result.json());
     }
 

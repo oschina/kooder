@@ -33,7 +33,7 @@ public interface SearchActionBase extends Action {
         int page = Math.max(1, param(context.request(),"p", 1));
 
         String sort = param(context.request(), "sort");
-        String lang = param(context.request(), "lang");
+        String lang = param(context.request(), Constants.FIELD_LANGUAGE);
 
         switch (type) {
             case Constants.TYPE_REPOSITORY:
