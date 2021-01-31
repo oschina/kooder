@@ -132,6 +132,7 @@ public class SearchHelper {
         if(StringUtils.isBlank(code) || StringUtils.isBlank(key))
             return null;
 
+        String line = null;
         List<CodeLine> codeLines = new ArrayList<>();
         try {
             QueryParser parser = new QueryParser(null, AnalyzerFactory.getCodeAnalyzer());
@@ -146,7 +147,7 @@ public class SearchHelper {
                 if (StringUtils.trim(lines[i]).length() < key.length())
                     continue;
 
-                String line = html(lines[i]);
+                line = html(lines[i]);
                 TokenStream tokens = AnalyzerFactory.getCodeAnalyzer().tokenStream(null, new StringReader(line));
                 String[] fragments = hig.getBestFragments(tokens, line, 5);
                 String hl_result = String.join("", fragments);
@@ -155,7 +156,7 @@ public class SearchHelper {
                 }
             }
         } catch (Exception e) {
-            log.warn("Failed to highlighter code lines", e);
+            log.warn("Failed to highlighter code line: " + line, e);
         }
         return codeLines;
     }
