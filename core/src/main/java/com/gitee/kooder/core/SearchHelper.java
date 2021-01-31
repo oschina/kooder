@@ -87,7 +87,7 @@ public class SearchHelper {
             String[] fragments = hig.getBestFragments(tokens, text, hig.getMaxDocCharsToAnalyze());
             result = String.join( "", fragments);
         } catch (Exception e) {
-            log.error("Unabled to hightlight text("+key+"): " + text, e);
+            log.warn("Unabled to hightlight text("+key+"): " + text, e);
         }
 
         return StringUtils.isBlank(result) ? text : result;
@@ -115,7 +115,7 @@ public class SearchHelper {
             String[] fragments = hig.getBestFragments(tokens, text, hig.getMaxDocCharsToAnalyze());
             result = String.join( "", fragments);
         } catch (Exception e) {
-            log.error("Unabled to hightlight text("+key+"): " + text, e);
+            log.warn("Unabled to hightlight text("+key+"): " + text, e);
         }
 
         return StringUtils.isBlank(result) ? text : result;
@@ -155,7 +155,7 @@ public class SearchHelper {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to highlighter code lines", e);
+            log.warn("Failed to highlighter code lines", e);
         }
         return codeLines;
     }
