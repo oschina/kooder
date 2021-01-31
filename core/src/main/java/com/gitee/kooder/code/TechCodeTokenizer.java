@@ -119,7 +119,7 @@ public final class TechCodeTokenizer extends Tokenizer {
             return nextWord();
 
         int endOffset = currentPos - stopStep - drifts[1];
-        int startOffset = endOffset - token.length();
+        int startOffset = Math.max(0, endOffset - token.length());
 
         return new IWord(token, startOffset, endOffset);
     }
