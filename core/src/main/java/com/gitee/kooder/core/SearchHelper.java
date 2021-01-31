@@ -155,7 +155,7 @@ public class SearchHelper {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to highlighter code lines", e);
         }
         return codeLines;
     }
