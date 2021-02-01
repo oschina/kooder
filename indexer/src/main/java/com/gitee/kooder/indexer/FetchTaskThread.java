@@ -47,21 +47,22 @@ public class FetchTaskThread extends Thread {
         while(!this.isInterrupted()) {
             final AtomicInteger taskCount = new AtomicInteger(0);
             BatchTaskRunner.execute(provider.types(), 1, types -> {
-                String type = types.get(0);
-                List<QueueTask> tasks = provider.queue(type).pop(batch_fetch_count);
-                if(tasks != null && tasks.size() > 0) {
-                    try (
-                        IndexWriter writer = StorageFactory.getIndexWriter(type);
-                        TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type))
-                    {
-                        //如果 tasks_per_thread < 0 ，则单线程处理
-                        int threshold = (tasks_per_thread>0)?tasks_per_thread:tasks.size();
-                        long startTime = System.currentTimeMillis();
-                        BatchTaskRunner.execute(tasks, threshold, list -> handleTasks(list, writer, taxonomyWriter));
-                        log.info("{} tasks<{}> finished in {} ms", tasks.size(), type, System.currentTimeMillis() - startTime);
-                        taskCount.addAndGet(tasks.size());
-                    } catch ( IOException e ) {
-                        log.error("Failed to write tasks<"+type+"> to indexes.", e);
+                for(String type : types) {
+                    List<QueueTask> tasks = provider.queue(type).pop(batch_fetch_count);
+                    if(tasks != null && tasks.size() > 0) {
+                        try (
+                            IndexWriter writer = StorageFactory.getIndexWriter(type);
+                            TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type))
+                        {
+                            //如果 tasks_per_thread < 0 ，则单线程处理
+                            int threshold = (tasks_per_thread>0)?tasks_per_thread:tasks.size();
+                            long startTime = System.currentTimeMillis();
+                            BatchTaskRunner.execute(tasks, threshold, list -> handleTasks(list, writer, taxonomyWriter));
+                            log.info("{} tasks<{}> finished in {} ms", tasks.size(), type, System.currentTimeMillis() - startTime);
+                            taskCount.addAndGet(tasks.size());
+                        } catch ( IOException e ) {
+                            log.error("Failed to write tasks<"+type+"> to indexes.", e);
+                        }
                     }
                 }
             });
@@ -73,6 +74,7 @@ public class FetchTaskThread extends Thread {
                     break;
                 }
             }
+
         }
     }
 

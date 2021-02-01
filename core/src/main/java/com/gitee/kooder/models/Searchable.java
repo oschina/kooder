@@ -42,8 +42,8 @@ public abstract class Searchable implements Serializable {
 
     protected Document newDocument() {
         Document doc = new Document();
-        doc.add(new StringField(Constants.FIELD_ID, String.valueOf(id), Field.Store.YES));
         doc.add(new NumericDocValuesField(Constants.FIELD_ID, id));
+        doc.add(new StoredField(Constants.FIELD_ID, String.valueOf(id)));
         return doc;
     }
 

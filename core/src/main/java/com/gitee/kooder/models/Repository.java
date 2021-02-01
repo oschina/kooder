@@ -24,6 +24,7 @@ public final class Repository extends Searchable {
     protected Relation project      = Relation.EMPTY;
     protected Relation owner        = Relation.EMPTY;
     protected int recomm;           //推荐级别
+    protected int gindex;           // Gitee Index
     protected int block;            //是否屏蔽 1屏蔽，0不屏蔽
     protected int visibility;       //0私有仓库，1内源仓库，2公开仓库
     protected String license;       //许可证
@@ -85,10 +86,13 @@ public final class Repository extends Searchable {
         doc.add(new NumericDocValuesField(Constants.FIELD_RECOMM, recomm));
         doc.add(new StoredField(Constants.FIELD_RECOMM, recomm));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_BLOCK, block));
+        doc.add(new NumericDocValuesField(Constants.FIELD_G_INDEX, gindex));
+        doc.add(new StoredField(Constants.FIELD_G_INDEX, gindex));
+
+        doc.add(new IntPoint(Constants.FIELD_BLOCK, block));
         doc.add(new StoredField(Constants.FIELD_BLOCK, block));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_VISIBILITY, visibility));
+        doc.add(new IntPoint(Constants.FIELD_VISIBILITY, visibility));
         doc.add(new StoredField(Constants.FIELD_VISIBILITY, visibility));
 
         if(StringUtils.isNotBlank(license)) {
@@ -104,7 +108,7 @@ public final class Repository extends Searchable {
         if(StringUtils.isNotBlank(readme))
             doc.add(new TextField(Constants.FIELD_README, readme, Field.Store.NO));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_FORK, fork));
+        doc.add(new LongPoint(Constants.FIELD_FORK, fork));
         doc.add(new StoredField(Constants.FIELD_FORK, fork));
 
         doc.add(new NumericDocValuesField(Constants.FIELD_STAR_COUNT, starsCount));
@@ -116,6 +120,7 @@ public final class Repository extends Searchable {
         doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
         doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
 
+
         //tags
         if(tags != null)
             doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", tags), Field.Store.NO));
@@ -125,6 +130,7 @@ public final class Repository extends Searchable {
 
         //enterprise info (just for gitee)
         enterprise:
+        doc.add(new LongPoint(Constants.FIELD_ENTERPRISE_ID, this.enterprise.id));
         doc.add(new StringField(Constants.FIELD_ENTERPRISE_ID, String.valueOf(enterprise.id), Field.Store.YES));
         if(StringUtils.isNotBlank(enterprise.name)) {
             doc.add(new FacetField(Constants.FIELD_ENTERPRISE_NAME, enterprise.name));
@@ -134,6 +140,7 @@ public final class Repository extends Searchable {
             doc.add(new StoredField(Constants.FIELD_ENTERPRISE_URL, enterprise.url));
         //program info (just for gitee)
         program:
+        doc.add(new LongPoint(Constants.FIELD_PROGRAM_ID, this.project.id));
         doc.add(new StringField(Constants.FIELD_PROGRAM_ID, String.valueOf(project.id), Field.Store.YES));
         if(StringUtils.isNotBlank(project.name)) {
             doc.add(new FacetField(Constants.FIELD_PROGRAM_NAME, project.name));
@@ -143,6 +150,7 @@ public final class Repository extends Searchable {
             doc.add(new StoredField(Constants.FIELD_PROGRAM_URL, project.url));
         //owner info
         owner:
+        doc.add(new LongPoint(Constants.FIELD_USER_ID, this.owner.id));
         doc.add(new StringField(Constants.FIELD_USER_ID, String.valueOf(owner.id), Field.Store.YES));
         if(StringUtils.isNotBlank(owner.name)) {
             doc.add(new FacetField(Constants.FIELD_USER_NAME, owner.name));
@@ -167,6 +175,7 @@ public final class Repository extends Searchable {
         this.description = doc.get(Constants.FIELD_DESC);
         this.url = doc.get(Constants.FIELD_URL);
         this.recomm = NumberUtils.toInt(doc.get(Constants.FIELD_RECOMM), Constants.RECOMM_NONE);
+        this.gindex = NumberUtils.toInt(doc.get(Constants.FIELD_G_INDEX), 0);
         this.block = NumberUtils.toInt(doc.get(Constants.FIELD_BLOCK), Constants.REPO_BLOCK_YES);//如果没有block字段，为安全计，默认是屏蔽状态
         this.visibility = NumberUtils.toInt(doc.get(Constants.FIELD_VISIBILITY), Constants.VISIBILITY_PRIVATE);
         this.fork = NumberUtils.toInt(doc.get(Constants.FIELD_FORK), 0);
@@ -255,6 +264,14 @@ public final class Repository extends Searchable {
 
     public void setRecomm(int recomm) {
         this.recomm = recomm;
+    }
+
+    public int getGindex() {
+        return gindex;
+    }
+
+    public void setGindex(int gindex) {
+        this.gindex = gindex;
     }
 
     public int getBlock() {

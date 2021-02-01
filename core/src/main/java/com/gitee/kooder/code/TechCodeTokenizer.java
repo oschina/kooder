@@ -16,6 +16,8 @@ import java.util.TreeSet;
  */
 public final class TechCodeTokenizer extends Tokenizer {
 
+    public final static int MAX_TERM_LENGTH = 128;
+
     public final static char[] beginTokens = {'+','#'};
     public final static char[] endTokens = {'.'};
     public final static Map<String, String[]> synonymWords = new HashMap<>(){{
@@ -113,11 +115,11 @@ public final class TechCodeTokenizer extends Tokenizer {
         //对一些 #+ 开头，.结尾的词汇进行规范化处理
         int[] drifts = {0,0};
         String token = this.normalize(word.toString(), drifts);
-        if(token.length() == 0)
+        if(token.length() == 0 || token.length() > MAX_TERM_LENGTH)
             return nextWord();
 
         int endOffset = currentPos - stopStep - drifts[1];
-        int startOffset = endOffset - token.length();
+        int startOffset = Math.max(0, endOffset - token.length());
 
         return new IWord(token, startOffset, endOffset);
     }

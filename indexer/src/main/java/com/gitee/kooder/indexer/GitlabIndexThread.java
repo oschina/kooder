@@ -135,7 +135,7 @@ public class GitlabIndexThread extends Thread {
                 codes.setId(p.getId());
                 codes.setScm(CodeRepository.SCM_GIT);
                 codes.setName(p.getName());
-                codes.setUrl(p.getHttpUrlToRepo());
+                codes.setUrl(p.getWebUrl());
                 //write to lucene index
                 QueueTask.add(Constants.TYPE_CODE, codes);
                 pc ++;
@@ -146,7 +146,7 @@ public class GitlabIndexThread extends Thread {
     }
 
     /**
-     * 选择占比最大的作为项目的编程语言
+     * Select the largest proportion language as the main programming language for the project
      * @param langs
      * @return
      */

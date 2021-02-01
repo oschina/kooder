@@ -1,16 +1,17 @@
 package com.gitee.kooder.queue;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.Constants;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * 定义了获取索引任务的队列接口
  * @author Winter Lau<javayou@gmail.com>
  */
 public interface QueueProvider extends AutoCloseable {
+
+    List<String> TYPES = Arrays.asList(Constants.TYPE_REPOSITORY, Constants.TYPE_ISSUE, Constants.TYPE_CODE);
 
     /**
      * Provider 唯一标识
@@ -23,9 +24,7 @@ public interface QueueProvider extends AutoCloseable {
      * @return
      */
     default List<String> types() {
-        Properties props = GiteeSearchConfig.getQueueProperties();
-        String type = props.getProperty("types").trim();
-        return Arrays.asList(type.split(","));
+        return TYPES;
     }
 
     /**

@@ -10,7 +10,7 @@ public class QueryFactory {
      * 仓库查询器
      * @return
      */
-    public final static IQuery REPO() {
+    public final static RepoQuery REPO() {
         return new RepoQuery();
     }
 
@@ -18,7 +18,7 @@ public class QueryFactory {
      * Issue 任务查询器
      * @return
      */
-    public final static IQuery ISSUE() {
+    public final static IssueQuery ISSUE() {
         return new IssueQuery();
     }
 
@@ -26,7 +26,7 @@ public class QueryFactory {
      * 源码查询器
      * @return
      */
-    public final static IQuery CODE() {
+    public final static CodeQuery CODE() {
         return new CodeQuery();
     }
 

@@ -60,8 +60,10 @@ public interface Constants {
     String FIELD_CLOSED_AT      = "closedAt";
     String FIELD_STAR_COUNT     = "starCount";
     String FIELD_FORK_COUNT     = "forkCount";
+    String FIELD_G_INDEX        = "gindex";
     String FIELD_TAGS           = "tags";
     String FIELD_CATALOGS       = "catalogs";
+    String FIELD_BRANCH         = "branch";
 
     String FIELD_REPO_ID        = "repo.id";
     String FIELD_REPO_NAME      = "repo.name";

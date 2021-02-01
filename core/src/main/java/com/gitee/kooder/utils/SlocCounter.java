@@ -265,7 +265,7 @@ public class SlocCounter {
 
             // This means the end of processing the line so calculate the stats according to what state
             // we are currently in
-            if (contents.charAt(index) == '\n' || index == endPoint) {
+            if (index >= contents.length() || contents.charAt(index) == '\n' || index == endPoint) {
                 linesCount++;
 
                 switch (currentState) {

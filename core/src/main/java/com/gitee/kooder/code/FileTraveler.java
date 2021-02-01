@@ -1,6 +1,6 @@
 package com.gitee.kooder.code;
 
-import com.gitee.kooder.models.CodeIndexDocument;
+import com.gitee.kooder.models.SourceFile;
 
 /**
  * 文件遍历回调接口
@@ -13,14 +13,14 @@ public interface FileTraveler {
      * @param doc  文档信息
      * @return true: 继续下一个文档， false 不再处理下面文档
      */
-    void updateDocument(CodeIndexDocument doc);
+    void updateDocument(SourceFile doc);
 
     /**
      * 删除文档
      * @param doc
      * @return
      */
-    void deleteDocument(CodeIndexDocument doc);
+    void deleteDocument(SourceFile doc);
 
     /**
      * 清空仓库所有文件，以待重建

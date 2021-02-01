@@ -49,9 +49,9 @@ TIME: ${result.timeUsed} ms
                         <div class="dropdown" id="SortMenu">
                             <a class="btn btn-link dropdown-toggle" tabindex="0">sort by<i class="icon icon-caret"></i></a>
                             <ul class="menu">
-                                <li class="menu-item#if($sort=='score') active#end"><a href="$tool.uri('sort','score')">Best Matched</a></li>
-                                <li class="menu-item#if($sort=='stars') active#end"><a href="$tool.uri('sort','stars')">By Stars</a></li>
-                                <li class="menu-item#if($sort=='forks') active#end"><a href="$tool.uri('sort','forks')">By Forks</a></li>
+                                <li class="menu-item#if($sort=='score') active#end"><a href="$tool.uri('sort','score')">Best Matched (Default)</a></li>
+                                ##<li class="menu-item#if($sort=='stars') active#end"><a href="$tool.uri('sort','stars')">By Stars</a></li>
+                                ##<li class="menu-item#if($sort=='forks') active#end"><a href="$tool.uri('sort','forks')">By Forks</a></li>
                                 <li class="menu-item#if($sort=='update') active#end"><a href="$tool.uri('sort','update')">Last Updated</a></li>
                             </ul>
                         </div>
