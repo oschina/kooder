@@ -79,13 +79,34 @@ $ bin/gateway.sh
 ```
 
 ### Docker安装
+
+#### docker-compose
 依赖
 * docker-ce环境
 * docker-compose
 
 开发代码优化后，部署只需将代码clone下来，然后在服务器上部署容器平台，在平台上执行如下命令：
 ```
-docker-compose up -d
+### 开箱即用
+docker-compose up -d 
+
+### 关闭容器
+docker-compose down
+```
+![Kooder_docker](docs/img/kooder-docker.png)
+
+#### docker-compose ha版
+依赖
+* docker-ce环境
+* docker-compose
+
+开发代码优化后，部署只需将代码clone下来，然后在服务器上部署容器平台，在平台上执行如下命令：
+```
+### 开箱即用
+docker-compose -f docker-compose-ha.yaml up -d
+
+### 关闭容器
+docker-compose -f docker-compose-ha.yaml down
 ```
 
 ![Kooder docker-ha](docs/img/docker-ha.png)
@@ -94,9 +115,11 @@ docker-compose up -d
 
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
 
-配置文件：`/deploy/kooder.properties`,修改配置文件之后，执行如下命令；
-删除本地kooder镜像，重新build镜像。
+配置文件：`/deploy/kooder.properties`,修改配置文件之后，执行如下命令:
+
+
 ```
+## 删除本地kooder镜像，重新build镜像。
 docker rmi imageID
 docker-compose up -d
 ```
@@ -125,4 +148,22 @@ git.username = root
 git.password =  
 ```
 
-如果不填写密码，则 Kooder 会自动使用 access token 作为密码。
+
+
+
+**构建并运行**
+
+```
+$ cd Kooder
+$ mvn install
+### 启动 gateway
+$ bin/gateway.sh
+### 浏览器访问 http://localhost:8080
+```
+
+
+**搜索界面效果**
+![kooder-index](docs/img/kooder-index.png)
+
+![Kooder ScreenShot](docs/img/screenshot.png)
+
