@@ -84,7 +84,16 @@ public class SearchAction implements SearchActionBase {
      * @throws IOException
      */
     public void issues(RoutingContext context) throws IOException {
-        QueryResult result = _search(context, Constants.TYPE_ISSUE);
+        String q = param(context.request(), "q");
+        String sort = param(context.request(), "sort");
+        int page = Math.max(1, param(context.request(),"p", 1));
+        QueryResult result = QueryFactory.ISSUE()
+                .setEnterpriseId(param(context.request(), Constants.FIELD_ENTERPRISE_ID, 0))
+                .setSearchKey(q)
+                .setSort(sort)
+                .setPage(page)
+                .setPageSize(PAGE_SIZE)
+                .execute();
         this.json(context.response(), result.json());
     }
 
@@ -94,7 +103,31 @@ public class SearchAction implements SearchActionBase {
      * @throws IOException
      */
     public void codes(RoutingContext context) throws IOException {
-        QueryResult result = _search(context, Constants.TYPE_CODE);
+        String q = param(context.request(), "q");
+        String sort = param(context.request(), "sort");
+        String lang = param(context.request(), Constants.FIELD_LANGUAGE);
+        int page = Math.max(1, param(context.request(),"p", 1));
+        int eid = param(context.request(), Constants.FIELD_ENTERPRISE_ID, 0);
+
+        //Specified repositories search
+        List<String> repos = Arrays.asList(param(context.request(), Constants.FIELD_REPO_ID, "").split(","));
+        String body = context.getBodyAsString();
+        if(body != null)
+            repos.addAll(Arrays.asList(body.split(",")));
+        List<Integer> iRepos = repos.stream().map(r -> NumberUtils.toInt(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
+
+        QueryResult result = QueryFactory.CODE()
+                .setEnterpriseId(eid)
+                .addRepositories(iRepos)
+                .setSearchKey(q)
+                .addFacets(Constants.FIELD_LANGUAGE, lang)
+                .addFacets(Constants.FIELD_REPO_NAME, param(context.request(), Constants.FIELD_REPO_NAME))
+                .addFacets(Constants.FIELD_CODE_OWNER, param(context.request(), Constants.FIELD_CODE_OWNER))
+                .setSort(sort)
+                .setPage(page)
+                .setPageSize(PAGE_SIZE)
+                .execute();
+
         this.json(context.response(), result.json());
     }
 
