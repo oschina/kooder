@@ -116,10 +116,12 @@ public final class SourceFile extends Searchable {
         //file info
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getName(),         Field.Store.YES));
         document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getLocation(),     Field.Store.YES));
-        document.add(new TextField(Constants.FIELD_SOURCE,          this.getContents(),     Field.Store.YES));
 
-        //文件属性
-        document.add(new StoredField(Constants.FIELD_FILE_HASH,     this.getHash()));
+        if(StringUtils.isNotBlank(this.getContents())) {
+            document.add(new TextField(Constants.FIELD_SOURCE, this.getContents(), Field.Store.YES));
+            //文件属性
+            document.add(new StoredField(Constants.FIELD_FILE_HASH, this.getHash()));
+        }
 
         //文件统计信息
         document.add(new StoredField(Constants.FIELD_LINES_TOTAL,   this.getLines()));
