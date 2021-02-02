@@ -1,5 +1,6 @@
 package com.gitee.kooder.index;
 
+import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.queue.QueueTask;
 import com.gitee.kooder.storage.StorageFactory;
 import org.apache.lucene.document.Document;
@@ -103,7 +104,13 @@ public class IndexManager {
      */
     public static long update(List<Document> docs, IndexWriter i_writer, TaxonomyWriter t_writer) throws IOException {
         for(Document doc : docs) {
-            i_writer.updateDocument(new Term(FIELD_ID, doc.get(FIELD_ID)), buildFacetDocument(t_writer, doc));
+            try {
+                i_writer.updateDocument(new Term(FIELD_ID, doc.get(FIELD_ID)), buildFacetDocument(t_writer, doc));
+            } catch ( IllegalArgumentException e) {
+                //FIXME 暂时先用这种方法来解决 jcseg 异常的问题
+                doc.removeField(Constants.FIELD_DESC);
+                i_writer.updateDocument(new Term(FIELD_ID, doc.get(FIELD_ID)), buildFacetDocument(t_writer, doc));
+            }
         }
         return docs.size();
     }
