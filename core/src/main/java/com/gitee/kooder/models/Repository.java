@@ -49,7 +49,7 @@ public final class Repository extends Searchable {
         this.id = p.getId();
         this.name = p.getName();
         this.description = p.getDescription();
-        this.url = p.getWebUrl();
+        this.url = p.getHttpUrlToRepo();
         this.enterprise = Relation.EMPTY;
         this.project = Relation.EMPTY;
         if(p.getOwner() != null)
