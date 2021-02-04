@@ -13,6 +13,7 @@ em.codeline {width:24px;text-align:right;font-style:normal;margin-right:10px;}
 #SearchResults .facets {margin-top:20px;}
 #SearchResults blockquote {padding-top:0;padding-bottom:0;margin:10px 0 5px 0;}
 #SearchResults #SortMenu {float:right;margin-right:10px;}
+#SortMenu .active { font-weight: bold; }
 #SearchResults #SearchTabs {margin:0 20px 20px 0;}
 #SearchResults #SearchTabs li {margin-right:20px;}
 #SearchResults .breadcrumb {margin:0;}
