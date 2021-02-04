@@ -1,9 +1,11 @@
 package com.gitee.kooder.indexer;
 
 import com.gitee.kooder.code.*;
+import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Searchable;
+import com.gitee.kooder.query.QueryFactory;
 import com.gitee.kooder.queue.QueueFactory;
 import com.gitee.kooder.queue.QueueProvider;
 import com.gitee.kooder.queue.QueueTask;
@@ -11,8 +13,10 @@ import com.gitee.kooder.storage.StorageFactory;
 import com.gitee.kooder.utils.BatchTaskRunner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.search.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,8 +139,15 @@ public class FetchTaskThread extends Thread {
             for(Searchable obj : task.getObjects()) {
                 CodeRepository repo = RepositoryManager.INSTANCE.get(obj.getId());
                 if (repo != null) {
-                    RepositoryFactory.getProvider(repo.getScm()).delete(repo);
-                    RepositoryManager.INSTANCE.delete(repo.getId());
+
+                    Query query = LongPoint.newExactQuery(Constants.FIELD_REPO_ID, repo.getId());
+                    try {
+                        writer.deleteDocuments(query);                              // Delete SourceCode indexes
+                        RepositoryFactory.getProvider(repo.getScm()).delete(repo);  // Delete temp project git directory
+                        RepositoryManager.INSTANCE.delete(repo.getId());            // Delete project metadata
+                    } catch (IOException e) {
+                        log.warn("Failed to delete code-repository id = " + repo.getId(), e);
+                    }
                 }
             }
         }

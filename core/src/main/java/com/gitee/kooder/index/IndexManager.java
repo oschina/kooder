@@ -4,6 +4,7 @@ import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.queue.QueueTask;
 import com.gitee.kooder.storage.StorageFactory;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.taxonomy.*;
 import org.apache.lucene.index.*;
@@ -123,7 +124,7 @@ public class IndexManager {
      * @throws IOException
      */
     public static long deleteById(List<Long> docs, IndexWriter i_writer) throws IOException {
-        Query[] queries = docs.stream().map(id -> new TermQuery(new Term(FIELD_ID, String.valueOf(id)))).toArray(Query[]::new);
+        Query[] queries = docs.stream().map(id -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, id)).toArray(Query[]::new);
         return i_writer.deleteDocuments(queries);
     }
 
