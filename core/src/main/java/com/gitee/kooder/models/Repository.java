@@ -8,6 +8,7 @@ import org.apache.lucene.facet.FacetField;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.Visibility;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,6 +66,27 @@ public final class Repository extends Searchable {
         this.setUpdatedAt((p.getLastActivityAt()!=null)?p.getLastActivityAt().getTime():0);
         this.setStarsCount(p.getStarCount());
         this.setForksCount(p.getForksCount());
+        this.setBlock(Constants.REPO_BLOCK_NO);
+    }
+
+    public Repository(com.gitee.kooder.models.gitee.Repository repository) {
+        this.id = repository.getId();
+        this.name = repository.getName();
+        this.description = repository.getDescription();
+        this.url = repository.getHtmlUrl();
+        this.enterprise = Relation.EMPTY;
+        this.project = Relation.EMPTY;
+        this.owner = new Relation(repository.getOwner().getId(), repository.getOwner().getName(), repository.getOwner().getHtmlUrl());
+        this.visibility = repository.getPrivate() ? Constants.VISIBILITY_PRIVATE : repository.getInternal() ? Constants.VISIBILITY_INTERNAL : Constants.VISIBILITY_PUBLIC;
+        this.license = repository.getLicense();
+        this.lang = repository.getLanguage();
+        this.readme = "";
+        this.fork = 0;
+        this.tags = Collections.emptyList();
+        this.starsCount = repository.getStargazersCount();
+        this.forksCount = repository.getForksCount();
+        this.createdAt = repository.getCreatedAt().getTime();
+        this.updatedAt = repository.getUpdatedAt().getTime();
         this.setBlock(Constants.REPO_BLOCK_NO);
     }
 

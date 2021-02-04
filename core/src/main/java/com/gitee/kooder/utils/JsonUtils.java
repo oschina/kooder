@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ public class JsonUtils {
     static {
         JSON.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JSON.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        JSON.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
     }
 
     /**
