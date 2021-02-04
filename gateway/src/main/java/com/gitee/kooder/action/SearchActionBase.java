@@ -4,7 +4,6 @@ import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.models.QueryResult;
 import com.gitee.kooder.query.QueryFactory;
 import com.gitee.kooder.server.Action;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,7 +14,7 @@ import java.util.Arrays;
  * Action for search, both for web and api
  * @author Winter Lau<javayou@gmail.com>
  */
-public interface SearchActionBase extends Action {
+interface SearchActionBase extends Action {
 
     /**
      * execute search

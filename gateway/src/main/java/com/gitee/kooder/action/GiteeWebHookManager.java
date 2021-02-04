@@ -18,7 +18,7 @@ import java.util.Optional;
 /**
  * @author zhanggx
  */
-public class GiteeWebHookManager {
+class GiteeWebHookManager {
 
     /**
      * handle gitee web hook

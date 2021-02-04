@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * This class provides a handler for processing GitLab System Hook callouts.
  * @author Winter Lau<javayou@gmail.com>
  */
-public class GitlabSystemHookManager {
+class GitlabSystemHookManager {
 
     private final static Logger log = LoggerFactory.getLogger(GitlabSystemHookManager.class);
 
