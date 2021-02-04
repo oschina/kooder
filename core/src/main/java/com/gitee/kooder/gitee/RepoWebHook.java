@@ -1,4 +1,4 @@
-package com.gitee.kooder.models.gitee;
+package com.gitee.kooder.gitee;
 
 /**
  * @author zhanggx

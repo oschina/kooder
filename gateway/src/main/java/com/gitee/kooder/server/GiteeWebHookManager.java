@@ -1,18 +1,16 @@
 package com.gitee.kooder.server;
 
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.exception.GiteeException;
+import com.gitee.kooder.gitee.GiteeException;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.GiteeWebHookEvent;
 import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
-import com.gitee.kooder.models.gitee.IssueWebHook;
-import com.gitee.kooder.models.gitee.RepoWebHook;
+import com.gitee.kooder.gitee.IssueWebHook;
+import com.gitee.kooder.gitee.RepoWebHook;
 import com.gitee.kooder.queue.QueueTask;
 import com.gitee.kooder.utils.JsonUtils;
 import io.vertx.ext.web.RoutingContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -22,8 +20,13 @@ import java.util.Optional;
  */
 public class GiteeWebHookManager {
 
-    private final static Logger log = LoggerFactory.getLogger(GiteeWebHookManager.class);
-
+    /**
+     * handle gitee web hook
+     *
+     * @param secretToken
+     * @param context
+     * @throws GiteeException
+     */
     public static void handleEvent(String secretToken, RoutingContext context) throws GiteeException {
         checkSecretToken(secretToken, context);
         GiteeWebHookEvent giteeWebHookEvent = parseGiteeWebHookEvent(context);
@@ -36,18 +39,20 @@ public class GiteeWebHookManager {
                 }
 
                 if (RepoWebHook.ACTION_CREATE.equals(repoWebHook.getAction())) {
+                    // index repository data
                     Repository repository = new Repository(repoWebHook.getRepository());
                     QueueTask.add(Constants.TYPE_REPOSITORY, repository);
-
+                    // index code data
                     CodeRepository coder = new CodeRepository(repository);
                     coder.setScm(CodeRepository.SCM_GIT);
                     QueueTask.add(Constants.TYPE_CODE, coder);
 
                 } else if (RepoWebHook.ACTION_DESTROY.equals(repoWebHook.getAction())) {
+                    // delete code data
                     CodeRepository codeRepository = new CodeRepository();
                     codeRepository.setId(repoWebHook.getRepository().getId());
                     QueueTask.delete(Constants.TYPE_CODE, codeRepository);
-
+                    // delete repository data
                     Repository repository = new Repository();
                     repository.setId(repoWebHook.getRepository().getId());
                     QueueTask.delete(Constants.TYPE_REPOSITORY, repository);

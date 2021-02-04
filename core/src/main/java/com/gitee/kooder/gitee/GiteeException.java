@@ -1,4 +1,4 @@
-package com.gitee.kooder.exception;
+package com.gitee.kooder.gitee;
 
 /**
  * Gitee related exception

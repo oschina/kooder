@@ -1,4 +1,4 @@
-package com.gitee.kooder.models.gitee;
+package com.gitee.kooder.gitee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,6 +17,8 @@ public class Repository {
     private String url;
 
     private String htmlUrl;
+
+    private String gitHttpUrl;
 
     private String description;
 
@@ -84,6 +86,14 @@ public class Repository {
 
     public void setHtmlUrl(String htmlUrl) {
         this.htmlUrl = htmlUrl;
+    }
+
+    public String getGitHttpUrl() {
+        return gitHttpUrl;
+    }
+
+    public void setGitHttpUrl(String gitHttpUrl) {
+        this.gitHttpUrl = gitHttpUrl;
     }
 
     public String getDescription() {

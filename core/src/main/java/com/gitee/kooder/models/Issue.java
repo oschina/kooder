@@ -79,7 +79,7 @@ public final class Issue extends Searchable {
         setDocument(doc);
     }
 
-    public Issue(com.gitee.kooder.models.gitee.Issue issue) {
+    public Issue(com.gitee.kooder.gitee.Issue issue) {
         this.id = issue.getId();
         this.ident = issue.getRepository().getId() + "_" + this.id;
         this.enterprise = Relation.EMPTY;
@@ -92,8 +92,8 @@ public final class Issue extends Searchable {
         this.labels = new ArrayList<>(issue.getLabels());
         this.createdAt = issue.getCreatedAt().getTime();
         this.updatedAt = issue.getUpdatedAt().getTime();
-        this.state = com.gitee.kooder.models.gitee.Issue.STATE_OPEN.equals(issue.getState())
-                || com.gitee.kooder.models.gitee.Issue.STATE_PROGRESSING.equals(issue.getState()) ? STATE_OPENED : STATE_CLOSED;
+        this.state = com.gitee.kooder.gitee.Issue.STATE_OPEN.equals(issue.getState())
+                || com.gitee.kooder.gitee.Issue.STATE_PROGRESSING.equals(issue.getState()) ? STATE_OPENED : STATE_CLOSED;
     }
 
     /**

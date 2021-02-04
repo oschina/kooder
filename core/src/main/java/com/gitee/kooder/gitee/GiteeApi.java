@@ -1,11 +1,7 @@
-package com.gitee.kooder.api;
+package com.gitee.kooder.gitee;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.gitee.kooder.core.GiteeSearchConfig;
-import com.gitee.kooder.exception.GiteeException;
-import com.gitee.kooder.models.gitee.EnterpriseHook;
-import com.gitee.kooder.models.gitee.Issue;
-import com.gitee.kooder.models.gitee.Repository;
 import com.gitee.kooder.utils.HttpUtils;
 import com.gitee.kooder.utils.JsonUtils;
 import okhttp3.Response;
@@ -15,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
+ * gitee open api
+ *
  * @author zhanggx
  */
 public class GiteeApi {
@@ -26,18 +24,37 @@ public class GiteeApi {
     private static final String URL_GET_REPOS = "/api/v5/enterprises/enterprise/repos";
     private static final String URL_GET_ISSUES = "/api/v5/enterprises/enterprise/issues";
 
+    /**
+     * gitee server url
+     */
     public final String giteeUrl;
-    private final String presonalAccessToken;
+    /**
+     * personal access token
+     */
+    private final String personalAccessToken;
 
     private GiteeApi() {
         giteeUrl = GiteeSearchConfig.getProperty("gitee.url");
-        presonalAccessToken = GiteeSearchConfig.getProperty("gitee.personal_access_token");
+        personalAccessToken = GiteeSearchConfig.getProperty("gitee.personal_access_token");
     }
 
     public static GiteeApi getInstance() {
         return Singleton.INSTANCE;
     }
 
+    /**
+     * create enterprise hook
+     *
+     * @param url                 enterprise hook url
+     * @param secretToken         enterprise hook password
+     * @param pushEvents          notice push event
+     * @param repoEvents          notice repo event
+     * @param tagPushEvents       notice tag push event
+     * @param issuesEvents        notice issue event
+     * @param noteEvents          notice note event
+     * @param mergeRequestsEvents notice merge request event
+     * @throws GiteeException request gitee server error
+     */
     public void createEnterpriseHooks(String url,
                                       String secretToken,
                                       boolean pushEvents,
@@ -65,6 +82,12 @@ public class GiteeApi {
         }
     }
 
+    /**
+     * get all enterprise hook
+     *
+     * @return all enterprise hook
+     * @throws GiteeException
+     */
     public List<EnterpriseHook> getEnterpriseHooks() throws GiteeException {
         int pageNo = 1, pageSize = 50;
         List<EnterpriseHook> res = new ArrayList<>();
@@ -75,6 +98,14 @@ public class GiteeApi {
         return res;
     }
 
+    /**
+     * paging get enterprise hook
+     *
+     * @param pageNo
+     * @param pageSize
+     * @return
+     * @throws GiteeException
+     */
     private List<EnterpriseHook> getEnterpriseHooks(int pageNo, int pageSize) throws GiteeException {
         Map<String, String> requestParamsMap = getRequestParamsMap();
         requestParamsMap.put("page", String.valueOf(pageNo));
@@ -94,6 +125,13 @@ public class GiteeApi {
         }
     }
 
+    /**
+     * get all repo
+     *
+     * @param afterId
+     * @return
+     * @throws GiteeException
+     */
     public List<Repository> getRepos(int afterId) throws GiteeException {
         int pageNo = 1, pageSize = 50;
         List<Repository> res = new ArrayList<>();
@@ -109,6 +147,14 @@ public class GiteeApi {
         return res;
     }
 
+    /**
+     * paging get repo
+     *
+     * @param pageNo
+     * @param pageSize
+     * @return
+     * @throws GiteeException
+     */
     private List<Repository> getRepos(int pageNo, int pageSize) throws GiteeException {
         Map<String, String> requestParamsMap = getRequestParamsMap();
         requestParamsMap.put("type", "all");
@@ -130,6 +176,13 @@ public class GiteeApi {
         }
     }
 
+    /**
+     * get all issue
+     *
+     * @param afterId
+     * @return
+     * @throws GiteeException
+     */
     public List<Issue> getIssues(int afterId) throws GiteeException {
         int pageNo = 1, pageSize = 50;
         List<Issue> res = new ArrayList<>();
@@ -145,6 +198,14 @@ public class GiteeApi {
         return res;
     }
 
+    /**
+     * paging get issue
+     *
+     * @param pageNo
+     * @param pageSize
+     * @return
+     * @throws GiteeException
+     */
     private List<Issue> getIssues(int pageNo, int pageSize) throws GiteeException {
         Map<String, String> requestParamsMap = getRequestParamsMap();
         requestParamsMap.put("state", "all");
@@ -166,9 +227,14 @@ public class GiteeApi {
         }
     }
 
+    /**
+     * get request params map with personal access token
+     *
+     * @return
+     */
     private Map<String, String> getRequestParamsMap() {
         Map<String, String> map = new HashMap<>();
-        map.put("access_token", presonalAccessToken);
+        map.put("access_token", personalAccessToken);
         return map;
     }
 

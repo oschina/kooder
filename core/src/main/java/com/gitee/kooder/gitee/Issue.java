@@ -1,4 +1,4 @@
-package com.gitee.kooder.models.gitee;
+package com.gitee.kooder.gitee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 

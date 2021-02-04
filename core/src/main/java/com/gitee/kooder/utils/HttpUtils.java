@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
+ * http util by okhttp3
+ *
  * @author zhanggx
  */
 public class HttpUtils {
@@ -22,11 +24,27 @@ public class HttpUtils {
         CLIENT = new OkHttpClient();
     }
 
+    /**
+     * http get
+     *
+     * @param url
+     * @param params
+     * @return
+     * @throws IOException
+     */
     public static Response get(String url, Map<String, String> params) throws IOException {
         Request request = getRequestBuilder(url, params).build();
         return getResponse(request);
     }
 
+    /**
+     * http post application/json
+     *
+     * @param url
+     * @param params
+     * @return
+     * @throws IOException
+     */
     public static Response postJson(String url, Map<String, String> params) throws IOException {
         Request request = getRequestBuilder(url)
                 .post(RequestBody.create(JsonUtils.toJson(params), APPLICATION_JSON_UTF8))

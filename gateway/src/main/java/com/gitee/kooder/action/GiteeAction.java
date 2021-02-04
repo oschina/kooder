@@ -2,7 +2,7 @@ package com.gitee.kooder.action;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.GiteeSearchConfig;
-import com.gitee.kooder.exception.GiteeException;
+import com.gitee.kooder.gitee.GiteeException;
 import com.gitee.kooder.server.Action;
 import com.gitee.kooder.server.GiteeWebHookManager;
 import io.vertx.ext.web.RoutingContext;

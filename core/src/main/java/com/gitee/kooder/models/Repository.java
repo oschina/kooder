@@ -69,11 +69,11 @@ public final class Repository extends Searchable {
         this.setBlock(Constants.REPO_BLOCK_NO);
     }
 
-    public Repository(com.gitee.kooder.models.gitee.Repository repository) {
+    public Repository(com.gitee.kooder.gitee.Repository repository) {
         this.id = repository.getId();
         this.name = repository.getName();
         this.description = repository.getDescription();
-        this.url = repository.getHtmlUrl();
+        this.url = repository.getGitHttpUrl() == null ? repository.getHtmlUrl() : repository.getGitHttpUrl();
         this.enterprise = Relation.EMPTY;
         this.project = Relation.EMPTY;
         this.owner = new Relation(repository.getOwner().getId(), repository.getOwner().getName(), repository.getOwner().getHtmlUrl());
