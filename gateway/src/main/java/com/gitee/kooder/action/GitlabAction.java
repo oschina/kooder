@@ -55,11 +55,6 @@ public class GitlabAction implements Action {
                         }
                         break;
                     case GitlabProjectEvent.E_PROJECT_DESTROY:
-                        //delete all source codes of this repository
-                        CodeRepository coder = new CodeRepository();
-                        coder.setId(event.getProjectId());
-                        QueueTask.delete(Constants.TYPE_CODE, coder);
-                        //delete repository
                         Repository repo = new Repository();
                         repo.setId(event.getProjectId());
                         QueueTask.delete(Constants.TYPE_REPOSITORY, repo);

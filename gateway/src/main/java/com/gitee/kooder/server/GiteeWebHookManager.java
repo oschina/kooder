@@ -48,10 +48,6 @@ public class GiteeWebHookManager {
                     QueueTask.add(Constants.TYPE_CODE, coder);
 
                 } else if (RepoWebHook.ACTION_DESTROY.equals(repoWebHook.getAction())) {
-                    // delete code data
-                    CodeRepository codeRepository = new CodeRepository();
-                    codeRepository.setId(repoWebHook.getRepository().getId());
-                    QueueTask.delete(Constants.TYPE_CODE, codeRepository);
                     // delete repository data
                     Repository repository = new Repository();
                     repository.setId(repoWebHook.getRepository().getId());
@@ -109,7 +105,7 @@ public class GiteeWebHookManager {
     private static GiteeWebHookEvent parseGiteeWebHookEvent(RoutingContext context) throws GiteeException {
         String event = context.request().getHeader("X-Gitee-Event");
         if (event == null) {
-            throw new GiteeException("X-Gitlab-Event header is missing!");
+            throw new GiteeException("X-Gitee-Event header is missing!");
         } else {
             GiteeWebHookEvent giteeWebHookEvent = GiteeWebHookEvent.getEvent(event);
             if (Objects.nonNull(giteeWebHookEvent)) {

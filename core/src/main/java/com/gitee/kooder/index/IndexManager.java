@@ -1,9 +1,12 @@
 package com.gitee.kooder.index;
 
 import com.gitee.kooder.core.Constants;
+import com.gitee.kooder.models.Repository;
+import com.gitee.kooder.models.Searchable;
 import com.gitee.kooder.queue.QueueTask;
 import com.gitee.kooder.storage.StorageFactory;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.NumericDocValuesField;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.taxonomy.*;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import static com.gitee.kooder.core.Constants.FIELD_ID;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +76,31 @@ public class IndexManager {
                 update(docs, i_writer, t_writer);
                 break;
             case QueueTask.ACTION_DELETE:
-                deleteById(task.getObjects().stream().map(o -> o.getId()).collect(Collectors.toList()), i_writer);
+                List<Long> objects = task.getObjects().stream().map(o -> o.getId()).collect(Collectors.toList());
+                Query[] queries = objects.stream().map(id -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, id)).toArray(Query[]::new);
+                i_writer.deleteDocuments(queries);
+                List<Long> repos = new ArrayList<>();
+                for(Searchable obj : task.getObjects()) {
+                    if(obj instanceof Repository) {
+                        repos.add(obj.getId());
+                    }
+                }
+                log.info("Documents['{}'] {} deleted.", task.getType(), objects);
+                // Delete repository need to delete it's related issues and codes
+                if(repos.size() > 0) {
+                    // Delete issues of this repository
+                    try (IndexWriter issues = StorageFactory.getIndexWriter(Constants.TYPE_ISSUE)) {
+                        Query[] i_querys = repos.stream().map(id -> LongPoint.newExactQuery(Constants.FIELD_REPO_ID, id)).toArray(Query[]::new);
+                        issues.deleteDocuments(i_querys);
+                        log.info("Issues of repositories : {} deleted.", repos);
+                    }
+                    // Delete code repositories
+                    try (IndexWriter codes = StorageFactory.getIndexWriter(Constants.TYPE_CODE)) {
+                        Query[] i_querys = repos.stream().map(id -> LongPoint.newExactQuery(Constants.FIELD_REPO_ID, id)).toArray(Query[]::new);
+                        codes.deleteDocuments(i_querys);
+                        log.info("Codes of repositories : {} deleted.", repos);
+                    }
+                }
         }
         return task.getObjects().size();
     }
@@ -114,18 +142,6 @@ public class IndexManager {
             }
         }
         return docs.size();
-    }
-
-    /**
-     * 删除文档
-     * @param docs
-     * @param i_writer
-     * @return
-     * @throws IOException
-     */
-    public static long deleteById(List<Long> docs, IndexWriter i_writer) throws IOException {
-        Query[] queries = docs.stream().map(id -> NumericDocValuesField.newSlowExactQuery(FIELD_ID, id)).toArray(Query[]::new);
-        return i_writer.deleteDocuments(queries);
     }
 
     /**
