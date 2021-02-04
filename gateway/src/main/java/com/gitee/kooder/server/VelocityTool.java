@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -97,12 +98,13 @@ public class VelocityTool {
     }
 
     /**
-     * url 拼接
+     * url 拼接，排除 ignore_params 这些参数
      * @param name
      * @param value
+     * @param ignore_params
      * @return
      */
-    public StringBuffer uri(String name, Object value) {
+    public String uri(String name, Object value, String...ignore_params) {
         HttpServerRequest req = context.request();
         StringBuffer newUri = new StringBuffer();
         String path = req.path();
@@ -110,7 +112,7 @@ public class VelocityTool {
         req.params().forEach(e -> {
             String k = e.getKey();
             String v = e.getValue();
-            if(!name.equals(k)) {
+            if(!name.equals(k) && Arrays.binarySearch(ignore_params, k) < 0) {
                 newUri.append((newUri.length()==path.length())?'?':'&');
                 newUri.append(encodeURL(k));
                 newUri.append('=');
@@ -121,7 +123,7 @@ public class VelocityTool {
         newUri.append(encodeURL(name));
         newUri.append('=');
         newUri.append(encodeURL(value.toString()));
-        return newUri;
+        return newUri.toString();
     }
 
     /**

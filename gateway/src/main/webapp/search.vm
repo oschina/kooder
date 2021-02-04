@@ -31,17 +31,17 @@ TIME: ${result.timeUsed} ms
                 <div>
                     <ul class="tab" id="SearchTabs">
                         <li class="tab-item#if($type=='code') active#end">
-                            <a href="$tool.uri('type','code')">
+                            <a href="$tool.uri('type','code', 'p')">
                                 Code
                             </a>
                         </li>
                         <li class="tab-item#if($type=='repo') active#end">
-                            <a href="$tool.uri('type','repo')">
+                            <a href="$tool.uri('type','repo', 'p')">
                                 Repository
                             </a>
                         </li>
                         <li class="tab-item#if($type=='issue') active#end">
-                            <a href="$tool.uri('type','issue')">
+                            <a href="$tool.uri('type','issue', 'p')">
                                 Issue
                             </a>
                         </li>
