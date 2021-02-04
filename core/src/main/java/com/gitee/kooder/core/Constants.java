@@ -106,4 +106,6 @@ public interface Constants {
     String FIELD_LINES_BLANK    = "lines.blank";
     String FIELD_LINES_COMMENT  = "lines.comment";
     String FIELD_COMPLEXITY     = "complexity";
+
+    String DEFAULT_SECRET_TOKEN = "gsearch";
 }

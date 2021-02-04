@@ -22,6 +22,7 @@
         <spark.version>2.7.2</spark.version>
         <spark.freemarker.version>2.0.0</spark.freemarker.version>
         <freemarker.version>2.3.23</freemarker.version>
+        <okhttp.version>4.9.0</okhttp.version>
     </properties>
 
     <dependencies>
@@ -218,6 +219,14 @@
             <version>4.15.7</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- okhttp -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okhttp.version}</version>
+        </dependency>
+
     </dependencies>
 
 </project>
