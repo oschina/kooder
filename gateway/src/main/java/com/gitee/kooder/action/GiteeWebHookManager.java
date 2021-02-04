@@ -1,4 +1,4 @@
-package com.gitee.kooder.server;
+package com.gitee.kooder.action;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.gitee.GiteeException;
