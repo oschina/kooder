@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
+ * This class provides a handler for processing gitee Web Hook callouts.
  * @author zhanggx
  */
 class GiteeWebHookManager {
