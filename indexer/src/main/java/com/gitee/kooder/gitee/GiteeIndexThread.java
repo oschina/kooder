@@ -56,7 +56,7 @@ public class GiteeIndexThread extends Thread {
             checkAndIndexIssues(enterprise);
             log.info("Gitee data initialize finished in {} ms.", System.currentTimeMillis() - ct);
         } catch (GiteeException e) {
-            log.error("Failed to initialize gitlab data.", e);
+            log.error("Failed to initialize gitee data.", e);
         }
     }
 
