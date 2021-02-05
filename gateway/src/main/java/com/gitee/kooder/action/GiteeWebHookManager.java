@@ -41,7 +41,7 @@ class GiteeWebHookManager {
 
                 if (RepoWebHook.ACTION_CREATE.equals(repoWebHook.getAction())) {
                     // index repository data
-                    Repository repository = new Repository(repoWebHook.getRepository());
+                    Repository repository = repoWebHook.getRepository().toKooderRepository();
                     QueueTask.add(Constants.TYPE_REPOSITORY, repository);
                     // index code data
                     CodeRepository coder = new CodeRepository(repository);
@@ -72,7 +72,7 @@ class GiteeWebHookManager {
                     throw new GiteeException("Cannot resolve issue web hook!");
                 }
                 issueWebHook.getIssue().setRepository(issueWebHook.getRepository());
-                Issue issue = new Issue(issueWebHook.getIssue());
+                Issue issue = issueWebHook.getIssue().toKooderIssue();
                 QueueTask.update(Constants.TYPE_ISSUE, issue);
                 break;
             default:
