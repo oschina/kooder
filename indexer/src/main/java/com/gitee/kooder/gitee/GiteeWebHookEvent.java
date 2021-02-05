@@ -7,7 +7,7 @@ import java.util.Arrays;
  */
 public enum GiteeWebHookEvent {
 
-    REPO_HOO("Repo Hook"),
+    REPO_HOOK("Repo Hook"),
     PUSH_HOOK("Push Hook"),
     ISSUE_HOOK("Issue Hook");
 

@@ -19,6 +19,7 @@ public class GiteeApi {
 
     private final static Logger log = LoggerFactory.getLogger(GiteeApi.class);
 
+    private static final String URL_GET_ENTERPRISE = "/api/v5/enterprises/enterprise";
     private static final String URL_CREATE_ENTERPRISE_HOOKS = "/api/v5/enterprises/enterprise/hooks/create";
     private static final String URL_GET_ENTERPRISE_HOOKS = "/api/v5/enterprises/enterprise/hooks";
     private static final String URL_GET_REPOS = "/api/v5/enterprises/enterprise/repos";
@@ -40,6 +41,24 @@ public class GiteeApi {
 
     public static GiteeApi getInstance() {
         return Singleton.INSTANCE;
+    }
+
+    /**
+     * get enterprise info
+     *
+     * @return
+     */
+    public Enterprise getEnterprise() throws GiteeException {
+        Map<String, String> requestParamsMap = getRequestParamsMap();
+        try (Response response = HttpUtils.get(giteeUrl + URL_GET_ENTERPRISE, requestParamsMap)) {
+            if (response.isSuccessful()) {
+                return JsonUtils.readValue(response.body().string(), Enterprise.class);
+            }
+            throw new GiteeException(response.body().string());
+        } catch (Exception e) {
+            log.warn("Create gitee enterprise hooks error: {}", e.getMessage());
+            throw new GiteeException(e.getMessage());
+        }
     }
 
     /**

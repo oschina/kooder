@@ -60,7 +60,6 @@ public class Repository {
         repo.setName(this.getName());
         repo.setDescription(this.getDescription());
         repo.setUrl(this.getGitHttpUrl() == null ? this.getHtmlUrl() : this.getGitHttpUrl());
-        repo.setEnterprise(Relation.EMPTY);
         repo.setProject(Relation.EMPTY);
         repo.setOwner(new Relation(this.getOwner().getId(), this.getOwner().getName(), this.getOwner().getHtmlUrl()));
         repo.setVisibility(this.getPrivate() ? Constants.VISIBILITY_PRIVATE : this.getInternal() ? Constants.VISIBILITY_INTERNAL : Constants.VISIBILITY_PUBLIC);

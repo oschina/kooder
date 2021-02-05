@@ -5,6 +5,7 @@ import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.indexer.GitlabIndexThread;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Issue;
+import com.gitee.kooder.models.Relation;
 import com.gitee.kooder.models.Repository;
 import com.gitee.kooder.query.QueryFactory;
 import com.gitee.kooder.queue.QueueTask;
@@ -49,9 +50,10 @@ public class GiteeIndexThread extends Thread {
     public void run() {
         try {
             long ct = System.currentTimeMillis();
+            Enterprise enterprise = GiteeApi.getInstance().getEnterprise();
             checkAndInstallEnterpriseHook();
-            checkAndIndexProjects();
-            checkAndIndexIssues();
+            checkAndIndexProjects(enterprise);
+            checkAndIndexIssues(enterprise);
             log.info("Gitee data initialize finished in {} ms.", System.currentTimeMillis() - ct);
         } catch (GiteeException e) {
             log.error("Failed to initialize gitlab data.", e);
@@ -78,8 +80,9 @@ public class GiteeIndexThread extends Thread {
      * check and index projects data
      *
      * @throws GiteeException get projects data error
+     * @param enterprise
      */
-    private void checkAndIndexProjects() throws GiteeException {
+    private void checkAndIndexProjects(Enterprise enterprise) throws GiteeException {
         long ct = System.currentTimeMillis();
         int pc = 0;
 
@@ -88,6 +91,7 @@ public class GiteeIndexThread extends Thread {
         List<com.gitee.kooder.gitee.Repository> repositoryList = GiteeApi.getInstance().getRepos(maxId);
         for (com.gitee.kooder.gitee.Repository repository : repositoryList) {
             Repository repo = repository.toKooderRepository();
+            repo.setEnterprise(new Relation(enterprise.getId(), enterprise.getName(), enterprise.getUrl()));
             QueueTask.add(Constants.TYPE_REPOSITORY, repo);
             CodeRepository codes = new CodeRepository();
             codes.setId(repository.getId());
@@ -104,9 +108,10 @@ public class GiteeIndexThread extends Thread {
     /**
      * check and index issues data
      *
+     * @param enterprise
      * @throws GiteeException get issues data error
      */
-    private void checkAndIndexIssues() throws GiteeException {
+    private void checkAndIndexIssues(Enterprise enterprise) throws GiteeException {
         long ct = System.currentTimeMillis();
         int pc = 0;
 
@@ -114,7 +119,9 @@ public class GiteeIndexThread extends Thread {
         int maxId = lastIssue == null ? 0 : Math.toIntExact(lastIssue.getId());
         List<com.gitee.kooder.gitee.Issue> issueList = GiteeApi.getInstance().getIssues(maxId);
         for (com.gitee.kooder.gitee.Issue issue : issueList) {
-            QueueTask.add(Constants.TYPE_ISSUE, issue.toKooderIssue());
+            Issue kooderIssue = issue.toKooderIssue();
+            kooderIssue.setEnterprise(new Relation(enterprise.getId(), enterprise.getName(), enterprise.getUrl()));
+            QueueTask.add(Constants.TYPE_ISSUE, kooderIssue);
             pc++;
         }
 

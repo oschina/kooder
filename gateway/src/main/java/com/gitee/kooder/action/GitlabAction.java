@@ -45,10 +45,6 @@ public class GitlabAction implements Action {
                         if(p != null) {
                             Repository repo = new Repository(p);
                             QueueTask.add(Constants.TYPE_REPOSITORY, repo);
-
-                            CodeRepository coder = new CodeRepository(repo);
-                            coder.setScm(CodeRepository.SCM_GIT);
-                            QueueTask.add(Constants.TYPE_CODE, coder);
                         }
                         break;
                     case GitlabProjectEvent.E_PROJECT_DESTROY:
@@ -70,9 +66,14 @@ public class GitlabAction implements Action {
                 this.fireCodeUpdate(event.getProjectId());
             }
 
-            private void fireCodeUpdate(long pid) {
-                CodeRepository repo = new CodeRepository(pid);
-                QueueTask.update(Constants.TYPE_CODE, repo); //update source code indexes
+            private void fireCodeUpdate(int pid) {
+                Project p = getProject(pid);
+                if(p != null) {
+                    Repository repo = new Repository(p);
+                    CodeRepository coder = new CodeRepository(repo);
+                    coder.setScm(CodeRepository.SCM_GIT);
+                    QueueTask.add(Constants.TYPE_CODE, coder); //update source code indexes
+                }
             }
         };
         hookMgr.handleEvent(context);
