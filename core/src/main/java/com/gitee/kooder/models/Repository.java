@@ -8,7 +8,6 @@ import org.apache.lucene.facet.FacetField;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.Visibility;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
