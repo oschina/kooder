@@ -3,7 +3,7 @@ package com.gitee.kooder.server;
 import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.indexer.FetchTaskThread;
 import com.gitee.kooder.indexer.GiteaIndexThread;
-import com.gitee.kooder.indexer.GiteeIndexThread;
+import com.gitee.kooder.gitee.GiteeIndexThread;
 import com.gitee.kooder.indexer.GitlabIndexThread;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.net.SocketAddress;

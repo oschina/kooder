@@ -4,7 +4,6 @@ import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.indexer.Gitlab;
-import com.gitee.kooder.models.GitlabProjectEvent;
 import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
 import com.gitee.kooder.queue.QueueTask;
@@ -107,6 +106,19 @@ public class GitlabAction implements Action {
             log.error("Failed to read project object, id = " + id, e);
         }
         return null;
+    }
+
+    /**
+     * Gitlab repositories events definition
+     */
+    class GitlabProjectEvent {
+
+        public final static String E_PROJECT_CREATE     = "project_create";
+        public final static String E_PROJECT_DESTROY    = "project_destroy";
+        public final static String E_PROJECT_RENAME     = "project_rename";
+        public final static String E_PROJECT_TRANSFER   = "project_transfer";
+        public final static String E_PROJECT_UPDATE     = "project_update";
+
     }
 
 }

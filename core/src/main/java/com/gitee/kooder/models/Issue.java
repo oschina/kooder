@@ -79,23 +79,6 @@ public final class Issue extends Searchable {
         setDocument(doc);
     }
 
-    public Issue(com.gitee.kooder.gitee.Issue issue) {
-        this.id = issue.getId();
-        this.ident = issue.getRepository().getId() + "_" + this.id;
-        this.enterprise = Relation.EMPTY;
-        this.project = Relation.EMPTY;
-        this.repository = new Relation(issue.getRepository().getId(), issue.getRepository().getName(), issue.getRepository().getUrl());
-        this.owner = new Relation(issue.getUser().getId(), issue.getUser().getName(), issue.getUser().getHtmlUrl());
-        this.title = issue.getTitle();
-        this.description = issue.getBody();
-        this.url = issue.getHtmlUrl();
-        this.labels = new ArrayList<>(issue.getLabels());
-        this.createdAt = issue.getCreatedAt().getTime();
-        this.updatedAt = issue.getUpdatedAt().getTime();
-        this.state = com.gitee.kooder.gitee.Issue.STATE_OPEN.equals(issue.getState())
-                || com.gitee.kooder.gitee.Issue.STATE_PROGRESSING.equals(issue.getState()) ? STATE_OPENED : STATE_CLOSED;
-    }
-
     /**
      * Read fields from document
      * @param doc

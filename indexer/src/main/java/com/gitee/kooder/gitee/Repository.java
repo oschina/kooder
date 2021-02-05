@@ -2,7 +2,10 @@ package com.gitee.kooder.gitee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.gitee.kooder.core.Constants;
+import com.gitee.kooder.models.Relation;
 
+import java.util.Collections;
 import java.util.Date;
 
 /**
@@ -11,15 +14,10 @@ import java.util.Date;
 public class Repository {
 
     private Integer id;
-
     private String name;
-
     private String url;
-
     private String htmlUrl;
-
     private String gitHttpUrl;
-
     private String description;
 
     /**
@@ -39,13 +37,9 @@ public class Repository {
      */
     @JsonProperty("public")
     private Boolean isPublic;
-
     private String license;
-
     private String language;
-
     private Integer stargazersCount;
-
     private Integer forksCount;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssX")
@@ -55,6 +49,34 @@ public class Repository {
     private Date updatedAt;
 
     private User owner;
+
+    /**
+     * Turn to kooder repository
+     * @return
+     */
+    public com.gitee.kooder.models.Repository toKooderRepository() {
+        com.gitee.kooder.models.Repository repo = new com.gitee.kooder.models.Repository();
+        repo.setId(this.getId());
+        repo.setName(this.getName());
+        repo.setDescription(this.getDescription());
+        repo.setUrl(this.getGitHttpUrl() == null ? this.getHtmlUrl() : this.getGitHttpUrl());
+        repo.setEnterprise(Relation.EMPTY);
+        repo.setProject(Relation.EMPTY);
+        repo.setOwner(new Relation(this.getOwner().getId(), this.getOwner().getName(), this.getOwner().getHtmlUrl()));
+        repo.setVisibility(this.getPrivate() ? Constants.VISIBILITY_PRIVATE : this.getInternal() ? Constants.VISIBILITY_INTERNAL : Constants.VISIBILITY_PUBLIC);
+        repo.setLicense(this.getLicense());
+        repo.setLang(this.getLanguage());
+        repo.setReadme(null);
+        repo.setFork(0);
+        repo.setTags(Collections.emptyList());
+        repo.setStarsCount(this.getStargazersCount());
+        repo.setForksCount(this.getForksCount());
+        repo.setCreatedAt(this.getCreatedAt().getTime());
+        repo.setUpdatedAt(this.getUpdatedAt().getTime());
+        repo.setBlock(Constants.REPO_BLOCK_NO);
+        return repo;
+    }
+
 
     public Integer getId() {
         return id;

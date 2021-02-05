@@ -1,13 +1,11 @@
-package com.gitee.kooder.indexer;
+package com.gitee.kooder.gitee;
 
-import com.gitee.kooder.gitee.GiteeApi;
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.GiteeSearchConfig;
-import com.gitee.kooder.gitee.GiteeException;
+import com.gitee.kooder.indexer.GitlabIndexThread;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
-import com.gitee.kooder.gitee.EnterpriseHook;
 import com.gitee.kooder.query.QueryFactory;
 import com.gitee.kooder.queue.QueueTask;
 import org.slf4j.Logger;
@@ -89,7 +87,7 @@ public class GiteeIndexThread extends Thread {
         int maxId = lastRepository == null ? 0 : Math.toIntExact(lastRepository.getId());
         List<com.gitee.kooder.gitee.Repository> repositoryList = GiteeApi.getInstance().getRepos(maxId);
         for (com.gitee.kooder.gitee.Repository repository : repositoryList) {
-            Repository repo = new Repository(repository);
+            Repository repo = repository.toKooderRepository();
             QueueTask.add(Constants.TYPE_REPOSITORY, repo);
             CodeRepository codes = new CodeRepository();
             codes.setId(repository.getId());
@@ -116,7 +114,7 @@ public class GiteeIndexThread extends Thread {
         int maxId = lastIssue == null ? 0 : Math.toIntExact(lastIssue.getId());
         List<com.gitee.kooder.gitee.Issue> issueList = GiteeApi.getInstance().getIssues(maxId);
         for (com.gitee.kooder.gitee.Issue issue : issueList) {
-            QueueTask.add(Constants.TYPE_ISSUE, new Issue(issue));
+            QueueTask.add(Constants.TYPE_ISSUE, issue.toKooderIssue());
             pc++;
         }
 

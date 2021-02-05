@@ -1,7 +1,9 @@
 package com.gitee.kooder.gitee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.gitee.kooder.models.Relation;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,26 +18,41 @@ public class Issue {
     public static final String STATE_REJECTED = "rejected";
 
     private Integer id;
-
     private String htmlUrl;
-
     private String state;
-
     private String title;
-
     private String body;
-
     private List<String> labels;
-
     private User user;
-
     private Repository repository;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     private Date createdAt;
-
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssX")
     private Date updatedAt;
+
+    /**
+     * Turn to kooder issue
+     * @return
+     */
+    public com.gitee.kooder.models.Issue toKooderIssue() {
+        com.gitee.kooder.models.Issue iss = new com.gitee.kooder.models.Issue();
+        iss.setId(getId());
+        iss.setIdent(this.getRepository().getId() + "_" + this.getId());
+        iss.setEnterprise(Relation.EMPTY);
+        iss.setProject(Relation.EMPTY);
+        iss.setRepository(new Relation(this.getRepository().getId(), this.getRepository().getName(), this.getRepository().getUrl()));
+        iss.setOwner(new Relation(this.getUser().getId(), this.getUser().getName(), this.getUser().getHtmlUrl()));
+        iss.setTitle(this.getTitle());
+        iss.setDescription(this.getBody());
+        iss.setUrl(this.getHtmlUrl());
+        iss.setLabels(new ArrayList<>(this.getLabels()));
+        iss.setCreatedAt(this.getCreatedAt().getTime());
+        iss.setUpdatedAt(this.getUpdatedAt().getTime());
+        iss.setState((STATE_OPEN.equals(this.getState()) || STATE_PROGRESSING.equals(this.getState()))
+                ?com.gitee.kooder.models.Issue.STATE_OPENED:com.gitee.kooder.models.Issue.STATE_CLOSED);
+        return iss;
+    }
 
     public Integer getId() {
         return id;
