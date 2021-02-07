@@ -19,7 +19,7 @@ public class FileClassifier {
 
     static {
         try (InputStream stream = FileClassifier.class.getResourceAsStream("/languages.json")){
-            TypeReference<HashMap<String, FileClassifierResult>> typeRef = new TypeReference(){};
+            TypeReference<HashMap<String, FileClassifierResult>> typeRef = new TypeReference<HashMap<String, FileClassifierResult>>(){};
             database = Collections.unmodifiableMap(JsonUtils.readValue(stream, typeRef));
         } catch (IOException ex) {
             ex.printStackTrace();
