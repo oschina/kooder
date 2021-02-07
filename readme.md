@@ -38,7 +38,7 @@ Kooder 服务包含两个模块，分别是 gateway 和 indexer（默认配置�
 
 1.依赖
 
-* openjdk >= 11
+* openjdk >= 8
 * maven > 3
 
 2.下载代码

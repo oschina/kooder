@@ -20,7 +20,7 @@ public final class TechCodeTokenizer extends Tokenizer {
 
     public final static char[] beginTokens = {'+','#'};
     public final static char[] endTokens = {'.'};
-    public final static Map<String, String[]> synonymWords = new HashMap<>(){{
+    public final static Map<String, String[]> synonymWords = new HashMap(){{
         put(".net", new String[]{"dotnet"});
         put("c#",   new String[]{"csharp"});
         put("c++",  new String[]{"cpp"});

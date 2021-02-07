@@ -33,7 +33,7 @@ Indexer:
 
 1.Dependencies
 
-* openjdk >= 11
+* openjdk >= 8
 * maven > 3
 
 2.Download source code

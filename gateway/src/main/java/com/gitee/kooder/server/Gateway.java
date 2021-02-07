@@ -21,7 +21,7 @@ import java.util.Map;
 public class Gateway extends GatewayBase {
 
     private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)";
-    private final static Map<String, Thread> startupTasks = new HashMap<>(){{
+    private final static Map<String, Thread> startupTasks = new HashMap(){{
         put("indexer", new FetchTaskThread());
         put("gitlab", new GitlabIndexThread());
         put("gitee", new GiteeIndexThread());

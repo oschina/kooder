@@ -19,7 +19,7 @@ public class FileClassifier {
 
     static {
         try (InputStream stream = FileClassifier.class.getResourceAsStream("/languages.json")){
-            TypeReference<HashMap<String, FileClassifierResult>> typeRef = new TypeReference<>(){};
+            TypeReference<HashMap<String, FileClassifierResult>> typeRef = new TypeReference(){};
             database = Collections.unmodifiableMap(JsonUtils.readValue(stream, typeRef));
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -39,8 +39,8 @@ public class FileClassifier {
      */
     public static String languageGuess(String fileName, String content) {
         fileName = fileName.toLowerCase();
-        var matches = new ArrayList<String>();
-        var extension = "";
+        List<String> matches = new ArrayList<>();
+        String extension = "";
 
         // Try finding based on full name match
         matches = checkIfFilenameExists(fileName);
@@ -73,11 +73,11 @@ public class FileClassifier {
         }
 
         // We have multiple matches, so try to work out which one is the most likely result
-        var toSort = new HashMap<String, Integer>();
+        HashMap<String, Integer> toSort = new HashMap();
 
-        for (var m : matches) {
+        for (String m : matches) {
             toSort.put(m, 0);
-            for (var keyword : database.get(m).keywords) {
+            for (String keyword : database.get(m).keywords) {
                 if (content.contains(keyword)) {
                     toSort.put(m, toSort.get(m) + 1);
                 }
@@ -98,13 +98,13 @@ public class FileClassifier {
         return result;
     }
 
-    private static ArrayList<String> checkIfExtentionExists(String extension) {
-        var matches = new ArrayList<String>();
+    private static List<String> checkIfExtentionExists(String extension) {
+        List<String> matches = new ArrayList<>();
 
         for (String key : database.keySet()) {
-            var fileClassifierResult = database.get(key);
+            FileClassifierResult fileClassifierResult = database.get(key);
 
-            for (var ext : fileClassifierResult.extensions) {
+            for (String ext : fileClassifierResult.extensions) {
                 if (extension.equals(ext)) {
                     matches.add(key);
                 }
@@ -114,14 +114,14 @@ public class FileClassifier {
         return matches;
     }
 
-    private static ArrayList<String> checkIfFilenameExists(String extension) {
-        var matches = new ArrayList<String>();
+    private static List<String> checkIfFilenameExists(String extension) {
+        List<String> matches = new ArrayList<>();
 
         for (String key : database.keySet()) {
-            var fileClassifierResult = database.get(key);
+            FileClassifierResult fileClassifierResult = database.get(key);
 
             if (fileClassifierResult.filenames != null) {
-                for (var ext : fileClassifierResult.filenames) {
+                for (String ext : fileClassifierResult.filenames) {
                     if (extension.equals(ext)) {
                         matches.add(key);
                     }

@@ -14,7 +14,7 @@ public class RepositoryFactory {
 
     private final static Logger log = LoggerFactory.getLogger(RepositoryFactory.class);
 
-    private final static Map<String, RepositoryProvider> providers = new HashMap<>(){{
+    private final static Map<String, RepositoryProvider> providers = new HashMap(){{
         put(CodeRepository.SCM_GIT,     new GitRepositoryProvider());
         put(CodeRepository.SCM_SVN,     new SvnRepositoryProvider());
         put(CodeRepository.SCM_FILE,    new FileRepositoryProvider());

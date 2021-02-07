@@ -337,7 +337,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             doc.setLanguage(FileClassifier.languageGuess(path, contents));  //语言
             doc.setContents(contents);                                      //源码
             doc.setCodeOwner(getCodeOwner(git, path));                      //开发者  TODO 如何能支持多个开发者
-            var slocCount = slocCounter.countStats(contents, doc.getLanguage());
+            SlocCounter.SlocCount slocCount = slocCounter.countStats(contents, doc.getLanguage());
             doc.setLines(slocCount.linesCount);                             //代码行统计
             doc.setCommentLines(slocCount.commentCount);
             doc.setBlankLines(slocCount.blankCount);
