@@ -73,6 +73,8 @@ $ cd kooder
 ```
 $ cd Kooder
 $ mvn install
+### 给执行脚本添加权限
+$ chmod +x bin/*.sh
 ### 启动 gateway
 $ bin/gateway.sh
 ### 浏览器访问 http://localhost:8080
