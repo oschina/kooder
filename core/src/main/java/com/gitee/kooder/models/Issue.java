@@ -38,10 +38,10 @@ public final class Issue extends Searchable {
     public final static int STATE_REOPENED  = 0x03;
 
     protected String ident;
-    protected Relation enterprise = Relation.EMPTY;
-    protected Relation project = Relation.EMPTY;
-    protected Relation repository = Relation.EMPTY;
-    protected Relation owner = Relation.EMPTY ;
+    protected Relation enterprise = Relation.EMPTY();
+    protected Relation project = Relation.EMPTY();
+    protected Relation repository = Relation.EMPTY();
+    protected Relation owner = Relation.EMPTY();
 
     protected String title;
     protected String description;
@@ -59,8 +59,8 @@ public final class Issue extends Searchable {
     public Issue(org.gitlab4j.api.models.Issue issue) {
         this.id = issue.getId();
         this.ident = issue.getProjectId() + "_" + issue.getId();
-        this.enterprise = Relation.EMPTY;
-        this.project = Relation.EMPTY;
+        //this.enterprise = Relation.EMPTY();
+        //this.project = Relation.EMPTY();
         this.repository = new Relation(issue.getProjectId(), null, null);
         this.owner = new Relation(issue.getAuthor().getId(), issue.getAuthor().getName(), issue.getAuthor().getWebUrl());
         this.title = issue.getTitle();
@@ -76,8 +76,8 @@ public final class Issue extends Searchable {
     public Issue(IssueEvent e) {
         this.id = e.getObjectAttributes().getId();
         this.ident = e.getProject().getId() + "_" + this.id;
-        this.enterprise = Relation.EMPTY;
-        this.project = Relation.EMPTY;
+        //this.enterprise = Relation.EMPTY();
+        //this.project = Relation.EMPTY();
         this.repository = new Relation(e.getProject().getId(), e.getProject().getName(), e.getProject().getUrl());
         this.owner = new Relation(e.getObjectAttributes().getAuthorId(), e.getUser().getName(), e.getUser().getWebUrl());
         this.title = e.getObjectAttributes().getTitle();

@@ -32,7 +32,7 @@ public final class SourceFile extends Searchable {
 
     private String uuid;            // file unique identify
     private int enterprise;         // enterpise
-    private Relation repository = Relation.EMPTY;    //repository, use this field to delete all files of repository
+    private Relation repository = Relation.EMPTY();    //repository, use this field to delete all files of repository
 
     private String branch;          // branch name
     private String name;            // file name

@@ -35,9 +35,9 @@ public final class Repository extends Searchable {
     protected String displayName;   //nameWithNamespace
     protected String description;
     protected String url;
-    protected Relation enterprise   = Relation.EMPTY;
-    protected Relation project      = Relation.EMPTY;
-    protected Relation owner        = Relation.EMPTY;
+    protected Relation enterprise   = Relation.EMPTY();
+    protected Relation project      = Relation.EMPTY();
+    protected Relation owner        = Relation.EMPTY();
     protected int recomm;           //推荐级别
     protected int gindex;           // Gitee Index
     protected int block;            //是否屏蔽 1屏蔽，0不屏蔽
@@ -65,8 +65,8 @@ public final class Repository extends Searchable {
         this.name = p.getName();
         this.description = p.getDescription();
         this.url = p.getHttpUrlToRepo();
-        this.enterprise = Relation.EMPTY;
-        this.project = Relation.EMPTY;
+        //this.enterprise = Relation.EMPTY();
+        //this.project = Relation.EMPTY();
         if(p.getOwner() != null)
             this.owner = new Relation(p.getOwner().getId(), p.getOwner().getName(), p.getOwner().getWebUrl());
         this.setVisibility(p.getVisibility());

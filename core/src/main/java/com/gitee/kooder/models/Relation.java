@@ -21,8 +21,6 @@ package com.gitee.kooder.models;
  */
 public final class Relation {
 
-    public final static Relation EMPTY = new Relation(0, "NONE", null);
-
     protected long id;
     protected String name;
     protected String url;
@@ -33,6 +31,10 @@ public final class Relation {
         this.id = id;
         this.name = name;
         this.url = url;
+    }
+
+    public final static Relation EMPTY() {
+        return new Relation(0, "NONE", null);
     }
 
     public long getId() {

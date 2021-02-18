@@ -54,7 +54,6 @@ public class Issue {
         com.gitee.kooder.models.Issue iss = new com.gitee.kooder.models.Issue();
         iss.setId(getId());
         iss.setIdent(this.getRepository().getId() + "_" + this.getId());
-        iss.setProject(Relation.EMPTY);
         iss.setRepository(new Relation(this.getRepository().getId(), this.getRepository().getName(), this.getRepository().getUrl()));
         iss.setOwner(new Relation(this.getUser().getId(), this.getUser().getName(), this.getUser().getHtmlUrl()));
         iss.setTitle(this.getTitle());
