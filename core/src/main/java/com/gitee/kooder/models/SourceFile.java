@@ -20,7 +20,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
-import org.apache.lucene.facet.FacetField;
 
 /**
  * Source File Object
@@ -29,6 +28,7 @@ import org.apache.lucene.facet.FacetField;
 public final class SourceFile extends Searchable {
 
     private String uuid;            // file unique identify
+    private int enterprise;         // enterpise
     private Relation repository = Relation.EMPTY;    //repository, use this field to delete all files of repository
 
     private String branch;          // branch name
@@ -76,6 +76,7 @@ public final class SourceFile extends Searchable {
     @Override
     public SourceFile setDocument(Document doc) {
         this.uuid = doc.get(Constants.FIELD_UUID);
+        this.enterprise = NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0);
         this.repository.id = NumberUtils.toInt(doc.get(Constants.FIELD_REPO_ID));
         this.repository.name = doc.get(Constants.FIELD_REPO_NAME);
         this.repository.url = doc.get(Constants.FIELD_REPO_URL);
@@ -111,22 +112,19 @@ public final class SourceFile extends Searchable {
         document.add(new StringField(Constants.FIELD_BRANCH,    this.branch, Field.Store.YES));
         document.add(new StoredField(Constants.FIELD_URL,       this.url));
 
+        super.addLongToDoc(document, Constants.FIELD_ENTERPRISE_ID, this.enterprise);
+
         //repository info
-        document.add(new LongPoint(Constants.FIELD_REPO_ID,         this.repository.id));
-        document.add(new StoredField(Constants.FIELD_REPO_ID,       this.repository.id));
-        document.add(new FacetField(Constants.FIELD_REPO_NAME,      this.repository.name));
-        document.add(new StringField(Constants.FIELD_REPO_NAME,     this.repository.name,   Field.Store.YES));
+        super.addLongToDoc(document, Constants.FIELD_REPO_ID, this.repository.id);
+        super.addFacetToDoc(document, Constants.FIELD_REPO_NAME, this.repository.name);
         document.add(new StringField(Constants.FIELD_REPO_URL,      this.repository.url,    Field.Store.YES));
 
         //file meta
-        if (StringUtils.isNotBlank(language)) {
-            document.add(new FacetField(Constants.FIELD_LANGUAGE,   this.getLanguage()));
-            document.add(new StringField(Constants.FIELD_LANGUAGE,  this.getLanguage(), Field.Store.YES));
-        }
-        if (StringUtils.isNotBlank(codeOwner)) {
-            document.add(new FacetField(Constants.FIELD_CODE_OWNER, this.getCodeOwner()));
-            document.add(new TextField(Constants.FIELD_CODE_OWNER,  this.getCodeOwner(), Field.Store.YES));
-        }
+        if (StringUtils.isNotBlank(language))
+            super.addFacetToDoc(document, Constants.FIELD_LANGUAGE, this.language);
+
+        if (StringUtils.isNotBlank(codeOwner))
+            super.addFacetToDoc(document, Constants.FIELD_CODE_OWNER, this.codeOwner);
 
         //file info
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getName(),         Field.Store.YES));
@@ -149,8 +147,7 @@ public final class SourceFile extends Searchable {
 
         // Extra metadata in this case when it was last indexed
         long indexTime = System.currentTimeMillis();
-        document.add(new NumericDocValuesField(Constants.FIELD_LAST_INDEX, indexTime));
-        document.add(new StoredField(Constants.FIELD_LAST_INDEX, indexTime));
+        super.addNumToDoc(document, Constants.FIELD_LAST_INDEX, indexTime);
 
         return document;
     }
@@ -281,5 +278,13 @@ public final class SourceFile extends Searchable {
 
     public void setRevision(String revision) {
         this.revision = revision;
+    }
+
+    public int getEnterprise() {
+        return enterprise;
+    }
+
+    public void setEnterprise(int enterprise) {
+        this.enterprise = enterprise;
     }
 }

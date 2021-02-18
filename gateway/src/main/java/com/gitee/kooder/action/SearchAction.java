@@ -78,7 +78,7 @@ public class SearchAction implements SearchActionBase {
         String body = context.getBodyAsString();
         if(body != null)
             repos.addAll(Arrays.asList(body.split(",")));
-        List<Integer> iRepos = repos.stream().map(r -> NumberUtils.toInt(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
+        List<Long> iRepos = repos.stream().map(r -> NumberUtils.toLong(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
 
         QueryResult result = QueryFactory.REPO()
                 .setEnterpriseId(eid)
@@ -129,7 +129,7 @@ public class SearchAction implements SearchActionBase {
         String body = context.getBodyAsString();
         if(body != null)
             repos.addAll(Arrays.asList(body.split(",")));
-        List<Integer> iRepos = repos.stream().map(r -> NumberUtils.toInt(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
+        List<Long> iRepos = repos.stream().map(r -> NumberUtils.toLong(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
 
         QueryResult result = QueryFactory.CODE()
                 .setEnterpriseId(eid)

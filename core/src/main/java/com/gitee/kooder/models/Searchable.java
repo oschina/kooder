@@ -18,7 +18,9 @@ package com.gitee.kooder.models;
 import com.gitee.kooder.core.Constants;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
+import org.apache.lucene.facet.FacetField;
 
+import javax.print.Doc;
 import java.io.Serializable;
 
 /**
@@ -84,6 +86,26 @@ public abstract class Searchable implements Serializable {
     public final static int getIntField(Document doc, String fieldName, int...defValues) {
         int def = (defValues.length > 0)?defValues[0]:-1;
         return NumberUtils.toInt(doc.get(fieldName), def);
+    }
+
+    protected void addLongToDoc(Document doc, String fn, long fv) {
+        doc.add(new LongPoint(fn, fv));
+        doc.add(new StoredField(fn, String.valueOf(fv)));
+    }
+
+    protected void addIntToDoc(Document doc, String fn, int fv) {
+        doc.add(new IntPoint(fn, fv));
+        doc.add(new StoredField(fn, String.valueOf(fv)));
+    }
+
+    protected void addFacetToDoc(Document doc, String fn, String fv) {
+        doc.add(new FacetField(fn, fv));
+        doc.add(new TextField(fn,  fv, Field.Store.YES));
+    }
+
+    protected void addNumToDoc(Document doc, String fn, long fv) {
+        doc.add(new NumericDocValuesField(fn, fv));
+        doc.add(new StoredField(fn, fv));
     }
 
 }

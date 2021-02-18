@@ -137,38 +137,26 @@ public final class Issue extends Searchable {
         doc.add(new StoredField(Constants.FIELD_URL,    url));
         doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", labels), Field.Store.NO));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_CREATED_AT, createdAt));
-        doc.add(new StoredField(Constants.FIELD_CREATED_AT, createdAt));
-        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
-        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
-        doc.add(new NumericDocValuesField(Constants.FIELD_CLOSED_AT, closedAt));
-        doc.add(new StoredField(Constants.FIELD_CLOSED_AT, closedAt));
+        super.addNumToDoc(doc, Constants.FIELD_CREATED_AT, createdAt);
+        super.addNumToDoc(doc, Constants.FIELD_UPDATED_AT, updatedAt);
+        super.addNumToDoc(doc, Constants.FIELD_CLOSED_AT, closedAt);
 
-        doc.add(new IntPoint(Constants.FIELD_BLOCK, block));
-        doc.add(new StoredField(Constants.FIELD_BLOCK, block));
-
-        doc.add(new IntPoint(Constants.FIELD_VISIBILITY, visibility));
-        doc.add(new StoredField(Constants.FIELD_VISIBILITY, visibility));
-
-        doc.add(new IntPoint(Constants.FIELD_STATUS, state));
-        doc.add(new StoredField(Constants.FIELD_STATUS, state));
+        super.addIntToDoc(doc, Constants.FIELD_BLOCK, block);
+        super.addIntToDoc(doc, Constants.FIELD_VISIBILITY, visibility);
+        super.addIntToDoc(doc, Constants.FIELD_STATUS, state);
 
         //enterprise info (just for gitee)
         enterprise:
-        doc.add(new LongPoint(Constants.FIELD_ENTERPRISE_ID, this.enterprise.id));
-        doc.add(new StoredField(Constants.FIELD_ENTERPRISE_ID, enterprise.id));
+        super.addLongToDoc(doc, Constants.FIELD_ENTERPRISE_ID, this.enterprise.id);
         //program info (just for gitee)
         program:
-        doc.add(new LongPoint(Constants.FIELD_PROGRAM_ID, this.project.id));
-        doc.add(new StoredField(Constants.FIELD_PROGRAM_ID, project.id));
+        super.addLongToDoc(doc, Constants.FIELD_PROGRAM_ID, this.project.id);
         //repository info (just for gitee)
         repository:
-        doc.add(new LongPoint(Constants.FIELD_REPO_ID, this.repository.id));
-        doc.add(new StoredField(Constants.FIELD_REPO_ID, repository.id));
+        super.addLongToDoc(doc, Constants.FIELD_REPO_ID, this.repository.id);
         //owner info
         owner:
-        doc.add(new LongPoint(Constants.FIELD_USER_ID, this.owner.id));
-        doc.add(new StoredField(Constants.FIELD_USER_ID, owner.id));
+        super.addLongToDoc(doc, Constants.FIELD_USER_ID, this.owner.id);
 
         return doc;
     }

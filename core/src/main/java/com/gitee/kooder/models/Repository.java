@@ -19,7 +19,6 @@ import com.gitee.kooder.core.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
-import org.apache.lucene.facet.FacetField;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.Visibility;
 
@@ -98,43 +97,26 @@ public final class Repository extends Searchable {
         if(StringUtils.isNotBlank(this.getUrl()))
             doc.add(new StoredField(Constants.FIELD_URL,    this.getUrl()));
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_RECOMM, recomm));
-        doc.add(new StoredField(Constants.FIELD_RECOMM, recomm));
+        super.addNumToDoc(doc, Constants.FIELD_RECOMM, recomm);
+        super.addNumToDoc(doc, Constants.FIELD_G_INDEX, gindex);
+        super.addNumToDoc(doc, Constants.FIELD_BLOCK, block);
+        super.addIntToDoc(doc, Constants.FIELD_VISIBILITY, visibility);
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_G_INDEX, gindex));
-        doc.add(new StoredField(Constants.FIELD_G_INDEX, gindex));
+        if(StringUtils.isNotBlank(license))
+            super.addFacetToDoc(doc, Constants.FIELD_LICENSE, license);
 
-        doc.add(new IntPoint(Constants.FIELD_BLOCK, block));
-        doc.add(new StoredField(Constants.FIELD_BLOCK, block));
-
-        doc.add(new IntPoint(Constants.FIELD_VISIBILITY, visibility));
-        doc.add(new StoredField(Constants.FIELD_VISIBILITY, visibility));
-
-        if(StringUtils.isNotBlank(license)) {
-            doc.add(new FacetField(Constants.FIELD_LICENSE, license));
-            doc.add(new StringField(Constants.FIELD_LICENSE, license, Field.Store.YES));
-        }
-
-        if(StringUtils.isNotBlank(lang)) {
-            doc.add(new FacetField(Constants.FIELD_LANGUAGE, lang));
-            doc.add(new StringField(Constants.FIELD_LANGUAGE, lang, Field.Store.YES));
-        }
+        if(StringUtils.isNotBlank(lang))
+            super.addFacetToDoc(doc, Constants.FIELD_LANGUAGE, lang);
 
         if(StringUtils.isNotBlank(readme))
             doc.add(new TextField(Constants.FIELD_README, readme, Field.Store.NO));
 
-        doc.add(new LongPoint(Constants.FIELD_FORK, fork));
-        doc.add(new StoredField(Constants.FIELD_FORK, fork));
+        super.addLongToDoc(doc, Constants.FIELD_FORK, fork);
 
-        doc.add(new NumericDocValuesField(Constants.FIELD_STAR_COUNT, starsCount));
-        doc.add(new StoredField(Constants.FIELD_STAR_COUNT, starsCount));
-        doc.add(new NumericDocValuesField(Constants.FIELD_FORK_COUNT, forksCount));
-        doc.add(new StoredField(Constants.FIELD_FORK_COUNT, forksCount));
-        doc.add(new NumericDocValuesField(Constants.FIELD_CREATED_AT, createdAt));
-        doc.add(new StoredField(Constants.FIELD_CREATED_AT, createdAt));
-        doc.add(new NumericDocValuesField(Constants.FIELD_UPDATED_AT, updatedAt));
-        doc.add(new StoredField(Constants.FIELD_UPDATED_AT, updatedAt));
-
+        super.addNumToDoc(doc, Constants.FIELD_STAR_COUNT, starsCount);
+        super.addNumToDoc(doc, Constants.FIELD_FORK_COUNT, forksCount);
+        super.addNumToDoc(doc, Constants.FIELD_CREATED_AT, createdAt);
+        super.addNumToDoc(doc, Constants.FIELD_UPDATED_AT, updatedAt);
 
         //tags
         if(tags != null)
@@ -145,32 +127,27 @@ public final class Repository extends Searchable {
 
         //enterprise info (just for gitee)
         enterprise:
-        doc.add(new LongPoint(Constants.FIELD_ENTERPRISE_ID, this.enterprise.id));
-        doc.add(new StringField(Constants.FIELD_ENTERPRISE_ID, String.valueOf(enterprise.id), Field.Store.YES));
-        if(StringUtils.isNotBlank(enterprise.name)) {
-            doc.add(new FacetField(Constants.FIELD_ENTERPRISE_NAME, enterprise.name));
-            doc.add(new TextField(Constants.FIELD_ENTERPRISE_NAME,  enterprise.name, Field.Store.YES));
-        }
+        super.addLongToDoc(doc, Constants.FIELD_ENTERPRISE_ID, this.enterprise.id);
+        if(StringUtils.isNotBlank(enterprise.name))
+            super.addFacetToDoc(doc, Constants.FIELD_ENTERPRISE_NAME, enterprise.name);
+
         if(StringUtils.isNotBlank(enterprise.url))
             doc.add(new StoredField(Constants.FIELD_ENTERPRISE_URL, enterprise.url));
         //program info (just for gitee)
         program:
-        doc.add(new LongPoint(Constants.FIELD_PROGRAM_ID, this.project.id));
-        doc.add(new StringField(Constants.FIELD_PROGRAM_ID, String.valueOf(project.id), Field.Store.YES));
-        if(StringUtils.isNotBlank(project.name)) {
-            doc.add(new FacetField(Constants.FIELD_PROGRAM_NAME, project.name));
-            doc.add(new TextField(Constants.FIELD_PROGRAM_NAME,  project.name, Field.Store.YES));
-        }
+        super.addLongToDoc(doc, Constants.FIELD_PROGRAM_ID, this.project.id);
+        if(StringUtils.isNotBlank(project.name))
+            super.addFacetToDoc(doc, Constants.FIELD_PROGRAM_NAME, project.name);
+
         if(StringUtils.isNotBlank(project.url))
             doc.add(new StoredField(Constants.FIELD_PROGRAM_URL, project.url));
         //owner info
         owner:
-        doc.add(new LongPoint(Constants.FIELD_USER_ID, this.owner.id));
-        doc.add(new StringField(Constants.FIELD_USER_ID, String.valueOf(owner.id), Field.Store.YES));
-        if(StringUtils.isNotBlank(owner.name)) {
-            doc.add(new FacetField(Constants.FIELD_USER_NAME, owner.name));
-            doc.add(new TextField(Constants.FIELD_USER_NAME,  owner.name, Field.Store.YES));
-        }
+        super.addLongToDoc(doc, Constants.FIELD_USER_ID, this.owner.id);
+
+        if(StringUtils.isNotBlank(owner.name))
+            super.addFacetToDoc(doc, Constants.FIELD_USER_NAME, owner.name);
+
         if(StringUtils.isNotBlank(owner.url))
             doc.add(new StoredField(Constants.FIELD_USER_URL, owner.url));
 

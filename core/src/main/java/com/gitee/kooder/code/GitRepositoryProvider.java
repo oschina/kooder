@@ -191,6 +191,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 for (DiffEntry entry : entries) {
                     if (entry.getChangeType() == DiffEntry.ChangeType.DELETE && traveler != null) {
                         SourceFile doc = new SourceFile(repo.getId(), repo.getName(), entry.getOldPath());
+                        doc.setEnterprise(repo.getEnterprise());
                         traveler.deleteDocument(doc);
                     } else {
                         addFileToDocument(repo, git, entry.getNewPath(), entry.getNewId().toObjectId(), traveler);
@@ -345,6 +346,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             String contents = String.join("\n", codeLines);
 
             SourceFile doc = new SourceFile();
+            doc.setEnterprise(repo.getEnterprise());
             doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
             doc.setBranch(git.getRepository().getBranch());
             doc.setName(FilenameUtils.getName(path));                       //文件名
@@ -380,6 +382,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
     private SourceFile buildBinaryDocument(CodeRepository repo, Git git, String path, ObjectId objectId) throws IOException {
         SourceFile doc = new SourceFile();
 
+        doc.setEnterprise(repo.getEnterprise());
         doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
         doc.setBranch(git.getRepository().getBranch());
         doc.setName(FilenameUtils.getName(path));     //文件名

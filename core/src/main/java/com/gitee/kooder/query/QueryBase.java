@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
@@ -52,14 +53,14 @@ public abstract class QueryBase implements IQuery {
     public final static FacetsConfig facetsConfig = new FacetsConfig();
 
     private int enterpriseId = 0;                           // Search in Enterprise
-    private List<Integer> repositories = new ArrayList<>(); // Search in repositories
+    private List<Long> repositories = new ArrayList(); // Search in repositories
     protected String searchKey;                             // Search Keyword
     protected boolean parseSearchKey = false;               // Escape Search key ?
     protected String sort;                                  // Sort field name
     protected int page = 1;                                 // Search result page index
     protected int pageSize = 20;                            // Search result page size
     protected Map<String, String[]> facets = new HashMap(); // Search with facets
-    protected List<Query> filters = new ArrayList<>();      // Search filters
+    protected List<Query> filters = new ArrayList();      // Search filters
 
     /**
      * Get max object indexed .
@@ -192,11 +193,12 @@ public abstract class QueryBase implements IQuery {
             return query;
 
         BooleanQuery.Builder fBuilder = new BooleanQuery.Builder();
+
         if(enterpriseId > 0)
-            fBuilder.add(new TermQuery(new Term(Constants.FIELD_ENTERPRISE_ID, String.valueOf(this.getEnterpriseId()))), BooleanClause.Occur.FILTER);
+            fBuilder.add(LongPoint.newExactQuery(Constants.FIELD_ENTERPRISE_ID, this.getEnterpriseId()), BooleanClause.Occur.FILTER);
 
         if(repositories.size() > 0)
-            fBuilder.add(IntPoint.newSetQuery(Constants.FIELD_REPO_ID, repositories), BooleanClause.Occur.FILTER);
+            fBuilder.add(LongPoint.newSetQuery(Constants.FIELD_REPO_ID, repositories), BooleanClause.Occur.FILTER);
 
         for(Query filter : filters)
             fBuilder.add(filter, BooleanClause.Occur.FILTER);
@@ -274,11 +276,11 @@ public abstract class QueryBase implements IQuery {
         return this;
     }
 
-    public List<Integer> getRepositories() {
+    public List<Long> getRepositories() {
         return repositories;
     }
 
-    public QueryBase addRepositories(List<Integer> repositories) {
+    public QueryBase addRepositories(List<Long> repositories) {
         this.repositories.addAll(repositories);
         return this;
     }
