@@ -29,8 +29,8 @@ import java.io.Serializable;
 public abstract class Searchable implements Serializable {
 
     protected long id;      // object id , ex: repo id, issue id
-    protected int _id;      // document id
-    protected float _score; // document score
+    protected int _doc_id;      // document id
+    protected float _doc_score; // document score
 
     public long getId() {
         return id;
@@ -40,20 +40,20 @@ public abstract class Searchable implements Serializable {
         this.id = id;
     }
 
-    public int get_id() {
-        return _id;
+    public int get_doc_id() {
+        return _doc_id;
     }
 
-    public void set_id(int _id) {
-        this._id = _id;
+    public void set_doc_id(int _doc_id) {
+        this._doc_id = _doc_id;
     }
 
-    public float get_score() {
-        return _score;
+    public float get_doc_score() {
+        return _doc_score;
     }
 
-    public void set_score(float _score) {
-        this._score = _score;
+    public void set_doc_score(float _doc_score) {
+        this._doc_score = _doc_score;
     }
 
     protected Document newDocument() {

@@ -58,21 +58,21 @@ public class QueryResult {
             case Constants.TYPE_REPOSITORY:
                 Repository repo = new Repository();
                 repo.setDocument(doc);
-                repo.set_id(doc_score.doc);
-                repo.set_score(doc_score.score);
+                repo.set_doc_id(doc_score.doc);
+                repo.set_doc_score(doc_score.score);
                 addObject(repo);
                 break;
             case Constants.TYPE_ISSUE:
                 Issue issue = new Issue(doc);
-                issue.set_id(doc_score.doc);
-                issue.set_score(doc_score.score);
+                issue.set_doc_id(doc_score.doc);
+                issue.set_doc_score(doc_score.score);
                 addObject(issue);
                 break;
             case Constants.TYPE_CODE:
                 SourceFile file = new SourceFile();
                 file.setDocument(doc);
-                file.set_id(doc_score.doc);
-                file.set_score(doc_score.score);
+                file.set_doc_id(doc_score.doc);
+                file.set_doc_score(doc_score.score);
                 addObject(file);
         }
     }
