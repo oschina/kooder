@@ -20,7 +20,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.FacetField;
 
-import javax.print.Doc;
 import java.io.Serializable;
 
 /**
