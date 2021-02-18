@@ -61,6 +61,10 @@ public final class Relation {
 
     @Override
     public boolean equals(Object obj) {
+        if(obj == null)
+            return false;
+        if(!(obj instanceof  Relation))
+            return false;
         return id == ((Relation)obj).id;
     }
 }

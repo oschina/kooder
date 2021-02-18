@@ -126,26 +126,25 @@ public class RangeFacetsExample implements Closeable {
 
     /** Runs the search and drill-down examples and prints the results. */
     public static void main(String[] args) throws Exception {
-        RangeFacetsExample example = new RangeFacetsExample();
-        example.index();
+        try(RangeFacetsExample example = new RangeFacetsExample()) {
+            example.index();
 
-        System.out.println("Facet counting example:");
-        System.out.println("-----------------------");
-        System.out.println(example.search());
+            System.out.println("Facet counting example:");
+            System.out.println("-----------------------");
+            System.out.println(example.search());
 
-        System.out.println("\n");
-        System.out.println("Facet drill-down example (timestamp/Past six hours):");
-        System.out.println("---------------------------------------------");
-        TopDocs hits = example.drillDown(example.PAST_SIX_HOURS);
-        System.out.println(hits.totalHits + " totalHits");
+            System.out.println("\n");
+            System.out.println("Facet drill-down example (timestamp/Past six hours):");
+            System.out.println("---------------------------------------------");
+            TopDocs hits = example.drillDown(example.PAST_SIX_HOURS);
+            System.out.println(hits.totalHits + " totalHits");
 
-        System.out.println("\n");
-        System.out.println("Facet drill-sideways example (timestamp/Past six hours):");
-        System.out.println("---------------------------------------------");
-        DrillSideways.DrillSidewaysResult sideways = example.drillSideways(example.PAST_SIX_HOURS);
-        System.out.println(sideways.hits.totalHits + " totalHits");
-        System.out.println(sideways.facets.getTopChildren(10, "timestamp"));
-
-        example.close();
+            System.out.println("\n");
+            System.out.println("Facet drill-sideways example (timestamp/Past six hours):");
+            System.out.println("---------------------------------------------");
+            DrillSideways.DrillSidewaysResult sideways = example.drillSideways(example.PAST_SIX_HOURS);
+            System.out.println(sideways.hits.totalHits + " totalHits");
+            System.out.println(sideways.facets.getTopChildren(10, "timestamp"));
+        }
     }
 }

@@ -41,7 +41,7 @@ public class EmbedQueueProvider implements QueueProvider {
         int batch_size = NumberUtils.toInt(props.getProperty("embed.batch_size", "10000"), 10000);
 
         Path path = checkoutPath(GiteeSearchConfig.getPath(props.getProperty("embed.path")));
-        for(String type : types()) {
+        for(String type : getAllTypes()) {
             Path typePath = checkoutPath(path.resolve(type));
             fileQueues.put(type, FileQueue.<QueueTask>batched().name(type)
                     .folder(typePath)

@@ -20,7 +20,6 @@ import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.GiteeSearchConfig;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Searchable;
-import com.gitee.kooder.query.QueryFactory;
 import com.gitee.kooder.queue.QueueFactory;
 import com.gitee.kooder.queue.QueueProvider;
 import com.gitee.kooder.queue.QueueTask;
@@ -65,7 +64,7 @@ public class FetchTaskThread extends Thread {
     public void run() {
         while(!this.isInterrupted()) {
             final AtomicInteger taskCount = new AtomicInteger(0);
-            BatchTaskRunner.execute(provider.types(), 1, types -> {
+            BatchTaskRunner.execute(provider.getAllTypes(), 1, types -> {
                 for(String type : types) {
                     List<QueueTask> tasks = provider.queue(type).pop(batch_fetch_count);
                     if(tasks != null && tasks.size() > 0) {

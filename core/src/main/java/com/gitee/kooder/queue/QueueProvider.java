@@ -38,7 +38,7 @@ public interface QueueProvider extends AutoCloseable {
      * 获取支持的所有任务类型
      * @return
      */
-    default List<String> types() {
+    default List<String> getAllTypes() {
         return TYPES;
     }
 
