@@ -149,7 +149,7 @@ public final class TechCodeTokenizer extends Tokenizer {
         if(ew.word.indexOf('.', 1)>0) {
             String[] pics = ew.word.split("\\.");
             for(int i=0;i<pics.length;i++) {
-                if("".equals(pics))
+                if("".equals(pics[i]))
                     continue;
                 int so = ew.word.indexOf(pics[i]) + ew.startOffset;
                 IWord iw = new IWord(pics[i], so, so + pics[i].length());
