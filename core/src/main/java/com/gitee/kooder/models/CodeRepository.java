@@ -21,6 +21,7 @@ public class CodeRepository extends Searchable {
     public final static String STATUS_DONE  = "indexed";
     public final static String STATUS_FETCH = "fetched";
 
+    private int enterprise = 0; //所属企业id
     private String scm;         //代码源类型：git/svn/file
     private String name;        //仓库名称
     private String url;         //仓库地址，ex: https://gitee.com/ld/J2Cache
@@ -30,14 +31,11 @@ public class CodeRepository extends Searchable {
 
     public CodeRepository(){}
 
-    public CodeRepository(long id) {
-        super.setId(id);
-    }
-
     public CodeRepository(Repository r) {
         this.id = r.getId();
         this.name = r.getName();
         this.url = r.getUrl();
+        this.enterprise = (int)r.getEnterprise().getId();
     }
 
     /**
@@ -96,6 +94,14 @@ public class CodeRepository extends Searchable {
         this.status = status;
     }
 
+    public int getEnterprise() {
+        return enterprise;
+    }
+
+    public void setEnterprise(int enterprise) {
+        this.enterprise = enterprise;
+    }
+
     /**
      * generate lucene document
      *
@@ -105,6 +111,7 @@ public class CodeRepository extends Searchable {
     public Document getDocument() {
         Document doc = new Document();
         doc.add(new StringField(Constants.FIELD_REPO_ID,        this.getIdAsString(), Field.Store.YES));
+        doc.add(new StoredField(Constants.FIELD_ENTERPRISE_ID,  this.getEnterprise()));
         doc.add(new StoredField(Constants.FIELD_REPO_URL,       this.getUrl()));
         doc.add(new StoredField(Constants.FIELD_REPO_NAME,      this.getName()));
         if(this.getLastCommitId() != null)
@@ -125,6 +132,7 @@ public class CodeRepository extends Searchable {
     @Override
     public CodeRepository setDocument(Document doc) {
         this.setId(NumberUtils.toLong(doc.get(Constants.FIELD_REPO_ID), 0));
+        this.setEnterprise(NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0));
         this.setName(doc.get(Constants.FIELD_REPO_NAME));
         this.setUrl(doc.get(Constants.FIELD_REPO_URL));
         this.setLastCommitId(doc.get(Constants.FIELD_REVISION));

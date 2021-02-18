@@ -95,6 +95,7 @@ public class GiteeIndexThread extends Thread {
             QueueTask.add(Constants.TYPE_REPOSITORY, repo);
             CodeRepository codes = new CodeRepository();
             codes.setId(repository.getId());
+            codes.setEnterprise(enterprise.getId());
             codes.setScm(CodeRepository.SCM_GIT);
             codes.setName(repository.getName());
             codes.setUrl(repository.getHtmlUrl());

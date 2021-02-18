@@ -132,6 +132,7 @@ public class GitlabIndexThread extends Thread {
                 QueueTask.add(Constants.TYPE_REPOSITORY, repo);
                 //index code
                 CodeRepository codes = new CodeRepository();
+                codes.setEnterprise(0); //Gitlab doesn't support enterprise
                 codes.setId(p.getId());
                 codes.setScm(CodeRepository.SCM_GIT);
                 codes.setName(p.getName());
