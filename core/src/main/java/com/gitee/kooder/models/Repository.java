@@ -15,6 +15,7 @@
  */
 package com.gitee.kooder.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gitee.kooder.core.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -87,6 +88,7 @@ public final class Repository extends Searchable {
      * @return
      */
     @Override
+    @JsonIgnore
     public Document getDocument() {
         Document doc = super.newDocument();
         doc.add(new TextField(Constants.FIELD_NAME,     this.getName(),         Field.Store.YES));
@@ -160,6 +162,7 @@ public final class Repository extends Searchable {
      * @param doc
      */
     @Override
+    @JsonIgnore
     public Repository setDocument(Document doc) {
         this.id = NumberUtils.toInt(doc.get(Constants.FIELD_ID), 0);
         this.name = doc.get(Constants.FIELD_NAME);

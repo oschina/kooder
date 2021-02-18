@@ -15,6 +15,7 @@
  */
 package com.gitee.kooder.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gitee.kooder.core.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -99,6 +100,7 @@ public final class Issue extends Searchable {
      * @param doc
      */
     @Override
+    @JsonIgnore
     public Issue setDocument(Document doc) {
         this.id = NumberUtils.toInt(doc.get(Constants.FIELD_ID), 0);
         this.ident = doc.get(Constants.FIELD_IDENT);
@@ -128,6 +130,7 @@ public final class Issue extends Searchable {
      * @return
      */
     @Override
+    @JsonIgnore
     public Document getDocument() {
         Document doc = super.newDocument();
 
