@@ -16,7 +16,10 @@
 package com.gitee.kooder.action;
 
 import com.gitee.kooder.core.Constants;
+import com.gitee.kooder.core.SearchHelper;
 import com.gitee.kooder.models.QueryResult;
+import com.gitee.kooder.models.Searchable;
+import com.gitee.kooder.models.SourceFile;
 import com.gitee.kooder.query.QueryFactory;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.http.HttpServerRequest;
@@ -33,6 +36,8 @@ import java.util.stream.Collectors;
  * @author Winter Lau<javayou@gmail.com>
  */
 public class SearchAction implements SearchActionBase {
+
+    private final static int MAX_LINES = 20;    // max code lines in highlight
 
     /**
      * controller for search.vm
@@ -142,6 +147,11 @@ public class SearchAction implements SearchActionBase {
                 .setPage(page)
                 .setPageSize(PAGE_SIZE)
                 .execute();
+
+        for(Searchable obj : result.getObjects()) {
+            SourceFile file = (SourceFile) obj;
+            file.setResult(SearchHelper.hl_lines(file.getContents(), q, MAX_LINES));
+        }
 
         this.json(context.response(), result.json());
     }

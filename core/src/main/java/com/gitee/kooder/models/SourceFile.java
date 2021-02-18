@@ -15,11 +15,14 @@
  */
 package com.gitee.kooder.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gitee.kooder.core.Constants;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
+
+import java.util.List;
 
 /**
  * Source File Object
@@ -48,6 +51,8 @@ public final class SourceFile extends Searchable {
 
     private String revision;        // last commit id
 
+    private List<CodeLine> result;  // code lines with keyword highlight
+
     public SourceFile() {}
 
     public SourceFile(long repoId, String repoName, String fileLocation) {
@@ -74,6 +79,7 @@ public final class SourceFile extends Searchable {
      * @param doc
      */
     @Override
+    @JsonIgnore
     public SourceFile setDocument(Document doc) {
         this.uuid = doc.get(Constants.FIELD_UUID);
         this.enterprise = NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0);
@@ -103,13 +109,15 @@ public final class SourceFile extends Searchable {
      * @return
      */
     @Override
+    @JsonIgnore
     public Document getDocument() {
         Document document = new Document();
 
         // Uuid is the primary key for documents
         document.add(new StringField(Constants.FIELD_UUID,      this.uuid,   Field.Store.YES));
 
-        document.add(new StringField(Constants.FIELD_BRANCH,    this.branch, Field.Store.YES));
+        if(StringUtils.isNotBlank(this.branch))
+            document.add(new StringField(Constants.FIELD_BRANCH,    this.branch, Field.Store.YES));
         document.add(new StoredField(Constants.FIELD_URL,       this.url));
 
         super.addLongToDoc(document, Constants.FIELD_ENTERPRISE_ID, this.enterprise);
@@ -286,5 +294,13 @@ public final class SourceFile extends Searchable {
 
     public void setEnterprise(int enterprise) {
         this.enterprise = enterprise;
+    }
+
+    public List<CodeLine> getResult() {
+        return result;
+    }
+
+    public void setResult(List<CodeLine> result) {
+        this.result = result;
     }
 }
