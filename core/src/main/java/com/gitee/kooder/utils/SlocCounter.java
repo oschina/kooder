@@ -43,10 +43,6 @@ public class SlocCounter {
         ));
     }
 
-    public ArrayList<List<Integer>> getByteOrderMarks() {
-        return byteOrderMarks;
-    }
-
     public boolean checkForMatch(char currentByte, int index, int endPoint, String[] matches, String content) {
         if (matches == null) {
             return false;
@@ -338,11 +334,11 @@ public class SlocCounter {
      * found inside the file it was asked to count.
      */
     public class SlocCount {
-        public int linesCount = 0;
-        public int blankCount = 0;
-        public int codeCount = 0;
-        public int commentCount = 0;
-        public int complexity = 0;
+        public int linesCount = 0;      // file lines
+        public int blankCount = 0;      // blank code lines
+        public int codeCount = 0;       // code lines
+        public int commentCount = 0;    // comment lines count
+        public int complexity = 0;      // code complexity
 
         public SlocCount() {
         }

@@ -16,7 +16,8 @@
 package com.gitee.kooder.utils;
 
 /**
- * 对应 languages.json 中的语言定义
+ * This class used to mapping language.json segment defined
+ * @author Winter Lau<javayou@gmail.com>
  */
 public class FileClassifierResult {
 

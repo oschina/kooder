@@ -50,15 +50,14 @@ public class FileClassifier {
     }
 
     /**
-     * Given a filename guesses the file type
+     * Guesses the file type of given filename
      */
     public static String languageGuess(String fileName, String content) {
         fileName = fileName.toLowerCase();
-        List<String> matches = new ArrayList<>();
         String extension = "";
 
         // Try finding based on full name match
-        matches = checkIfFilenameExists(fileName);
+        List<String> matches = checkIfFilenameExists(fileName);
 
         // Try finding using the whole name EG LICENSE
         if (matches.isEmpty()) {
