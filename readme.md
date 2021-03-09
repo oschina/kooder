@@ -66,7 +66,7 @@ $ cd kooder
 `gitlab.url`  访问 Gitlab 的首页  
 `gitlab.personal_access_token`  Gitlab 管理员账号 root 的 Personal Access Token
 
-更多配置项请看 [configuration.md](configuration.md)
+更多配置项请看 [configuration.md](docs/configuration.md)
 
 3. 构建并运行
 
@@ -79,6 +79,10 @@ $ chmod +x bin/*.sh
 $ bin/gateway.sh
 ### 浏览器访问 http://localhost:8080
 ```
+
+### Kooder Search API
+
+@see [API.md](docs/API.md)
 
 ### Docker安装
 

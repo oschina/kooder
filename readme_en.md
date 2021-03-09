@@ -52,7 +52,7 @@ Config kooder's url `http.url`. It will be injected into Git service as the webh
 ```
 http.url = http://<kooder-host>:8080
 ```
-Click here to see more config options [configuration.md](configuration.md)
+Click here to see more config options [configuration.md](docs/configuration.md)
 
 ### Install Docker
 Dependencies
