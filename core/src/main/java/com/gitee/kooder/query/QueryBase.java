@@ -77,7 +77,7 @@ public abstract class QueryBase implements IQuery {
             }
         }catch(IndexNotFoundException e) {
         }catch(Exception e) {
-            log.error("Failed to get lastest object from index[" + type() + "]", e);
+            log.error("Failed to get latest object from index[" + type() + "]", e);
         }
         return null;
     }

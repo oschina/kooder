@@ -31,7 +31,7 @@ import java.util.List;
 public final class SourceFile extends Searchable {
 
     private String uuid;            // file unique identify
-    private int enterprise;         // enterpise
+    private int enterprise;         // enterprise
     private Relation repository = Relation.EMPTY();    //repository, use this field to delete all files of repository
 
     private String branch;          // branch name
