@@ -30,7 +30,7 @@ import java.util.Map;
 
 /**
  * Action base
- * Eash request has one independent action instance
+ * Each request has one independent action instance
  * @author Winter Lau<javayou@gmail.com>
  */
 public interface Action {
