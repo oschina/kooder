@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.storage;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
@@ -41,13 +41,13 @@ public class StorageFactory {
     private static int  repositoriesMaxSizeInGigabyte = 100;//unit:G
 
     static {
-        Properties props = GiteeSearchConfig.getStoragePropertes();
+        Properties props = KooderConfig.getStoragePropertes();
         try {
             if("disk".equalsIgnoreCase(props.getProperty("type").trim())) {
                 storage = new DiskIndexStorage(props);
             }
             String repoPath = props.getProperty("repositories.path");
-            repositoriesPath = GiteeSearchConfig.checkAndCreatePath(repoPath);
+            repositoriesPath = KooderConfig.checkAndCreatePath(repoPath);
         } catch (IOException e) {
             log.error("Failed to initialize storage manager.", e);
         }

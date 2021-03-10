@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.server;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl;
 import org.slf4j.Logger;
@@ -37,8 +37,8 @@ public class AutoContentTypeStaticHandler extends StaticHandlerImpl {
     private final static Path webRoot;
 
     static {
-        String sWebroot = GiteeSearchConfig.getProperty("http.webroot");
-        webRoot = GiteeSearchConfig.getPath(sWebroot);
+        String sWebroot = KooderConfig.getProperty("http.webroot");
+        webRoot = KooderConfig.getPath(sWebroot);
         try (InputStream stream = AutoContentTypeStaticHandler.class.getResourceAsStream("/mime-types.properties")) {
             CONTENT_TYPES.load(stream);
         } catch(IOException e) {

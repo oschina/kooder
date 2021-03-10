@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.server;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.velocity.VelocityContext;
@@ -58,7 +58,7 @@ public class TemplateEngine {
             p.load(stream);
             String sWebappPath = p.getProperty("resource.loader.file.path");
             if(sWebappPath != null) {
-                Path webappPath = GiteeSearchConfig.getPath(sWebappPath);
+                Path webappPath = KooderConfig.getPath(sWebappPath);
                 p.setProperty("resource.loader.file.path", webappPath.toString());
             }
             Velocity.init(p);

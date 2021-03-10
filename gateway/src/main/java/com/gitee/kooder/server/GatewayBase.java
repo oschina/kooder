@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.server;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServer;
@@ -56,17 +56,17 @@ public abstract class GatewayBase implements Daemon {
     List<MessageFormat> log_patterns = new ArrayList<>();
 
     public GatewayBase() {
-        this.bind = GiteeSearchConfig.getHttpBind();
+        this.bind = KooderConfig.getHttpBind();
         if(StringUtils.isBlank(this.bind))
             this.bind = null;
-        this.port = GiteeSearchConfig.getHttpPort();
-        this.workerPoolSize = NumberUtils.toInt(GiteeSearchConfig.getProperty("http.worker.pool.size"), 16);
+        this.port = KooderConfig.getHttpPort();
+        this.workerPoolSize = NumberUtils.toInt(KooderConfig.getProperty("http.worker.pool.size"), 16);
 
         this.vOptions = new VertxOptions();
         this.vOptions.setWorkerPoolSize(this.workerPoolSize);
         this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
 
-        String logs_pattern = GiteeSearchConfig.getProperty("http.log.pattern");
+        String logs_pattern = KooderConfig.getProperty("http.log.pattern");
         if(logs_pattern != null) {
             Arrays.stream(logs_pattern.split(",")).forEach(pattern -> {
                 log_patterns.add(new MessageFormat(StringUtils.replace(pattern, "*", "{0}")));

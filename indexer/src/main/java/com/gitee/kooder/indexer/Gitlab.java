@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.indexer;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.gitlab4j.api.GitLabApi;
 
@@ -36,13 +36,13 @@ public class Gitlab {
     public final static GitLabApi INSTANCE;
 
     static {
-        gitlab_url = GiteeSearchConfig.getProperty("gitlab.url");
-        access_token = GiteeSearchConfig.getProperty("gitlab.personal_access_token");
-        version = NumberUtils.toInt(GiteeSearchConfig.getProperty("gitlab.version"), 4);
-        gsearch_url = GiteeSearchConfig.getProperty("http.url");
+        gitlab_url = KooderConfig.getProperty("gitlab.url");
+        access_token = KooderConfig.getProperty("gitlab.personal_access_token");
+        version = NumberUtils.toInt(KooderConfig.getProperty("gitlab.version"), 4);
+        gsearch_url = KooderConfig.getProperty("http.url");
         system_hook_url = gsearch_url + "/gitlab/system";
         project_hook_url = gsearch_url + "/gitlab/project";
-        secret_token = GiteeSearchConfig.getProperty("gitlab.secret_token", "gsearch");
+        secret_token = KooderConfig.getProperty("gitlab.secret_token", "gsearch");
 
         INSTANCE = new GitLabApi((version != 3) ? GitLabApi.ApiVersion.V4 : GitLabApi.ApiVersion.V3, gitlab_url, access_token);
         // Set the connect timeout to 1 second and the read timeout to 5 seconds

@@ -29,9 +29,9 @@ import java.util.Properties;
  * The global gitee search configuration
  * @author Winter Lau<javayou@gmail.com>
  */
-public class GiteeSearchConfig {
+public class KooderConfig {
 
-    private final static Logger log = LoggerFactory.getLogger(GiteeSearchConfig.class);
+    private final static Logger log = LoggerFactory.getLogger(KooderConfig.class);
 
     private final static String CONFIG_NAME = "/kooder.properties";
     private static Configuration config;

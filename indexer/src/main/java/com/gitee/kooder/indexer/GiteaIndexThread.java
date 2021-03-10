@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.indexer;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +38,9 @@ public class GiteaIndexThread extends Thread {
     }
 
     public GiteaIndexThread() {
-        this.gsearch_url = GiteeSearchConfig.getProperty("http.url");
+        this.gsearch_url = KooderConfig.getProperty("http.url");
         this.system_hook_url = gsearch_url + "/gitea";
-        this.secret_token = GiteeSearchConfig.getProperty("gitea.secret_token", "gsearch");
+        this.secret_token = KooderConfig.getProperty("gitea.secret_token", "gsearch");
     }
 
     @Override

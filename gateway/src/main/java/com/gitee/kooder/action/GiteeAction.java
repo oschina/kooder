@@ -16,7 +16,7 @@
 package com.gitee.kooder.action;
 
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.gitee.GiteeException;
 import com.gitee.kooder.server.Action;
 import io.vertx.ext.web.RoutingContext;
@@ -29,7 +29,7 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class GiteeAction implements Action {
 
-    String SECRET_TOKEN = GiteeSearchConfig.getProperty("gitee.secret_token", Constants.DEFAULT_SECRET_TOKEN);
+    String SECRET_TOKEN = KooderConfig.getProperty("gitee.secret_token", Constants.DEFAULT_SECRET_TOKEN);
 
     /**
      * Gitee webhook handler

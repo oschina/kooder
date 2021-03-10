@@ -16,7 +16,7 @@
 package com.gitee.kooder.gitee;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.utils.HttpUtils;
 import com.gitee.kooder.utils.JsonUtils;
 import okhttp3.Response;
@@ -50,8 +50,8 @@ public class GiteeApi {
     private final String personalAccessToken;
 
     private GiteeApi() {
-        giteeUrl = GiteeSearchConfig.getProperty("gitee.url");
-        personalAccessToken = GiteeSearchConfig.getProperty("gitee.personal_access_token");
+        giteeUrl = KooderConfig.getProperty("gitee.url");
+        personalAccessToken = KooderConfig.getProperty("gitee.personal_access_token");
     }
 
     public static GiteeApi getInstance() {

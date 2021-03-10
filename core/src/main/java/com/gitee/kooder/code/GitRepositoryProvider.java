@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.code;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.models.*;
 import com.gitee.kooder.storage.StorageFactory;
 import com.gitee.kooder.utils.FileClassifier;
@@ -70,19 +70,19 @@ public class GitRepositoryProvider implements RepositoryProvider {
 
     public GitRepositoryProvider() {
         //http authenticator
-        String username = GiteeSearchConfig.getProperty("git.username");
-        String password = GiteeSearchConfig.getProperty("git.password");
+        String username = KooderConfig.getProperty("git.username");
+        String password = KooderConfig.getProperty("git.password");
         if(StringUtils.isBlank(password)) {
-            password = GiteeSearchConfig.getProperty("gitlab.personal_access_token");
+            password = KooderConfig.getProperty("gitlab.personal_access_token");
             if(StringUtils.isBlank(password))
-                password = GiteeSearchConfig.getProperty("gitee.personal_access_token");
+                password = KooderConfig.getProperty("gitee.personal_access_token");
         }
         if(StringUtils.isNotBlank(username) && StringUtils.isNotBlank(password))
             this.credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
 
         //ssh authenticator
-        String sshkey   = GiteeSearchConfig.getProperty("git.ssh.key");     //私钥文件
-        String keypass  = GiteeSearchConfig.getProperty("git.ssh.keypass"); //密钥对应的密码
+        String sshkey   = KooderConfig.getProperty("git.ssh.key");     //私钥文件
+        String keypass  = KooderConfig.getProperty("git.ssh.keypass"); //密钥对应的密码
         if(StringUtils.isNotBlank(sshkey)) {
             this.transportConfigCallback = new TransportConfigCallback() {
                 @Override
@@ -93,7 +93,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
                             @Override
                             protected JSch createDefaultJSch(FS fs) throws JSchException {
                                 JSch defaultJSch = super.createDefaultJSch(fs);
-                                String keypath = GiteeSearchConfig.getPath(sshkey).toString();
+                                String keypath = KooderConfig.getPath(sshkey).toString();
                                 if (StringUtils.isNotBlank(keypass))
                                     defaultJSch.addIdentity(keypath, keypass.trim());
                                 else

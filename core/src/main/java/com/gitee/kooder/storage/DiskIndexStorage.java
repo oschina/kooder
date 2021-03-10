@@ -16,7 +16,7 @@
 package com.gitee.kooder.storage;
 
 import com.gitee.kooder.core.AnalyzerFactory;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.analysis.Analyzer;
@@ -59,7 +59,7 @@ public class DiskIndexStorage implements IndexStorage {
     public DiskIndexStorage(Properties props) throws IOException {
         this.props = props;
         String idxPath = props.getProperty("disk.path");
-        this.indexBasePath = GiteeSearchConfig.checkAndCreatePath(idxPath);
+        this.indexBasePath = KooderConfig.checkAndCreatePath(idxPath);
         isWindows = SystemUtils.IS_OS_WINDOWS;
     }
 

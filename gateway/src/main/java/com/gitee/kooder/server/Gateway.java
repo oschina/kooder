@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.server;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.indexer.FetchTaskThread;
 import com.gitee.kooder.indexer.GiteaIndexThread;
 import com.gitee.kooder.gitee.GiteeIndexThread;
@@ -88,7 +88,7 @@ public class Gateway extends GatewayBase {
      * 启动配置文件中指定的初始任务
      */
     private void startInitTasks() {
-        String tasks = GiteeSearchConfig.getProperty("http.startup.tasks");
+        String tasks = KooderConfig.getProperty("http.startup.tasks");
         if(tasks == null)
             return ;
         String[] taskNames = tasks.split(",");

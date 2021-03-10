@@ -16,7 +16,7 @@
 package com.gitee.kooder.gitee;
 
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.indexer.GitlabIndexThread;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Issue;
@@ -56,9 +56,9 @@ public class GiteeIndexThread extends Thread {
     }
 
     public GiteeIndexThread() {
-        this.gsearchUrl = GiteeSearchConfig.getProperty("http.url");
+        this.gsearchUrl = KooderConfig.getProperty("http.url");
         this.systemHookUrl = gsearchUrl + "/gitee";
-        this.secretToken = GiteeSearchConfig.getProperty("gitee.secret_token", Constants.DEFAULT_SECRET_TOKEN);
+        this.secretToken = KooderConfig.getProperty("gitee.secret_token", Constants.DEFAULT_SECRET_TOKEN);
     }
 
     @Override

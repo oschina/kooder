@@ -17,7 +17,7 @@ package com.gitee.kooder.action;
 
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.indexer.Gitlab;
 import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
@@ -42,7 +42,7 @@ public class GitlabAction implements Action {
 
     private final static Logger log = LoggerFactory.getLogger(GitlabAction.class);
 
-    private String secret_token = GiteeSearchConfig.getProperty("gitlab.secret_token", "gsearch");
+    private String secret_token = KooderConfig.getProperty("gitlab.secret_token", "gsearch");
 
     /**
      * handle system webhook from gitlab

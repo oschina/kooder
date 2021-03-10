@@ -15,7 +15,7 @@
  */
 package com.gitee.kooder.queue;
 
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.infobip.lib.popout.FileQueue;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class EmbedQueueProvider implements QueueProvider {
     public EmbedQueueProvider(Properties props) {
         int batch_size = NumberUtils.toInt(props.getProperty("embed.batch_size", "10000"), 10000);
 
-        Path path = checkoutPath(GiteeSearchConfig.getPath(props.getProperty("embed.path")));
+        Path path = checkoutPath(KooderConfig.getPath(props.getProperty("embed.path")));
         for(String type : getAllTypes()) {
             Path typePath = checkoutPath(path.resolve(type));
             fileQueues.put(type, FileQueue.<QueueTask>batched().name(type)

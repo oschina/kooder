@@ -16,7 +16,7 @@
 package com.gitee.kooder.server;
 
 import com.gitee.kooder.models.CodeLine;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.core.SearchHelper;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.web.RoutingContext;
@@ -57,7 +57,7 @@ public class VelocityTool {
     public String static_with_timestamp(String uri) {
         StringBuffer url = new StringBuffer();
         url.append(uri);
-        Path path = GiteeSearchConfig.getPath("gateway/src/main/webapp/" + uri);
+        Path path = KooderConfig.getPath("gateway/src/main/webapp/" + uri);
         if(Files.exists(path)) {
             try {
                 url.append("?timestamp=");

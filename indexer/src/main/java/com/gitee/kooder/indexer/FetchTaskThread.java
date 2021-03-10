@@ -17,7 +17,7 @@ package com.gitee.kooder.indexer;
 
 import com.gitee.kooder.code.*;
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.core.GiteeSearchConfig;
+import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.models.Searchable;
 import com.gitee.kooder.queue.QueueFactory;
@@ -54,7 +54,7 @@ public class FetchTaskThread extends Thread {
 
     public FetchTaskThread() {
         this.provider = QueueFactory.getProvider();
-        Properties props = GiteeSearchConfig.getIndexerProperties();
+        Properties props = KooderConfig.getIndexerProperties();
         this.no_task_interval   = NumberUtils.toInt(props.getProperty("no_task_interval"),  1000);
         this.batch_fetch_count  = NumberUtils.toInt(props.getProperty("batch_fetch_count"), 10);
         this.tasks_per_thread   = NumberUtils.toInt(props.getProperty("tasks_per_thread"),  1);
