@@ -19,9 +19,6 @@
         <lucene.version>8.7.0</lucene.version>
         <jackson.version>2.11.3</jackson.version>
         <jcseg.version>2.6.2</jcseg.version>
-        <spark.version>2.7.2</spark.version>
-        <spark.freemarker.version>2.0.0</spark.freemarker.version>
-        <freemarker.version>2.3.23</freemarker.version>
         <okhttp.version>4.9.0</okhttp.version>
     </properties>
 
