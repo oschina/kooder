@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   kooder:
-    build: ./deploy
+    build: ./
     container_name: kooder
+    volumes:
+      - ./core/src/main/resources/kooder.properties:/root/core/src/main/resources/kooder.properties:ro
     ports:
       - 8080:8080
