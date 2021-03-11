@@ -99,7 +99,8 @@ docker-compose up -d
 ### 关闭容器
 docker-compose down
 ```
-![Kooder_docker](docs/img/kooder-docker.png)
+
+
 
 #### docker-compose ha版
 依赖
@@ -115,18 +116,17 @@ docker-compose -f docker-compose-ha.yaml up -d
 docker-compose -f docker-compose-ha.yaml down
 ```
 
-![Kooder docker-ha](docs/img/docker-ha.png)
 
 实现的效果如下：
 
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
 
-配置文件：`/deploy/kooder.properties`,修改配置文件之后，执行如下命令:
 
+配置文件: `core/src/main/resource/kooder.properties`，修改配置文件之后，执行如下命令:
 
 ```
-## 删除本地kooder镜像，重新build镜像。
-docker rmi imageID
+# 停用容器重新启动
+docker-compose down
 docker-compose up -d
 ```
 
