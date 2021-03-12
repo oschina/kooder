@@ -92,13 +92,17 @@ public class GitlabIndexThread extends Thread {
      * @throws GitLabApiException
      */
     private void checkAndInstallSystemHook(GitLabApi gitlab) throws GitLabApiException {
-        SystemHooksApi api = gitlab.getSystemHooksApi();
-        for(SystemHook hook : api.getSystemHooks()){
-            if(hook.getUrl().equals(system_hook_url))
-                return ;
+        try {
+            SystemHooksApi api = gitlab.getSystemHooksApi();
+            for (SystemHook hook : api.getSystemHooks()) {
+                if (hook.getUrl().equals(system_hook_url))
+                    return;
+            }
+            gitlab.getSystemHooksApi().addSystemHook(system_hook_url, secret_token, true, true, false);
+            log.info("Gitlab system hook : {} installed.", system_hook_url);
+        } catch (Exception e) {
+            log.error("Failed to install gitlab system hook: {}", system_hook_url );
         }
-        gitlab.getSystemHooksApi().addSystemHook(system_hook_url, secret_token, true, true, false);
-        log.info("Gitlab system hook : {} installed.", system_hook_url);
     }
 
     /**
@@ -108,18 +112,22 @@ public class GitlabIndexThread extends Thread {
      * @throws GitLabApiException
      */
     private void checkAndInstallProjectHook(GitLabApi gitlab, Project p) throws GitLabApiException {
-        for(ProjectHook hook : gitlab.getProjectApi().getHooks(p.getId())){
-            if(hook.getUrl().equals(this.project_hook_url))
-                return ;
+        try {
+            for (ProjectHook hook : gitlab.getProjectApi().getHooks(p.getId())) {
+                if (hook.getUrl().equals(this.project_hook_url))
+                    return;
+            }
+            ProjectHook hook = new ProjectHook(); //just accept issue event, other event via system hook trigger
+            hook.setIssuesEvents(true);
+            hook.setPushEvents(false);
+            hook.setMergeRequestsEvents(false);
+            hook.setRepositoryUpdateEvents(false);
+            hook.setTagPushEvents(false);
+            hook.setWikiPageEvents(false);
+            gitlab.getProjectApi().addHook(p.getId(), this.project_hook_url, hook, true, secret_token);
+        } catch (Exception e) {
+            log.error("Failed to install gitlab project hook: {}", this.project_hook_url);
         }
-        ProjectHook hook = new ProjectHook(); //just accept issue event, other event via system hook trigger
-        hook.setIssuesEvents(true);
-        hook.setPushEvents(false);
-        hook.setMergeRequestsEvents(false);
-        hook.setRepositoryUpdateEvents(false);
-        hook.setTagPushEvents(false);
-        hook.setWikiPageEvents(false);
-        gitlab.getProjectApi().addHook(p.getId(), this.project_hook_url, hook, true, secret_token);
     }
 
     /**
