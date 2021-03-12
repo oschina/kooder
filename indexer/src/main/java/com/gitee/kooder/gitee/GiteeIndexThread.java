@@ -81,14 +81,18 @@ public class GiteeIndexThread extends Thread {
      * @throws GiteeException install enterprise hook error
      */
     private void checkAndInstallEnterpriseHook() throws GiteeException {
-        List<EnterpriseHook> enterpriseHookList = GiteeApi.getInstance().getEnterpriseHooks();
-        for (EnterpriseHook enterpriseHook : enterpriseHookList) {
-            if (systemHookUrl.equals(enterpriseHook.getUrl())) {
-                return;
+        try {
+            List<EnterpriseHook> enterpriseHookList = GiteeApi.getInstance().getEnterpriseHooks();
+            for (EnterpriseHook enterpriseHook : enterpriseHookList) {
+                if (systemHookUrl.equals(enterpriseHook.getUrl())) {
+                    return;
+                }
             }
+            GiteeApi.getInstance().createEnterpriseHooks(systemHookUrl, secretToken, true, true, false, true, false, false);
+            log.info("Gitee enterprise hook : {} installed.", systemHookUrl);
+        } catch (Exception e) {
+            log.error("Failed to install gitee system hook: {}", systemHookUrl );
         }
-        GiteeApi.getInstance().createEnterpriseHooks(systemHookUrl, secretToken, true, true, false, true, false, false);
-        log.info("Gitee enterprise hook : {} installed.", systemHookUrl);
     }
 
     /**
