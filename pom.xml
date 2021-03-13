@@ -6,7 +6,7 @@
 
     <groupId>com.gitee.koode</groupId>
     <artifactId>kooder</artifactId>
-    <version>1.0-alpha</version>
+    <version>1.0-alpha2</version>
     <packaging>pom</packaging>
 
     <description>Gitee Search Engine</description>

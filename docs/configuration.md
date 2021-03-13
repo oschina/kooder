@@ -13,6 +13,14 @@ Web Service configurations
 `http.webroot = gateway/src/main/webapp`    Web 静态文件和模板文件的存放目录  
 `http.startup.tasks = indexer`  将 `indexer` 依附到 `gateway` 进程中运行
 
+[Gitlab configurations]
+
+`gitlab.url = `  Gitlab 服务地址
+`gitlab.personal_access_token = xxx`  Gitlab 管理员账号的 access token  
+`gitlab.secret_token = gsearch`  Webhook 回调的密钥  
+`gitlab.connect_timeout = 2000`  连接超时设置，单位毫秒  
+`gitlab.read_timeout = 10000`  数据读取超时设置，单位毫秒
+
 Git access configrations  
 
 `git.username = xxx`    访问 git 仓库的用户名  
