@@ -90,9 +90,8 @@ public class GitlabIndexThread extends Thread {
     /**
      * check and install system hook
      * @param gitlab
-     * @throws GitLabApiException
      */
-    private void checkAndInstallSystemHook(GitLabApi gitlab) throws GitLabApiException {
+    private void checkAndInstallSystemHook(GitLabApi gitlab) {
         if(StringUtils.isNotBlank(gsearch_url)) {
             try {
                 SystemHooksApi api = gitlab.getSystemHooksApi();
@@ -112,9 +111,8 @@ public class GitlabIndexThread extends Thread {
      * Check and install project hook
      * @param gitlab
      * @param p
-     * @throws GitLabApiException
      */
-    private void checkAndInstallProjectHook(GitLabApi gitlab, Project p) throws GitLabApiException {
+    private void checkAndInstallProjectHook(GitLabApi gitlab, Project p) {
         if(StringUtils.isNotBlank(gsearch_url)) {
             try {
                 for (ProjectHook hook : gitlab.getProjectApi().getHooks(p.getId())) {
@@ -150,28 +148,36 @@ public class GitlabIndexThread extends Thread {
         Pager<Project> projects = api.getProjects(new ProjectFilter().withIdAfter(maxId), itemsPerPage);
         while(projects.hasNext()) {
             for(Project p : projects.next()) {
-                //Check and install webhook to this project (Repository hook only handle issue event)
-                this.checkAndInstallProjectHook(gitlab, p);
-                //index project info
-                Repository repo = new Repository(p);
-                Map<String, Float> langs = gitlab.getProjectApi().getProjectLanguages(p.getId());
-                repo.setLicense(this.selectLang(langs));
-                //write to lucene index
-                QueueTask.add(Constants.TYPE_REPOSITORY, repo);
-                //index code
-                CodeRepository codes = new CodeRepository();
-                codes.setEnterprise(0); //Gitlab doesn't support enterprise
-                codes.setId(p.getId());
-                codes.setScm(CodeRepository.SCM_GIT);
-                codes.setName(p.getName());
-                codes.setUrl(p.getWebUrl());
-                //write to lucene index
-                QueueTask.add(Constants.TYPE_CODE, codes);
+                indexProject(gitlab, p);
                 pc ++;
             }
         }
 
         log.info("{} repositories indexed (with id > {}), using {} ms", pc, maxId, System.currentTimeMillis() - ct);
+    }
+
+    private void indexProject(GitLabApi gitlab, Project p) {
+        try {
+            //Check and install webhook to this project (Repository hook only handle issue event)
+            this.checkAndInstallProjectHook(gitlab, p);
+            //index project info
+            Repository repo = new Repository(p);
+            Map<String, Float> langs = gitlab.getProjectApi().getProjectLanguages(p.getId());
+            repo.setLicense(this.selectLang(langs));
+            //write to lucene index
+            QueueTask.add(Constants.TYPE_REPOSITORY, repo);
+            //index code
+            CodeRepository codes = new CodeRepository();
+            codes.setEnterprise(0); //Gitlab doesn't support enterprise
+            codes.setId(p.getId());
+            codes.setScm(CodeRepository.SCM_GIT);
+            codes.setName(p.getName());
+            codes.setUrl(p.getWebUrl());
+            //write to lucene index
+            QueueTask.add(Constants.TYPE_CODE, codes);
+        } catch (Exception e) {
+            log.error("Failed to index project: {}", p);
+        }
     }
 
     /**

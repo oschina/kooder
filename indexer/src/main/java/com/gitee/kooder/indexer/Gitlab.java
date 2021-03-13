@@ -46,7 +46,9 @@ public class Gitlab {
 
         INSTANCE = new GitLabApi((version != 3) ? GitLabApi.ApiVersion.V4 : GitLabApi.ApiVersion.V3, gitlab_url, access_token);
         // Set the connect timeout to 1 second and the read timeout to 5 seconds
-        INSTANCE.setRequestTimeout(1000, 5000);
+        int connectTimeout = NumberUtils.toInt(KooderConfig.getProperty("gitlab.connect_timeout"), 2000);
+        int readTimeout = NumberUtils.toInt(KooderConfig.getProperty("gitlab.read_timeout"), 10000);
+        INSTANCE.setRequestTimeout(connectTimeout, readTimeout);
     }
 
 }
