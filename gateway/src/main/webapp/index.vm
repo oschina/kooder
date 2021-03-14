@@ -8,7 +8,7 @@
                 <form class="form-group" action="search">
                     <input type="hidden" name="type" value="code"/>
                     <fieldset class="input-group">
-                        <input class="form-input input-lg" name="q" type="text" style="width:400px;" id="txt_q">
+                        <input class="form-input input-lg" name="q" placeholder="$!{total_repo_count} repositories" type="text" style="width:400px;" id="txt_q">
                         <button class="btn btn-primary input-group-btn btn-lg" type="submit">Search</button>
                     </fieldset>
                 </form>

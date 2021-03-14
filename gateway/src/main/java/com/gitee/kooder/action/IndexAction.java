@@ -15,10 +15,13 @@
  */
 package com.gitee.kooder.action;
 
+import com.gitee.kooder.query.QueryFactory;
 import com.gitee.kooder.server.Action;
 import io.vertx.ext.web.RoutingContext;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Default action for web
@@ -32,7 +35,9 @@ public class IndexAction implements Action {
      * @return
      */
     public void index(RoutingContext context) throws IOException {
-        this.vm(context, "index.vm");
+        Map<String, Object> params = new HashMap();
+        params.put("total_repo_count", QueryFactory.REPO().totalCount());
+        this.vm(context, "index.vm", params);
     }
 
 }

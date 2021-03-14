@@ -107,4 +107,10 @@ public interface IQuery {
      * @return
      */
     public Searchable getLastestObject() ;
+
+    /**
+     * Get total records count
+     * @return
+     */
+    public long totalCount();
 }

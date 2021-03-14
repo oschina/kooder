@@ -87,6 +87,22 @@ public abstract class QueryBase implements IQuery {
     }
 
     /**
+     * Get total records count
+     *
+     * @return
+     */
+    @Override
+    public long totalCount() {
+        try (IndexReader reader = StorageFactory.getIndexReader(this.type())) {
+            return reader.numDocs();
+        }catch(IndexNotFoundException e) {
+        }catch(Exception e){
+            log.error("Failed to get total object count from index[" + type() + "]", e);
+        }
+        return 0;
+    }
+
+    /**
      * execute search
      * @return
      * @throws IOException
