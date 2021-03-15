@@ -136,7 +136,8 @@ public final class Issue extends Searchable {
 
         doc.add(new StringField(Constants.FIELD_IDENT,  ident,                  Field.Store.YES));
         doc.add(new TextField(Constants.FIELD_TITLE,    title,                  Field.Store.YES));
-        doc.add(new TextField(Constants.FIELD_DESC,     description,            Field.Store.YES));
+        if(StringUtils.isNotBlank(description))
+            doc.add(new TextField(Constants.FIELD_DESC,     description,            Field.Store.YES));
         doc.add(new StoredField(Constants.FIELD_URL,    url));
         doc.add(new TextField(Constants.FIELD_TAGS, String.join("\n", labels), Field.Store.NO));
 
