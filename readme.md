@@ -50,7 +50,7 @@ $ cd kooder
 
 ### 运行前准备工作
 
-配置文件: `core/src/main/resource/kooder.properties`
+配置文件: `core/src/main/resources/kooder.properties`
 
 1. 配置 HTTP 服务
 
