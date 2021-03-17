@@ -102,7 +102,7 @@ public class GitlabIndexThread extends Thread {
                 gitlab.getSystemHooksApi().addSystemHook(system_hook_url, secret_token, true, true, false);
                 log.info("Gitlab system hook : {} installed.", system_hook_url);
             } catch (Exception e) {
-                log.error("Failed to install gitlab system hook: {}", system_hook_url);
+                log.error("Failed to install gitlab system hook: {}", system_hook_url, e);
             }
         }
     }
@@ -128,7 +128,7 @@ public class GitlabIndexThread extends Thread {
                 hook.setWikiPageEvents(false);
                 gitlab.getProjectApi().addHook(p.getId(), this.project_hook_url, hook, true, secret_token);
             } catch (Exception e) {
-                log.error("Failed to install gitlab project hook: {}", this.project_hook_url);
+                log.error("Failed to install gitlab project hook: {}", this.project_hook_url, e);
             }
         }
     }
