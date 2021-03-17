@@ -91,7 +91,7 @@ public class GiteeIndexThread extends Thread {
             GiteeApi.getInstance().createEnterpriseHooks(systemHookUrl, secretToken, true, true, false, true, false, false);
             log.info("Gitee enterprise hook : {} installed.", systemHookUrl);
         } catch (Exception e) {
-            log.error("Failed to install gitee system hook: {}", systemHookUrl );
+            log.error("Failed to install gitee system hook: " + systemHookUrl , e);
         }
     }
 

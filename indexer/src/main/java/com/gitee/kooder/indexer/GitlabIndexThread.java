@@ -176,7 +176,7 @@ public class GitlabIndexThread extends Thread {
             //write to lucene index
             QueueTask.add(Constants.TYPE_CODE, codes);
         } catch (Exception e) {
-            log.error("Failed to index project: {}", p);
+            log.error("Failed to index project: " + p, e);
         }
     }
 
