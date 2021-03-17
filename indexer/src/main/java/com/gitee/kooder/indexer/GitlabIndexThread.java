@@ -162,8 +162,12 @@ public class GitlabIndexThread extends Thread {
             this.checkAndInstallProjectHook(gitlab, p);
             //index project info
             Repository repo = new Repository(p);
-            Map<String, Float> langs = gitlab.getProjectApi().getProjectLanguages(p.getId());
-            repo.setLicense(this.selectLang(langs));
+            try {
+                Map<String, Float> langs = gitlab.getProjectApi().getProjectLanguages(p.getId());
+                repo.setLicense(this.selectLang(langs));
+            }catch(Exception e){
+                log.error("Failed to get project language: " + p, e);
+            }
             //write to lucene index
             QueueTask.add(Constants.TYPE_REPOSITORY, repo);
             //index code
