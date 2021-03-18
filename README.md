@@ -61,11 +61,14 @@ Dependencies
 
 After cloning this repo, in a machine with docker compose installed, run the following command:
 
-```
-docker-compose up -d
-```
 
-![Kooder docker-ha](docs/img/docker-ha.png)
+```
+### Run containers in the background
+docker-compose up -d 
+
+### Stop and remove containers
+docker-compose down
+```
 
 This is how it will look like：
 
