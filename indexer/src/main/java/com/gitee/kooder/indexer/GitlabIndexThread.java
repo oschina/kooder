@@ -166,6 +166,7 @@ public class GitlabIndexThread extends Thread {
                 Map<String, Float> langs = gitlab.getProjectApi().getProjectLanguages(p.getId());
                 repo.setLicense(this.selectLang(langs));
             }catch(Exception e){
+                //some gitlab version didn't supply language api
                 log.error("Failed to get project language: " + p, e);
             }
             //write to lucene index
