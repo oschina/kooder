@@ -178,8 +178,9 @@ public abstract class QueryBase implements IQuery {
                 }
             }
 
-            return result;
+        } catch(IndexNotFoundException e) {
         }
+        return result;
     }
 
     /**
