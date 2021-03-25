@@ -154,7 +154,7 @@ public class GiteeApi {
             }
             throw new GiteeException(response.body().string());
         } catch (Exception e) {
-            log.warn("Get gitt enterprise hooks error: {}", e.getMessage());
+            log.warn("Get gitee enterprise hooks error: {}", e.getMessage());
             throw new GiteeException(e.getMessage());
         }
     }

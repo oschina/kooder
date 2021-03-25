@@ -15,6 +15,9 @@
  */
 package com.gitee.kooder.action;
 
+import com.gitee.kooder.core.Constants;
+import com.gitee.kooder.core.KooderConfig;
+import com.gitee.kooder.gitea.GiteaException;
 import com.gitee.kooder.server.Action;
 import io.vertx.ext.web.RoutingContext;
 
@@ -25,11 +28,14 @@ import io.vertx.ext.web.RoutingContext;
  */
 public class GiteaAction implements Action {
 
+    String SECRET_TOKEN = KooderConfig.getProperty("gitea.secret_token", Constants.DEFAULT_SECRET_TOKEN);
+
     /**
      * Gitea webhook handler
      * @param context
      */
-    public void index(RoutingContext context) {
-
+    public void index(RoutingContext context) throws GiteaException {
+        GiteaSystemHookManager.handleEvent(SECRET_TOKEN, context);
     }
+
 }

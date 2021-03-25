@@ -17,7 +17,7 @@ package com.gitee.kooder.server;
 
 import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.indexer.FetchTaskThread;
-import com.gitee.kooder.indexer.GiteaIndexThread;
+import com.gitee.kooder.gitea.GiteaIndexThread;
 import com.gitee.kooder.gitee.GiteeIndexThread;
 import com.gitee.kooder.indexer.GitlabIndexThread;
 import io.vertx.core.http.HttpServerResponse;
