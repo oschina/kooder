@@ -82,6 +82,7 @@ docker-compose up -d
 ```
 
 
+
 **Use it in Gitlab**
 
 Config following properties：
@@ -107,6 +108,35 @@ git.password =
 ```
 
 Kooder will use access token as the password if you don't offer one.
+
+**Use it in Gitea**
+
+1.Site Administration
+
+![](./docs/img/gitea_webhook.png)
+
+2.Add Gitea Webhook
+
+![](./docs/img/gitea_webhook_select.png)
+
+3.Set up Webhook
+
+* Set Target URL to  `http://ip:port/gitea`
+* Set POST Content Type to `POST + application/json`
+* Check`All Event` or `Custom Events` for the `Trigger On` option. ( If you choose `Custom Events`, you need to check `Repo`, `Push` and `Issue`)
+
+![](./docs/img/gitea_webhook_setting.png)
+
+
+2.Config following properties.
+
+```
+gitea.secret_token = <webhook secret token>
+gitea.url = http://gitea-ip:prot/
+gitea.personal_access_token = <admin user personal access token>
+git.username = <admin username>
+git.password = <admin password>
+```
 
 
 **Build and Run**
