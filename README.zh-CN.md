@@ -1,6 +1,7 @@
 ## Kooder
 
 ### 背景
+![](./docs/img/kooder_logo.png)
 
 一个企业里往往有大量的项目，每个项目都包含很多的代码，这些代码都是企业的核心资产。
 经过日积月累，不同的开发人员不断的修改完善，企业中很难有人能掌握所有的代码。
@@ -168,7 +169,7 @@ git.password =
 
 3.设置 Web 钩子。
 
-Url 填写 `http://ip:port/gitea`，请求方式为`POST + application/json`，触发条件可选`所有事件`或者`自定义事件`。
+Url 填写 `http://kooder-ip:kooder-port/gitea`，请求方式为`POST + application/json`，触发条件可选`所有事件`或者`自定义事件`。
 
 如选择自定义事件，则需要勾选仓库事件的`推送`、`仓库`选项，和工单事件的`工单`选项。
 
