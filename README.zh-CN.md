@@ -59,11 +59,11 @@ $ cd kooder
 
 `http.port`  Kooder 运行的 HTTP 端口
 
-2. 配置 Gitlab 服务地址
+2. 配置 GitLab 服务地址
 
-目前 Kooder 支持 Gitee 和 Gitlab ，其他服务正在开发中。
+目前 Kooder 支持 Gitee、GitLab 和 Gitea ，其他服务正在开发中。
 
-`gitlab.url`  访问 Gitlab 的首页  
+`gitlab.url`  访问 GitLab 的首页  
 `gitlab.personal_access_token`  Gitlab 管理员账号 root 的 Personal Access Token
 
 更多配置项请看 [configuration.md](docs/configuration.md)
@@ -84,14 +84,14 @@ $ bin/gateway.sh
 
 @see [API.md](docs/API.md)
 
-### Docker安装
+### Docker 安装
 
 #### docker-compose
 依赖
 * docker-ce环境
 * docker-compose
 
-开发代码优化后，部署只需将代码clone下来，然后在服务器上部署容器平台，在平台上执行如下命令：
+开发代码优化后，部署只需将代码 clone 下来，然后在服务器上部署容器平台，在平台上执行如下命令：
 ```
 ### 开箱即用
 docker-compose up -d 
@@ -102,7 +102,7 @@ docker-compose down
 
 
 
-#### docker-compose ha版
+#### docker-compose ha 版
 依赖
 * docker-ce环境
 * docker-compose
@@ -130,7 +130,9 @@ docker-compose down
 docker-compose up -d
 ```
 
-**对接 Gitlab**
+### 对接不同平台
+
+#### 对接 GitLab
 
 需配置如下几项：
 
@@ -143,7 +145,7 @@ git.password =
 
 如果不填写密码，则 Kooder 会自动使用 access token 作为密码。
 
-**对接 Gitee**
+#### 对接 Gitee
 
 需配置如下几项：
 
@@ -154,10 +156,37 @@ git.username = root
 git.password =  
 ```
 
+#### 对接 Gitea
+
+1.进入 Gitea 管理后台；
+
+![](./docs/img/gitea_webhook.png)
+
+2.添加 Gitea Web 钩子；
+
+![](./docs/img/gitea_webhook_select.png)
+
+3.设置 Web 钩子。
+
+Url 填写 `http://ip:port/gitea`，请求方式为`POST + application/json`，触发条件可选`所有事件`或者`自定义事件`。
+
+如选择自定义事件，则需要勾选仓库事件的`推送`、`仓库`选项，和工单事件的`工单`选项。
+
+![](./docs/img/gitea_webhook_setting.png)
 
 
+2.配置如下几项
 
-**构建并运行**
+```
+gitea.secret_token = <webhook secret token>
+gitea.url = http://gitea-ip:prot/
+gitea.personal_access_token = <admin personal access token>
+git.username = <admin username>
+git.password = <admin password>
+```
+
+
+### 构建并运行
 
 ```
 $ cd Kooder
@@ -168,7 +197,7 @@ $ bin/gateway.sh
 ```
 
 
-**搜索界面效果**
+### 搜索界面效果
 ![kooder-index](docs/img/kooder-index.png)
 
 ![Kooder ScreenShot](docs/img/screenshot.png)
