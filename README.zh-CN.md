@@ -1,5 +1,5 @@
 ## Kooder
-![](./docs/img/kooder_logo.png)
+![](./gateway/src/main/webapp/img/kooder_logo.png)
 
 ### 背景
 
