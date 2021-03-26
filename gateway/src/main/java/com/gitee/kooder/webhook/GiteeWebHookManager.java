@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gitee.kooder.action;
+package com.gitee.kooder.webhook;
 
 import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.gitee.*;

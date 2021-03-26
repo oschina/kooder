@@ -23,6 +23,8 @@ import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
 import com.gitee.kooder.queue.QueueTask;
 import com.gitee.kooder.server.Action;
+import com.gitee.kooder.webhook.GitlabSystemHookManager;
+import com.gitee.kooder.webhook.GitlabWebhookManager;
 import io.vertx.ext.web.RoutingContext;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.Project;

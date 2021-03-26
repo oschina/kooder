@@ -19,6 +19,7 @@ import com.gitee.kooder.core.Constants;
 import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.gitee.GiteeException;
 import com.gitee.kooder.server.Action;
+import com.gitee.kooder.webhook.GiteeWebHookManager;
 import io.vertx.ext.web.RoutingContext;
 
 /**
