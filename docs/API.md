@@ -2,7 +2,7 @@
 
 **搜索接口**
 
-/search/repositories  #仓库搜索  
+GET(POST): /search/repositories  #仓库搜索  
 
 |参数名 |参数含义  | 示例|
 --- | --- | ---
@@ -12,7 +12,7 @@
 |sort|排序方法(stars,forks,update)|sort=update|
 |p|页码(每页20条)|p=3|
 
-/search/codes         #代码搜索  
+GET(POST): /search/codes         #代码搜索  
 
 |参数名 |参数含义  | 示例|
 --- | --- | ---
@@ -23,7 +23,7 @@
 |sort|排序方法(stars,forks,update)|sort=update|
 |p|页码(每页20条)|p=3|
 
-/search/issues        #Issue 搜索
+GET(POST): /search/issues        #Issue 搜索
 
 |参数名 |参数含义  | 示例|
 --- | --- | ---
