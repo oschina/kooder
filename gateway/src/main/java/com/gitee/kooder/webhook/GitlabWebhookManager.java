@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * This class provides a handler for processing GitLab Web Hook callouts.
  * @author Winter Lau<javayou@gmail.com>
  */
-class GitlabWebhookManager {
+public class GitlabWebhookManager {
 
     private final static org.slf4j.Logger log = LoggerFactory.getLogger(GitlabWebhookManager.class);
 

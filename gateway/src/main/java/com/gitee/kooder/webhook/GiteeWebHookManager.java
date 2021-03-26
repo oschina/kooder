@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * @author zhanggx
  */
-class GiteeWebHookManager {
+public class GiteeWebHookManager {
 
     /**
      * handle gitee web hook
