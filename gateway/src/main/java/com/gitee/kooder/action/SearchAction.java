@@ -67,21 +67,33 @@ public class SearchAction implements SearchActionBase {
     }
 
     /**
-     * Search Repositories
+     * API: Search Repositories
      * @param context
      * @throws IOException
      */
     public void repositories(RoutingContext context) throws IOException {
+        String httpMethod = context.request().method().name().toUpperCase();
+        switch(httpMethod){
+            case "GET":
+            case "POST":
+                this.doSearchRepo(context);
+                break;
+            case "PUT":
+                //TODO add repo to index
+        }
+    }
+
+    private void doSearchRepo(RoutingContext context) throws IOException {
         String q = param(context.request(), "q");
         String sort = param(context.request(), "sort");
         String lang = param(context.request(), Constants.FIELD_LANGUAGE);
-        int page = Math.max(1, param(context.request(),"p", 1));
+        int page = Math.max(1, param(context.request(), "p", 1));
         int eid = param(context.request(), Constants.FIELD_ENTERPRISE_ID, 0);
 
         //Specified repositories search
         List<String> repos = Arrays.asList(param(context.request(), Constants.FIELD_REPO_ID, "").split(","));
         String body = context.getBodyAsString();
-        if(body != null)
+        if (body != null)
             repos.addAll(Arrays.asList(body.split(",")));
         List<Long> iRepos = repos.stream().map(r -> NumberUtils.toLong(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
 
@@ -99,14 +111,25 @@ public class SearchAction implements SearchActionBase {
     }
 
     /**
-     * Search Issues
+     * API: Search Issues
      * @param context
      * @throws IOException
      */
     public void issues(RoutingContext context) throws IOException {
+        String httpMethod = context.request().method().name().toUpperCase();
+        switch(httpMethod){
+            case "GET":
+            case "POST":
+                this.doSearchIssue(context);
+                break;
+            case "PUT":
+        }
+    }
+
+    private void doSearchIssue(RoutingContext context) throws IOException {
         String q = param(context.request(), "q");
         String sort = param(context.request(), "sort");
-        int page = Math.max(1, param(context.request(),"p", 1));
+        int page = Math.max(1, param(context.request(), "p", 1));
         QueryResult result = QueryFactory.ISSUE()
                 .setEnterpriseId(param(context.request(), Constants.FIELD_ENTERPRISE_ID, 0))
                 .setSearchKey(q)
@@ -118,21 +141,32 @@ public class SearchAction implements SearchActionBase {
     }
 
     /**
-     * Search Codes
+     * API: Search Codes
      * @param context
      * @throws IOException
      */
     public void codes(RoutingContext context) throws IOException {
+        String httpMethod = context.request().method().name().toUpperCase();
+        switch(httpMethod){
+            case "GET":
+            case "POST":
+                this.doSearchCode(context);
+                break;
+            case "PUT":
+        }
+    }
+
+    private void doSearchCode(RoutingContext context) throws IOException {
         String q = param(context.request(), "q");
         String sort = param(context.request(), "sort");
         String lang = param(context.request(), Constants.FIELD_LANGUAGE);
-        int page = Math.max(1, param(context.request(),"p", 1));
+        int page = Math.max(1, param(context.request(), "p", 1));
         int eid = param(context.request(), Constants.FIELD_ENTERPRISE_ID, 0);
 
         //Specified repositories search
         List<String> repos = Arrays.asList(param(context.request(), Constants.FIELD_REPO_ID, "").split(","));
         String body = context.getBodyAsString();
-        if(body != null)
+        if (body != null)
             repos.addAll(Arrays.asList(body.split(",")));
         List<Long> iRepos = repos.stream().map(r -> NumberUtils.toLong(r, 0)).filter(r -> (r > 0)).collect(Collectors.toList());
 
@@ -148,7 +182,7 @@ public class SearchAction implements SearchActionBase {
                 .setPageSize(PAGE_SIZE)
                 .execute();
 
-        for(Searchable obj : result.getObjects()) {
+        for (Searchable obj : result.getObjects()) {
             SourceFile file = (SourceFile) obj;
             file.setResult(SearchHelper.hl_lines(file.getContents(), q, MAX_LINES));
         }
