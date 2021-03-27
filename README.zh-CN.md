@@ -146,12 +146,12 @@ git.password =
 
 如果不填写密码，则 Kooder 会自动使用 access token 作为密码。
 
-#### 对接 Gitee
+#### 对接 Gitee 私有化
 
 需配置如下几项：
 
 ```
-gitee.url = https://gitee.com/  
+gitee.url = https://<gitee-host>/  
 gitee.personal_access_token = <root user personal access token>  
 git.username = root  
 git.password =  
