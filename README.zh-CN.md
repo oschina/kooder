@@ -123,7 +123,7 @@ docker-compose -f docker-compose-ha.yaml down
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
 
 
-配置文件: `core/src/main/resource/kooder.properties`，修改配置文件之后，执行如下命令:
+配置文件: `core/src/main/resources/kooder.properties`，修改配置文件之后，执行如下命令:
 
 ```
 # 停用容器重新启动
