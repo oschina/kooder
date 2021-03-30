@@ -76,12 +76,17 @@ This is how it will look like：
 
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
 
-After modifing the config file `/deploy/kooder.properties`, run the following commands; delete local kooder image and rebuid it.
+After modifing the config file `core/src/main/resources/kooder.properties`, run the following commands; delete local kooder image and rebuid it.
 
 ```
-docker rmi imageID
+docker-compose down
 docker-compose up -d
+
 ```
+
+`registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:202103 `
+version：March 2021 
+The mirror remains active and updated, always ensuring the latest version
 
 
 
