@@ -16,6 +16,7 @@
 package com.gitee.kooder.server;
 
 import com.gitee.kooder.core.KooderConfig;
+import com.gitee.kooder.file.FileIndexThread;
 import com.gitee.kooder.indexer.FetchTaskThread;
 import com.gitee.kooder.gitea.GiteaIndexThread;
 import com.gitee.kooder.gitee.GiteeIndexThread;
@@ -41,6 +42,7 @@ public class Gateway extends GatewayBase {
         put("gitlab", new GitlabIndexThread());
         put("gitee", new GiteeIndexThread());
         put("gitea", new GiteaIndexThread());
+        put("file", new FileIndexThread());
     }};
 
     private Gateway() {
