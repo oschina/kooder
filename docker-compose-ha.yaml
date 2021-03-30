@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   koodera:
-    build: ./
+    image: hub.gitee.cc/kooder/kooder:202103
     expose:
       - 8080
   kooderb:
-    build: ./
+    image: hub.gitee.cc/kooder/kooder:202103
     expose:
       - 8080
 
