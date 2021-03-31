@@ -1,4 +1,4 @@
-![](./docs/img/kooder_logo.png)
+![](./gateway/src/main/webapp/img/kooder_logo.png)
 ### Intro
 
 Kooder is an open source code search project, offering code, repositories and issues search service for code hosting platforms including Gitee, GitLab and Gitea.
