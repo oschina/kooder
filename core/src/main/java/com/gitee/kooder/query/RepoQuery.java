@@ -99,7 +99,7 @@ public class RepoQuery extends QueryBase {
         //不搜索fork仓库
         builder.add(LongPoint.newExactQuery(Constants.FIELD_FORK, Constants.REPO_FORK_NO), BooleanClause.Occur.FILTER);
         //不搜索被屏蔽的仓库
-        builder.add(IntPoint.newExactQuery(Constants.FIELD_BLOCK, Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
+        //builder.add(IntPoint.newExactQuery(Constants.FIELD_BLOCK, Constants.REPO_BLOCK_NO), BooleanClause.Occur.FILTER);
 
         //BoostQuery
         //如果调整  boost 就要调整 ScoreHelper 中的 SCORE_FACTOR
