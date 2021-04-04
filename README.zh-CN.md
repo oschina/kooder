@@ -138,6 +138,7 @@ docker-compose up -d
 需配置如下几项：
 
 ```
+http.startup.tasks = indexer,gitlab
 gitlab.url = http://gitlab-host:gitlab-port/  
 gitlab.personal_access_token = <root user personal access token>  
 git.username = root  
@@ -151,6 +152,7 @@ git.password =
 需配置如下几项：
 
 ```
+http.startup.tasks = indexer,gitee
 gitee.url = https://<gitee-host>/  
 gitee.personal_access_token = <root user personal access token>  
 git.username = root  
@@ -179,6 +181,7 @@ Url 填写 `http://kooder-ip:kooder-port/gitea`，请求方式为`POST + applica
 2.配置如下几项
 
 ```
+http.startup.tasks = indexer,gitea
 gitea.secret_token = <webhook secret token>
 gitea.url = http://gitea-ip:prot/
 gitea.personal_access_token = <admin personal access token>

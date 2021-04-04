@@ -61,6 +61,7 @@ public interface Constants {
     String FIELD_IDENT          = "ident";
 
     /* 代码相关的字段定义 */
+    String FIELD_VENDER         = "vender";
     String FIELD_UUID           = "uuid";
     String FIELD_LANGUAGE       = "lang";
     String FIELD_NAME           = "name";

@@ -23,6 +23,8 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -34,6 +36,7 @@ public class KooderConfig {
     private final static Logger log = LoggerFactory.getLogger(KooderConfig.class);
 
     private final static String CONFIG_NAME = "/kooder.properties";
+    private final static List<String> gitVenderNames = Arrays.asList("gitee","gitlab","gitea");
     private static Configuration config;
 
     static {
@@ -139,5 +142,23 @@ public class KooderConfig {
      */
     public static String getProperty(String name, String defValue) {
         return config.getProperty(name, defValue);
+    }
+
+    /**
+     * return git vender name, such as gitee,gitlab,gitee
+     * @return
+     */
+    public static String getGitVenderName() {
+        try {
+            String initTasks = getProperty("http.startup.tasks");
+            String[] tasks = initTasks.split(",");
+            for (String task : tasks) {
+                if (gitVenderNames.contains(task))
+                    return task;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to read git vender name", e);
+        }
+        return null;
     }
  }

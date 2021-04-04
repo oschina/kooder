@@ -17,6 +17,7 @@ package com.gitee.kooder.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gitee.kooder.core.Constants;
+import com.gitee.kooder.core.KooderConfig;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -30,6 +31,9 @@ import java.util.List;
  */
 public final class SourceFile extends Searchable {
 
+    private final static String VENDER = KooderConfig.getGitVenderName();
+
+    private String vender;          // gitee,gitlab or gitea, using this field to indentify file url
     private String uuid;            // file unique identify
     private int enterprise;         // enterprise
     private Relation repository = Relation.EMPTY();    //repository, use this field to delete all files of repository
@@ -53,7 +57,8 @@ public final class SourceFile extends Searchable {
 
     private List<CodeLine> result;  // code lines with keyword highlight
 
-    public SourceFile() {}
+    public SourceFile() {
+    }
 
     public SourceFile(long repoId, String repoName, String fileLocation) {
         this.repository.id = repoId;
@@ -71,7 +76,12 @@ public final class SourceFile extends Searchable {
         String rurl = repository.getUrl();
         if(rurl.endsWith(".git"))
             rurl = rurl.substring(0, rurl.length() - 4);
-        this.setUrl(rurl + "/tree/" + this.getBranch() + "/" + this.getLocation());
+        if(this.vender == null)
+            this.vender = VENDER;
+        if("gitea".equals(this.vender))
+            this.setUrl(rurl + "/src/branch/" + this.getBranch() + "/" + this.getLocation());
+        else
+            this.setUrl(rurl + "/tree/" + this.getBranch() + "/" + this.getLocation());
     }
 
     /**
@@ -81,6 +91,7 @@ public final class SourceFile extends Searchable {
     @Override
     @JsonIgnore
     public SourceFile setDocument(Document doc) {
+        this.vender = doc.get(Constants.FIELD_VENDER);
         this.uuid = doc.get(Constants.FIELD_UUID);
         this.enterprise = NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0);
         this.repository.id = NumberUtils.toInt(doc.get(Constants.FIELD_REPO_ID));
@@ -113,26 +124,27 @@ public final class SourceFile extends Searchable {
     public Document getDocument() {
         Document document = new Document();
 
+        document.add(new StoredField(Constants.FIELD_VENDER,    this.vender));
         // Uuid is the primary key for documents
         document.add(new StringField(Constants.FIELD_UUID,      this.uuid,   Field.Store.YES));
 
         if(StringUtils.isNotBlank(this.branch))
-            document.add(new StringField(Constants.FIELD_BRANCH,    this.branch, Field.Store.YES));
+            document.add(new StringField(Constants.FIELD_BRANCH,this.branch, Field.Store.YES));
         document.add(new StoredField(Constants.FIELD_URL,       this.url));
 
         super.addLongToDoc(document, Constants.FIELD_ENTERPRISE_ID, this.enterprise);
 
         //repository info
-        super.addLongToDoc(document, Constants.FIELD_REPO_ID, this.repository.id);
-        super.addFacetToDoc(document, Constants.FIELD_REPO_NAME, this.repository.name);
+        super.addLongToDoc(document, Constants.FIELD_REPO_ID,       this.repository.id);
+        super.addFacetToDoc(document, Constants.FIELD_REPO_NAME,    this.repository.name);
         document.add(new StringField(Constants.FIELD_REPO_URL,      this.repository.url,    Field.Store.YES));
 
         //file meta
         if (StringUtils.isNotBlank(language))
-            super.addFacetToDoc(document, Constants.FIELD_LANGUAGE, this.language);
+            super.addFacetToDoc(document, Constants.FIELD_LANGUAGE,     this.language);
 
         if (StringUtils.isNotBlank(codeOwner))
-            super.addFacetToDoc(document, Constants.FIELD_CODE_OWNER, this.codeOwner);
+            super.addFacetToDoc(document, Constants.FIELD_CODE_OWNER,   this.codeOwner);
 
         //file info
         document.add(new TextField(Constants.FIELD_FILE_NAME,       this.getName(),         Field.Store.YES));
@@ -158,6 +170,14 @@ public final class SourceFile extends Searchable {
         super.addNumToDoc(document, Constants.FIELD_LAST_INDEX, indexTime);
 
         return document;
+    }
+
+    public String getVender() {
+        return vender;
+    }
+
+    public void setVender(String vender) {
+        this.vender = vender;
     }
 
     public String getUuid() {

@@ -90,6 +90,7 @@ docker-compose up -d
 Config following properties：
 
 ```
+http.startup.tasks = indexer,gitlab
 gitlab.url = http://gitlab-host:gitlab-port/  
 gitlab.personal_access_token = <root user personal access token>  
 git.username = root  
@@ -103,6 +104,7 @@ Kooder will use access token as the password if you don't offer one.
 Config following properties：
 
 ```
+http.startup.tasks = indexer,gitee
 gitee.url = https://gitee.com/  
 gitee.personal_access_token = <root user personal access token>  
 git.username = root  
@@ -133,6 +135,7 @@ Kooder will use access token as the password if you don't offer one.
 2.Config following properties.
 
 ```
+http.startup.tasks = indexer,gitea
 gitea.secret_token = <webhook secret token>
 gitea.url = http://gitea-ip:prot/
 gitea.personal_access_token = <admin user personal access token>
