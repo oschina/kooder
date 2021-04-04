@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   kooder:
-    build: ./
+    image: registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:202103
     container_name: kooder
     volumes:
       - ./core/src/main/resources/kooder.properties:/root/core/src/main/resources/kooder.properties:ro

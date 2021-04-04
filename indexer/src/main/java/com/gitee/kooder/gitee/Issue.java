@@ -21,6 +21,7 @@ import com.gitee.kooder.models.Relation;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author zhanggx
@@ -37,7 +38,7 @@ public class Issue {
     private String state;
     private String title;
     private String body;
-    private List<String> labels;
+    private List<Label> labels;
     private User user;
     private Repository repository;
 
@@ -54,12 +55,14 @@ public class Issue {
         com.gitee.kooder.models.Issue iss = new com.gitee.kooder.models.Issue();
         iss.setId(getId());
         iss.setIdent(this.getRepository().getId() + "_" + this.getId());
-        iss.setRepository(new Relation(this.getRepository().getId(), this.getRepository().getName(), this.getRepository().getUrl()));
+        if (this.getRepository().getId() != null) {
+            iss.setRepository(new Relation(this.getRepository().getId(), this.getRepository().getName(), this.getRepository().getUrl()));
+        }
         iss.setOwner(new Relation(this.getUser().getId(), this.getUser().getName(), this.getUser().getHtmlUrl()));
         iss.setTitle(this.getTitle());
         iss.setDescription(this.getBody());
         iss.setUrl(this.getHtmlUrl());
-        iss.setLabels(new ArrayList<>(this.getLabels()));
+        iss.setLabels(this.getLabels().stream().map(Label::getName).collect(Collectors.toList()));
         iss.setCreatedAt(this.getCreatedAt().getTime());
         iss.setUpdatedAt(this.getUpdatedAt().getTime());
         iss.setState((STATE_OPEN.equals(this.getState()) || STATE_PROGRESSING.equals(this.getState()))
@@ -107,11 +110,11 @@ public class Issue {
         this.body = body;
     }
 
-    public List<String> getLabels() {
+    public List<Label> getLabels() {
         return labels;
     }
 
-    public void setLabels(List<String> labels) {
+    public void setLabels(List<Label> labels) {
         this.labels = labels;
     }
 

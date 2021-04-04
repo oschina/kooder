@@ -1,10 +1,7 @@
-## Kooder
-
 ![](./gateway/src/main/webapp/img/kooder_logo.png)
-
 ### Intro
 
-Kooder is a open source code search project, offering code, repositories and issues search service for code hosting platforms including Gitee, GitLab and Gitea.
+Kooder is an open source code search project, offering code, repositories and issues search service for code hosting platforms including Gitee, GitLab and Gitea.
 
 
 **UI**
@@ -76,14 +73,16 @@ This is how it will look like：
 
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
 
-After modifing the config file `/deploy/kooder.properties`, run the following commands; delete local kooder image and rebuid it.
+After modifing the config file `core/src/main/resources/kooder.properties`, run the following commands; delete local kooder image and rebuid it.
 
 ```
-docker rmi imageID
+docker-compose down
 docker-compose up -d
 ```
 
+version：March 2021 
 
+The mirror remains active and updated, always ensuring the latest version
 
 **Use it in Gitlab**
 
@@ -141,6 +140,26 @@ gitea.url = http://gitea-ip:prot/
 gitea.personal_access_token = <admin user personal access token>
 git.username = <admin username>
 git.password = <admin password>
+```
+
+**Index repository from file**
+
+Config `kooder.properties` ：
+
+```java
+//Enable index repository from file
+
+http.startup.tasks = indexer,file  //Add file field
+
+file.index.path = C:/Documents/Kooder/file.txt	 //Config file path of file.txt
+```
+
+Content of file.txt
+```
+// Add repositories URL
+http://gitee.com/koode/kooder.git
+https://gitee.com/ld/J2Cache.git
+...
 ```
 
 

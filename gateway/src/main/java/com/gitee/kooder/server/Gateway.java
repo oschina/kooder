@@ -16,6 +16,7 @@
 package com.gitee.kooder.server;
 
 import com.gitee.kooder.core.KooderConfig;
+import com.gitee.kooder.file.FileIndexThread;
 import com.gitee.kooder.indexer.FetchTaskThread;
 import com.gitee.kooder.gitea.GiteaIndexThread;
 import com.gitee.kooder.gitee.GiteeIndexThread;
@@ -35,12 +36,13 @@ import java.util.Map;
  */
 public class Gateway extends GatewayBase {
 
-    private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif)";
+    private final static String pattern_static_file = "/.*\\.(css|ico|js|html|htm|jpg|png|gif|svg)";
     private final static Map<String, Thread> startupTasks = new HashMap(){{
         put("indexer", new FetchTaskThread());
         put("gitlab", new GitlabIndexThread());
         put("gitee", new GiteeIndexThread());
         put("gitea", new GiteaIndexThread());
+        put("file", new FileIndexThread());
     }};
 
     private Gateway() {

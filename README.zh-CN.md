@@ -1,4 +1,3 @@
-## Kooder
 ![](./gateway/src/main/webapp/img/kooder_logo.png)
 
 ### 背景
@@ -187,6 +186,24 @@ gitea.url = http://gitea-ip:prot/
 gitea.personal_access_token = <admin personal access token>
 git.username = <admin username>
 git.password = <admin password>
+```
+
+### 从文件索引仓库
+
+在 `kooder.properties` 配置文件中进行如下设置：
+```java
+//开启 Kooder 从文件索引仓库的特性
+
+https.startup.tasks = indexer,file //增加 file 字段
+
+file.index.path = C:/Documents/Kooder/file.txt //配置 file.index.path 文件路径（file.txt 为本地文件，路径可自行配置）
+```
+file.txt 内容
+```
+//添加仓库地址
+https://gitee.com/koode/kooder.git
+https://gitee.com/ld/J2Cache.git
+...
 ```
 
 

@@ -2,11 +2,11 @@ version: '3.8'
 
 services:
   koodera:
-    build: ./
+    image: registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:202103
     expose:
       - 8080
   kooderb:
-    build: ./
+    image: registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:202103
     expose:
       - 8080
 
