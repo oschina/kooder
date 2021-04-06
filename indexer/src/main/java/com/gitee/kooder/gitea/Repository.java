@@ -278,7 +278,6 @@ public class Repository {
         repo.setOwner(new Relation(this.getOwner().getId(), this.getOwner().getLogin(), ""));
         repo.setVisibility(this.getPrivate() ? Constants.VISIBILITY_PRIVATE : this.getInternal() ? Constants.VISIBILITY_INTERNAL : Constants.VISIBILITY_PUBLIC);
         repo.setLicense(null);
-        repo.setLang(this.getOwner().getLanguage());
         repo.setReadme(null);
         repo.setFork(0);
         repo.setTags(Collections.emptyList());
