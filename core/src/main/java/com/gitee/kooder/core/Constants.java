@@ -124,4 +124,8 @@ public interface Constants {
     String FIELD_COMPLEXITY     = "complexity";
 
     String DEFAULT_SECRET_TOKEN = "gsearch";
+
+    String GITLAB = "gitlab";
+    String GITEE = "gitee";
+    String GITEA = "gitea";
 }

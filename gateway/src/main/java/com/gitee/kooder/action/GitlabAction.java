@@ -89,6 +89,7 @@ public class GitlabAction implements Action {
                     Repository repo = new Repository(p);
                     CodeRepository coder = new CodeRepository(repo);
                     coder.setScm(CodeRepository.SCM_GIT);
+                    coder.setVender(Constants.GITLAB);
                     QueueTask.add(Constants.TYPE_CODE, coder); //update source code indexes
                 }
             }

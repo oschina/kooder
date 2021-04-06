@@ -86,6 +86,7 @@ public class GiteaIndexThread extends Thread {
             codes.setScm(CodeRepository.SCM_GIT);
             codes.setName(repository.getName());
             codes.setUrl(repository.getHtmlUrl());
+            codes.setVender(Constants.GITEA);
             QueueTask.add(Constants.TYPE_CODE, codes);
             pc++;
         }

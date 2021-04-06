@@ -80,6 +80,7 @@ public class GiteaSystemHookManager {
         Repository repository = pushWebHook.getRepository().toKooderRepository();
         CodeRepository codeRepository = new CodeRepository(repository);
         codeRepository.setScm(CodeRepository.SCM_GIT);
+        codeRepository.setVender(Constants.GITEA);
         QueueTask.add(Constants.TYPE_CODE, codeRepository);
     }
 

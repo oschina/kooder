@@ -107,6 +107,7 @@ public class GiteeWebHookManager {
         repository.setEnterprise(new Relation(enterprise.getId(), enterprise.getName(), enterprise.getUrl()));
         CodeRepository codeRepository = new CodeRepository(repository);
         codeRepository.setScm(CodeRepository.SCM_GIT);
+        codeRepository.setVender(Constants.GITEE);
         QueueTask.add(Constants.TYPE_CODE, codeRepository);
     }
 

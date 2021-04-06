@@ -27,6 +27,11 @@ public class FileIndexThread extends Thread {
     @Override
     public void run() {
         String filePath = KooderConfig.getProperty("file.index.path");
+        String vender = KooderConfig.getProperty("file.index.vender");
+
+        if (StringUtils.isBlank(vender)) {
+            throw new IllegalArgumentException("file.index.vender cannot be null or empty");
+        }
 
         long start = System.currentTimeMillis();
         AtomicLong id = new AtomicLong(start);
@@ -46,6 +51,7 @@ public class FileIndexThread extends Thread {
                             codes.setScm(CodeRepository.SCM_GIT);
                             codes.setName(repo.getName());
                             codes.setUrl(repo.getUrl());
+                            codes.setVender(vender);
                             QueueTask.add(Constants.TYPE_CODE, codes);
                             success.incrementAndGet();
                         } catch (Exception e) {

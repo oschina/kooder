@@ -178,6 +178,7 @@ public class GitlabIndexThread extends Thread {
             codes.setScm(CodeRepository.SCM_GIT);
             codes.setName(p.getName());
             codes.setUrl(p.getWebUrl());
+            codes.setVender(Constants.GITLAB);
             //write to lucene index
             QueueTask.add(Constants.TYPE_CODE, codes);
         } catch (Exception e) {
