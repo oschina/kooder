@@ -144,21 +144,4 @@ public class KooderConfig {
         return config.getProperty(name, defValue);
     }
 
-    /**
-     * return git vender name, such as gitee,gitlab,gitee
-     * @return
-     */
-    public static String getGitVenderName() {
-        try {
-            String initTasks = getProperty("http.startup.tasks");
-            String[] tasks = initTasks.split(",");
-            for (String task : tasks) {
-                if (gitVenderNames.contains(task))
-                    return task;
-            }
-        } catch (Exception e) {
-            log.warn("Failed to read git vender name", e);
-        }
-        return "unknown";
-    }
  }

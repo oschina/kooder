@@ -345,7 +345,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             List<String> codeLines = TextFileUtils.readFileLines(stream, 20000);
             String contents = String.join("\n", codeLines);
 
-            SourceFile doc = new SourceFile();
+            SourceFile doc = new SourceFile(repo.getVender());
             doc.setEnterprise(repo.getEnterprise());
             doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
             doc.setBranch(git.getRepository().getBranch());
@@ -380,7 +380,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
      * @throws IOException
      */
     private SourceFile buildBinaryDocument(CodeRepository repo, Git git, String path, ObjectId objectId) throws IOException {
-        SourceFile doc = new SourceFile();
+        SourceFile doc = new SourceFile(repo.getVender());
 
         doc.setEnterprise(repo.getEnterprise());
         doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));

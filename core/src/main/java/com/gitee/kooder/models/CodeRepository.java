@@ -38,6 +38,7 @@ public class CodeRepository extends Searchable {
 
     private int enterprise = 0; //所属企业id
     private String scm;         //代码源类型：git/svn/file
+    private String vender;      // git vender name, for SourceFile
     private String name;        //仓库名称
     private String url;         //仓库地址，ex: https://gitee.com/ld/J2Cache
     private String lastCommitId;//最后提交编号
@@ -115,6 +116,14 @@ public class CodeRepository extends Searchable {
 
     public void setEnterprise(int enterprise) {
         this.enterprise = enterprise;
+    }
+
+    public String getVender() {
+        return vender;
+    }
+
+    public void setVender(String vender) {
+        this.vender = vender;
     }
 
     /**

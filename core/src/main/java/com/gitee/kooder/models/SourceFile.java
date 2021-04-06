@@ -17,7 +17,6 @@ package com.gitee.kooder.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gitee.kooder.core.Constants;
-import com.gitee.kooder.core.KooderConfig;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -30,8 +29,6 @@ import java.util.List;
  * @author Winter Lau<javayou@gmail.com>
  */
 public final class SourceFile extends Searchable {
-
-    private final static String VENDER = KooderConfig.getGitVenderName();
 
     private String vender;          // gitee,gitlab or gitea, using this field to indentify file url
     private String uuid;            // file unique identify
@@ -59,6 +56,9 @@ public final class SourceFile extends Searchable {
 
     public SourceFile() {
     }
+    public SourceFile(String vender) {
+        this.vender = vender;
+    }
 
     public SourceFile(long repoId, String repoName, String fileLocation) {
         this.repository.id = repoId;
@@ -76,8 +76,6 @@ public final class SourceFile extends Searchable {
         String rurl = repository.getUrl();
         if(rurl.endsWith(".git"))
             rurl = rurl.substring(0, rurl.length() - 4);
-        if(this.vender == null)
-            this.vender = VENDER;
         if("gitea".equals(this.vender))
             this.setUrl(rurl + "/src/branch/" + this.getBranch() + "/" + this.getLocation());
         else
