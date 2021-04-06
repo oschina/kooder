@@ -190,6 +190,8 @@ git.password = <admin password>
 
 ### 从文件索引仓库
 
+Kooder 目前支持同一托管平台的仓库索引，如需索引多个托管平台，进行分次导入即可。
+
 在 `kooder.properties` 配置文件中进行如下设置：
 ```java
 //开启 Kooder 从文件索引仓库的特性
@@ -197,10 +199,13 @@ git.password = <admin password>
 https.startup.tasks = indexer,file //增加 file 字段
 
 file.index.path = C:/Documents/Kooder/file.txt //配置 file.index.path 文件路径（file.txt 为本地文件，路径可自行配置）
+
+file.index.vender = gitee //指定对应的代码托管平台（必须）
+
 ```
 file.txt 内容
 ```
-//添加仓库地址
+//添加配置中指定的托管平台仓库地址
 https://gitee.com/koode/kooder.git
 https://gitee.com/ld/J2Cache.git
 ...
