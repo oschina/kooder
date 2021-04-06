@@ -23,8 +23,6 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -36,7 +34,6 @@ public class KooderConfig {
     private final static Logger log = LoggerFactory.getLogger(KooderConfig.class);
 
     private final static String CONFIG_NAME = "/kooder.properties";
-    private final static List<String> gitVenderNames = Arrays.asList("gitee","gitlab","gitea");
     private static Configuration config;
 
     static {
