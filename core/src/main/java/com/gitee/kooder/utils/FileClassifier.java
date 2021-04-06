@@ -91,9 +91,11 @@ public class FileClassifier {
 
         for (String m : matches) {
             toSort.put(m, 0);
-            for (String keyword : database.get(m).keywords) {
-                if (content.contains(keyword)) {
-                    toSort.put(m, toSort.get(m) + 1);
+            if (database.get(m).keywords != null) {
+                for (String keyword : database.get(m).keywords) {
+                    if (content.contains(keyword)) {
+                        toSort.put(m, toSort.get(m) + 1);
+                    }
                 }
             }
         }
