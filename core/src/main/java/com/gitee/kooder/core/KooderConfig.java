@@ -159,6 +159,6 @@ public class KooderConfig {
         } catch (Exception e) {
             log.warn("Failed to read git vender name", e);
         }
-        return null;
+        return "unknown";
     }
  }
