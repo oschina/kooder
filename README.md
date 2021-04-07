@@ -144,6 +144,8 @@ git.password = <admin password>
 
 **Index repository from file**
 
+Kooder currently supports repository indexing for the same hosting platform. If you need to index multiple hosting platforms, you can do a split import.
+
 Config `kooder.properties` ：
 
 ```java
@@ -151,12 +153,14 @@ Config `kooder.properties` ：
 
 http.startup.tasks = indexer,file  //Add file field
 
-file.index.path = C:/Documents/Kooder/file.txt	 //Config file path of file.txt
+file.index.path = C:/Documents/Kooder/file.txt   //Config file path of file.txt
+
+file.index.vender = gitee //Specify the corresponding code hosting platform
 ```
 
 Content of file.txt
 ```
-// Add repositories URL
+// Add the repository URL of the hosting platform specified in the configuration
 http://gitee.com/koode/kooder.git
 https://gitee.com/ld/J2Cache.git
 ...
