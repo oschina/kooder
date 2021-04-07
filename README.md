@@ -54,6 +54,8 @@ http.url = http://<kooder-host>:8080
 Click here to see more config options [configuration.md](docs/configuration.md)
 
 ### Install Docker
+
+#### Single container deploy
 Dependencies
 * docker-ce environment
 * docker-compose
@@ -69,20 +71,43 @@ docker-compose up -d
 docker-compose down
 ```
 
+
+#### ha deploy
+``` 
+### Run containers in the background
+docker-compose -f docker-compose-ha.yaml up -d
+
+### Stop and remove containers
+docker-compose -f docker-compose-ha.yaml down
+```
+
 This is how it will look like：
 
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
+
+
 
 After modifing the config file `core/src/main/resources/kooder.properties`, run the following commands; delete local kooder image and rebuid it.
 
 ```
 docker-compose down
-docker-compose up -d
+docker-compose up -d 
 ```
 
-version：March 2021 
+View service startup status
+``` 
+docker logs -f CONTAINER_ID
+......
+2021-04-07 13:28:49 INFO [gateway] - Tasks [indexer,gitee] started.
+2021-04-07 13:28:49 INFO [gateway] - READY (*:8080)!
+.......
+```
+The log output as the above information indicates that the startup is successful
 
-The mirror remains active and updated, always ensuring the latest version
+**prompt**
+
+Every startup will execute `mvn install` to ensure that the configuration file takes effect
+
 
 **Use it in Gitlab**
 
@@ -148,7 +173,7 @@ Kooder currently supports repository indexing for the same hosting platform. If 
 
 Config `kooder.properties` ：
 
-```java
+```
 //Enable index repository from file
 
 http.startup.tasks = indexer,file  //Add file field
