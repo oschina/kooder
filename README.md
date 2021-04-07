@@ -77,12 +77,23 @@ After modifing the config file `core/src/main/resources/kooder.properties`, run 
 
 ```
 docker-compose down
-docker-compose up -d
+docker-compose up -d 
 ```
 
-version：March 2021 
+View service startup status
+``` 
+docker logs -f CONTAINER_ID
+......
+2021-04-07 13:28:49 INFO [gateway] - Tasks [indexer,gitee] started.
+2021-04-07 13:28:49 INFO [gateway] - READY (*:8080)!
+.......
+```
+The log output as the above information indicates that the startup is successful
 
-The mirror remains active and updated, always ensuring the latest version
+**prompt**
+
+Every startup will execute mvn to ensure that the configuration file takes effect
+
 
 **Use it in Gitlab**
 
