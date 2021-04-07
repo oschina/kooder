@@ -125,10 +125,23 @@ docker-compose -f docker-compose-ha.yaml down
 配置文件: `core/src/main/resources/kooder.properties`，修改配置文件之后，执行如下命令:
 
 ```
-# 停用容器重新启动
 docker-compose down
-docker-compose up -d
+docker-compose up -d 
 ```
+
+查看服务启动状态
+``` 
+docker logs -f CONTAINER_ID
+......
+2021-04-07 13:28:49 INFO [gateway] - Tasks [indexer,gitee] started.
+2021-04-07 13:28:49 INFO [gateway] - READY (*:8080)!
+.......
+```
+以上信息显示的日志表明启动成功
+
+**注意**
+
+每次启动都会执行`mvn install`以确保配置文件生效
 
 ### 对接不同平台
 

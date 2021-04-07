@@ -92,7 +92,7 @@ The log output as the above information indicates that the startup is successful
 
 **prompt**
 
-Every startup will execute mvn to ensure that the configuration file takes effect
+Every startup will execute `mvn install` to ensure that the configuration file takes effect
 
 
 **Use it in Gitlab**
