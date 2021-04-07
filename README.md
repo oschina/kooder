@@ -74,10 +74,10 @@ docker-compose down
 
 #### ha deploy
 ``` 
-### 开箱即用
+### Run containers in the background
 docker-compose -f docker-compose-ha.yaml up -d
 
-### 关闭容器
+### Stop and remove containers
 docker-compose -f docker-compose-ha.yaml down
 ```
 
