@@ -54,6 +54,8 @@ http.url = http://<kooder-host>:8080
 Click here to see more config options [configuration.md](docs/configuration.md)
 
 ### Install Docker
+
+#### Single container deploy
 Dependencies
 * docker-ce environment
 * docker-compose
@@ -69,9 +71,21 @@ docker-compose up -d
 docker-compose down
 ```
 
+
+#### ha deploy
+``` 
+### 开箱即用
+docker-compose -f docker-compose-ha.yaml up -d
+
+### 关闭容器
+docker-compose -f docker-compose-ha.yaml down
+```
+
 This is how it will look like：
 
 ![Kooder docker-ha](docs/img/docker-ha-kooder.png)
+
+
 
 After modifing the config file `core/src/main/resources/kooder.properties`, run the following commands; delete local kooder image and rebuid it.
 
@@ -157,7 +171,7 @@ git.password = <admin password>
 
 Config `kooder.properties` ：
 
-```java
+```
 //Enable index repository from file
 
 http.startup.tasks = indexer,file  //Add file field
