@@ -60,7 +60,7 @@ public abstract class GatewayBase implements Daemon {
         if(StringUtils.isBlank(this.bind))
             this.bind = null;
         this.port = KooderConfig.getHttpPort();
-        this.workerPoolSize = NumberUtils.toInt(KooderConfig.getProperty("http.worker.pool.size"), 16);
+        this.workerPoolSize = NumberUtils.toInt(KooderConfig.getProperty("http.worker.pool.size"), Runtime.getRuntime().availableProcessors());
 
         this.vOptions = new VertxOptions();
         this.vOptions.setWorkerPoolSize(this.workerPoolSize);

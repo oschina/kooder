@@ -56,7 +56,7 @@ public class Gateway extends GatewayBase {
         //body parser
         router.route().handler(BodyHandler.create().setHandleFileUploads(false));
         //action handler
-        router.route().handler(context -> {
+        router.route().blockingHandler(context -> {
             long ct = System.currentTimeMillis();
             try {
                 ActionExecutor.execute(context);
@@ -68,7 +68,7 @@ public class Gateway extends GatewayBase {
                     res.close();
             }
             writeAccessLog(context.request(), System.currentTimeMillis() - ct);
-        });
+        }, false);
 
         InetSocketAddress address = (bind==null)?new InetSocketAddress(this.port):new InetSocketAddress(this.bind, this.port);
 
