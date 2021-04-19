@@ -39,9 +39,9 @@ public class Repository {
     private Integer openPrCounter;
     private Integer releaseCounter;
     private String defaultBranch;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private Date createdAt;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private Date updatedAt;
     private User owner;
 

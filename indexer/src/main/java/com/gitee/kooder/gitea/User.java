@@ -18,9 +18,9 @@ public class User {
     private String language;
     private Boolean isAdmin;
     private Boolean restricted;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private Date lastLogin;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private Date created;
 
     public Integer getId() {
