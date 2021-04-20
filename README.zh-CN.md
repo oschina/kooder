@@ -209,7 +209,7 @@ Kooder 目前支持同一托管平台的仓库索引，如需索引多个托管�
 ```java
 //开启 Kooder 从文件索引仓库的特性
 
-https.startup.tasks = indexer,file //增加 file 字段
+http.startup.tasks = indexer,file //增加 file 字段
 
 file.index.path = C:/Documents/Kooder/file.txt //配置 file.index.path 文件路径（file.txt 为本地文件，路径可自行配置）
 
