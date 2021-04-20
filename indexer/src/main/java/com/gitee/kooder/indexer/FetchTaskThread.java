@@ -139,6 +139,8 @@ public class FetchTaskThread extends Thread {
                         repo.setScm(newRepo.getScm());
                     if(StringUtils.isNotBlank(newRepo.getUrl()))
                         repo.setUrl(newRepo.getUrl());
+                    if(StringUtils.isNotBlank(newRepo.getVender()))
+                        repo.setVender(newRepo.getVender());
                 } else {
                     repo = newRepo;
                 }
