@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * index from file
@@ -36,9 +35,7 @@ public class FileIndexThread extends Thread {
 
     @Override
     public void run() {
-
         long start = System.currentTimeMillis();
-        AtomicLong id = new AtomicLong(start);
         AtomicInteger success = new AtomicInteger(), error = new AtomicInteger();
         try {
             Files.lines(Paths.get(filePath))
@@ -46,7 +43,7 @@ public class FileIndexThread extends Thread {
                     .forEach(repoUrl -> {
                         try {
                             Repository repo = new Repository();
-                            repo.setId(id.getAndIncrement());
+                            repo.setId(repoUrl.hashCode());
                             repo.setName(repoUrl.substring(repoUrl.lastIndexOf("/") + 1, repoUrl.lastIndexOf(".git")));
                             repo.setUrl(repoUrl);
                             QueueTask.add(Constants.TYPE_REPOSITORY, repo);
