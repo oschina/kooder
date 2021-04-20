@@ -173,4 +173,12 @@ public class QueueTask implements Serializable {
         return JsonUtils.readValue(json, QueueTask.class);
     }
 
+    @Override
+    public String toString() {
+        return "QueueTask{" +
+                "type='" + type + '\'' +
+                ", action='" + action + '\'' +
+                ", objects=" + objects +
+                '}';
+    }
 }
