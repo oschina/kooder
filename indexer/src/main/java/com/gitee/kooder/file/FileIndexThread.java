@@ -29,9 +29,8 @@ public class FileIndexThread extends Thread {
         String filePath = KooderConfig.getProperty("file.index.path");
         String vender = KooderConfig.getProperty("file.index.vender");
 
-        if (StringUtils.isBlank(vender)) {
-            throw new IllegalArgumentException("file.index.vender cannot be null or empty");
-        }
+        if (StringUtils.isBlank(vender))
+            vender = "gitee";
 
         long start = System.currentTimeMillis();
         AtomicLong id = new AtomicLong(start);
