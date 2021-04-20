@@ -135,6 +135,7 @@ public class CodeRepository extends Searchable {
     public Document getDocument() {
         Document doc = new Document();
         doc.add(new StringField(Constants.FIELD_REPO_ID,        this.getIdAsString(), Field.Store.YES));
+        doc.add(new StoredField(Constants.FIELD_VENDER, this.vender));
         doc.add(new StoredField(Constants.FIELD_ENTERPRISE_ID,  this.getEnterprise()));
         doc.add(new StoredField(Constants.FIELD_REPO_URL,       this.getUrl()));
         doc.add(new StoredField(Constants.FIELD_REPO_NAME,      this.getName()));
@@ -157,6 +158,7 @@ public class CodeRepository extends Searchable {
     public CodeRepository setDocument(Document doc) {
         this.setId(NumberUtils.toLong(doc.get(Constants.FIELD_REPO_ID), 0));
         this.setEnterprise(NumberUtils.toInt(doc.get(Constants.FIELD_ENTERPRISE_ID), 0));
+        this.setVender(doc.get(Constants.FIELD_VENDER));
         this.setName(doc.get(Constants.FIELD_REPO_NAME));
         this.setUrl(doc.get(Constants.FIELD_REPO_URL));
         this.setLastCommitId(doc.get(Constants.FIELD_REVISION));
