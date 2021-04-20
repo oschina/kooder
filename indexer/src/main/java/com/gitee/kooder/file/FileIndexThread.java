@@ -23,14 +23,19 @@ import java.util.concurrent.atomic.AtomicLong;
 public class FileIndexThread extends Thread {
 
     private final static Logger log = LoggerFactory.getLogger(FileIndexThread.class);
+    private String filePath;
+    private String vender;
 
-    @Override
-    public void run() {
-        String filePath = KooderConfig.getProperty("file.index.path");
-        String vender = KooderConfig.getProperty("file.index.vender");
+    public FileIndexThread() {
+        filePath = KooderConfig.getProperty("file.index.path");
+        vender = KooderConfig.getProperty("file.index.vender");
 
         if (StringUtils.isBlank(vender))
             vender = "gitee";
+    }
+
+    @Override
+    public void run() {
 
         long start = System.currentTimeMillis();
         AtomicLong id = new AtomicLong(start);
