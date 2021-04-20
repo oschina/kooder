@@ -123,9 +123,10 @@ public class GitRepositoryProvider implements RepositoryProvider {
         try {
             long ct = System.currentTimeMillis();
             File repoFile = StorageFactory.getRepositoryPath(repo.getRelativePath()).toFile();
+            log.info("Pulling code from {} to {}.", repo.getUrl(), repoFile.getPath());
             if (!repoFile.exists()) {//检查目录不存在就 clone
                 git = justClone(repo.getUrl(), repoFile);
-                log.info("Repository '{}:{}' no exists, re-clone from '{}' in {}ms",
+                log.info("Repository '{}:{}' clone from '{}' in {}ms",
                         repo.getId(), repo.getName(), repo.getUrl(), System.currentTimeMillis() - ct);
             } else {//目录存在就 pull，如果使用 bare 模式克隆仓库，对应的是 git fetch
                 git = Git.open(repoFile);
@@ -256,7 +257,9 @@ public class GitRepositoryProvider implements RepositoryProvider {
                 treeWalk.addTree(commit.getTree());
                 treeWalk.setRecursive(true);
                 while(treeWalk.next()) {
+                    long ct = System.currentTimeMillis();
                     addFileToDocument(repo, git, treeWalk.getPathString(), treeWalk.getObjectId(0), traveler);
+                    log.debug("add file:{} to index in {}ms.", treeWalk.getPathString(), (System.currentTimeMillis()-ct));
                     fileCount ++;
                 }
             }
@@ -278,15 +281,15 @@ public class GitRepositoryProvider implements RepositoryProvider {
             throws IOException, GitAPIException
     {
         boolean isBinaryFile = TextFileUtils.isBinaryFile(path);
-        if(!isBinaryFile) { //Text file
+        if(isBinaryFile) { //Binary file
+            SourceFile doc = buildBinaryDocument(repo, git, path, objectId);
+            traveler.updateDocument(doc);
+        }
+        else { // Text file
             SourceFile doc = buildDocument(repo, git, path, objectId);
             if (doc != null && traveler != null) {
                 traveler.updateDocument(doc);
             }
-        }
-        else { // Binary file
-            SourceFile doc = buildBinaryDocument(repo, git, path, objectId);
-            traveler.updateDocument(doc);
         }
     }
 
@@ -340,12 +343,14 @@ public class GitRepositoryProvider implements RepositoryProvider {
     private SourceFile buildDocument(CodeRepository repo, Git git, String path, ObjectId objectId)
             throws IOException, GitAPIException
     {
+        long ct = System.currentTimeMillis();
         ObjectLoader loader = git.getRepository().open(objectId);
         try(InputStream stream = loader.openStream()) {
             List<String> codeLines = TextFileUtils.readFileLines(stream, 20000);
             String contents = String.join("\n", codeLines);
 
             SourceFile doc = new SourceFile(repo.getVender());
+            doc.setVender(repo.getVender());
             doc.setEnterprise(repo.getEnterprise());
             doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
             doc.setBranch(git.getRepository().getBranch());
@@ -353,7 +358,7 @@ public class GitRepositoryProvider implements RepositoryProvider {
             doc.setLocation(path);
             doc.setLanguage(FileClassifier.languageGuess(path, contents));  //语言
             doc.setContents(contents);                                      //源码
-            doc.setCodeOwner(getCodeOwner(git, path));                      //开发者  TODO 如何能支持多个开发者
+            //doc.setCodeOwner(getCodeOwner(git, path));                      //开发者  TODO 如何能支持多个开发者，性能非常差
             SlocCounter.SlocCount slocCount = slocCounter.countStats(contents, doc.getLanguage());
             doc.setLines(slocCount.linesCount);                             //代码行统计
             doc.setCommentLines(slocCount.commentCount);
