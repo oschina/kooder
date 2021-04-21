@@ -16,7 +16,7 @@ TIME: ${result.timeUsed} ms
             <form class="form-group">
                 <input type="hidden" name="type" value="$type"/>
                 <fieldset class="input-group">
-                    <label class="input-group-addon addon-sm" for="INPUT_SEARCH">Kooder</label>
+                    <label class="input-group-addon addon-sm" for="INPUT_SEARCH"><a href="/">Kooder</a></label>
                     <input class="form-input input-sm" name="q" value="$!q" type="text" id="INPUT_SEARCH">
                     <button class="btn btn-primary input-group-btn btn-sm" type="submit">Search</button>
                 </fieldset>
