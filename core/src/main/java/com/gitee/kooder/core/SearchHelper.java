@@ -90,6 +90,8 @@ public class SearchHelper {
         if (StringUtils.isBlank(key) || StringUtils.isBlank(text))
             return text;
 
+        key = QueryParser.escape(key);
+
         String result = null;
         if(maxLen < text.length())
             text = StringUtils.left(text, maxLen);
@@ -120,6 +122,7 @@ public class SearchHelper {
             return text;
 
         String result = null;
+        key = QueryParser.escape(key);
 
         try {
             QueryParser parser = new QueryParser(null, AnalyzerFactory.getCodeAnalyzer());
@@ -149,6 +152,8 @@ public class SearchHelper {
 
         String line = null;
         List<CodeLine> codeLines = new ArrayList<>();
+        key = QueryParser.escape(key);
+
         try {
             QueryParser parser = new QueryParser(null, AnalyzerFactory.getCodeAnalyzer());
             Query query = parser.parse(key);
