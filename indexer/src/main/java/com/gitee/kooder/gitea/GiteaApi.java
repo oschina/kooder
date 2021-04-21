@@ -5,6 +5,7 @@ import com.gitee.kooder.core.KooderConfig;
 import com.gitee.kooder.utils.HttpUtils;
 import com.gitee.kooder.utils.JsonUtils;
 import okhttp3.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,10 @@ public class GiteaApi {
     private final String personalAccessToken;
 
     private GiteaApi() {
-        giteaUrl = KooderConfig.getProperty("gitea.url");
+        giteaUrl = Optional.ofNullable(KooderConfig.getProperty("gitea.url"))
+                .filter(StringUtils::isNotBlank)
+                .map(s -> s.charAt(s.length() - 1) == '/' ? s.substring(0, s.length() - 1) : s)
+                .get();
         personalAccessToken = KooderConfig.getProperty("gitea.personal_access_token");
     }
 
