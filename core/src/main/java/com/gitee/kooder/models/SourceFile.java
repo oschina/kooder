@@ -149,7 +149,7 @@ public final class SourceFile extends Searchable {
         document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getLocation(),     Field.Store.YES));
 
         if(StringUtils.isNotBlank(this.getContents())) {
-            document.add(new TextField(Constants.FIELD_SOURCE, this.getContents(), Field.Store.YES));
+            document.add(new TextField(Constants.FIELD_SOURCE, StringUtils.abbreviate(this.getContents(), 32000) , Field.Store.YES));
             //文件属性
             document.add(new StoredField(Constants.FIELD_FILE_HASH, this.getHash()));
         }
