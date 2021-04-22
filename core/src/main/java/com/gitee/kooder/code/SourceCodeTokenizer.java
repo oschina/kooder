@@ -85,6 +85,9 @@ public class SourceCodeTokenizer extends Tokenizer {
         while (i < len) {
             char ch = code.charAt(i);
             if(Character.isIdeographic(ch)) {
+                String pre_word = code.substring(start, i);
+                if(pre_word.length() > 0)
+                    words.add(new IWord(pre_word, start, i));
                 words.add(new IWord(ch, i, i + 1));
                 start = i + 1;
             }
@@ -166,7 +169,7 @@ public class SourceCodeTokenizer extends Tokenizer {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
-        String text = "中文简介public static void main(String[] args) throws IOException {} // c#";
+        String text = "hello你好";
 
         Analyzer analyzer = new Analyzer() {
             @Override
