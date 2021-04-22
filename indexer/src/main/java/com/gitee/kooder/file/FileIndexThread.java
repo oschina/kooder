@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 /**
  * index from file
@@ -37,9 +38,8 @@ public class FileIndexThread extends Thread {
     public void run() {
         long start = System.currentTimeMillis();
         AtomicInteger success = new AtomicInteger(), error = new AtomicInteger();
-        try {
-            Files.lines(Paths.get(filePath))
-                    .filter(StringUtils::isNotBlank)
+        try (Stream<String> pathStream = Files.lines(Paths.get(filePath))) {
+            pathStream.filter(StringUtils::isNotBlank)
                     .forEach(repoUrl -> {
                         try {
                             Repository repo = new Repository();

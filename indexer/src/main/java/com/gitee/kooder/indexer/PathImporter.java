@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 直接导入指定目录下的 json 数据
@@ -99,10 +100,11 @@ public class PathImporter {
         final AtomicInteger fc = new AtomicInteger(0);
         thread_count = Math.min(MAX_THREAD_COUNT, Math.max(thread_count, 1));
         try (
-            IndexWriter writer = StorageFactory.getIndexWriter(type);
-            TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
+                IndexWriter writer = StorageFactory.getIndexWriter(type);
+                TaxonomyWriter taxonomyWriter = StorageFactory.getTaxonomyWriter(type);
+                Stream<Path> pathStream = Files.list(path);
         ) {
-            List<Path> allFiles = Files.list(path).filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p)).collect(Collectors.toList());
+            List<Path> allFiles = pathStream.filter(p -> p.toString().endsWith(".json") && !Files.isDirectory(p)).collect(Collectors.toList());
             int threshold = Math.max(allFiles.size()/thread_count, 1);
             BatchTaskRunner.execute(allFiles, threshold, files -> {
                 files.forEach( jsonFile -> {
