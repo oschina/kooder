@@ -18,6 +18,8 @@ package com.gitee.kooder.query;
 import com.gitee.kooder.core.AnalyzerFactory;
 import com.gitee.kooder.core.Constants;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 
@@ -46,10 +48,23 @@ public class CodeQuery extends QueryBase {
      */
     @Override
     protected Query buildUserQuery() {
-        String q = QueryParser.escape(searchKey);
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        builder.add(makeBoostQuery(Constants.FIELD_FILE_NAME,  q, 10.0f), BooleanClause.Occur.SHOULD);
-        builder.add(makeBoostQuery(Constants.FIELD_SOURCE,     q, 1.0f), BooleanClause.Occur.SHOULD);
+        QueryParser parser = new QueryParser(Constants.FIELD_SOURCE, AnalyzerFactory.getCodeAnalyzer());
+        parser.setDefaultOperator(QueryParser.Operator.AND);
+        Query q_source = null;
+        try {
+            q_source = parser.parse(searchKey);
+        } catch (ParseException e) {
+            try {
+                q_source = parser.parse(QueryParser.escape(searchKey));
+            } catch (ParseException ee) {}
+        }
+        builder.add(q_source, BooleanClause.Occur.SHOULD);
+
+        builder.add(new BoostQuery(new WildcardQuery(new Term(Constants.FIELD_FILE_NAME, QueryParser.escape(searchKey))), 10.f), BooleanClause.Occur.SHOULD);
+
+        //builder.add(makeBoostQuery(Constants.FIELD_FILE_NAME,  q, 10.0f), BooleanClause.Occur.SHOULD);
+        //builder.add(makeBoostQuery(Constants.FIELD_SOURCE,     q, 1.0f), BooleanClause.Occur.SHOULD);
         builder.setMinimumNumberShouldMatch(1);
         return builder.build();
     }
