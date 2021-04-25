@@ -18,7 +18,7 @@
             #end
             </ol>
         </blockquote>
-        <p class="meta"><span class="label">${obj.lang|'None'}</span><em class="md">${obj.lines}</em> Lines#if(${obj.codeOwner}) by <em class="md">${obj.codeOwner}</em>#end. <a href="${obj.repository.url}" target="_blank">${obj.repository.url}</a></p>
+        <p class="meta"><span class="label">${obj.language|'None'}</span><em class="md">${obj.lines}</em> Lines#if(${obj.codeOwner}) by <em class="md">${obj.codeOwner}</em>#end. <a href="${obj.repository.url}" target="_blank">${obj.repository.url}</a></p>
     </li>
     #end
 </ul>

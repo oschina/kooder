@@ -99,7 +99,7 @@ public abstract class Searchable implements Serializable {
 
     protected void addFacetToDoc(Document doc, String fn, String fv) {
         doc.add(new FacetField(fn, fv));
-        doc.add(new TextField(fn,  fv, Field.Store.YES));
+        doc.add(new StringField(fn,  fv, Field.Store.YES));
     }
 
     protected void addNumToDoc(Document doc, String fn, long fv) {
