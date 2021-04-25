@@ -19,9 +19,11 @@ import com.gitee.kooder.core.AnalyzerFactory;
 import com.gitee.kooder.core.Constants;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.spans.SpanMultiTermQueryWrapper;
+import org.apache.lucene.search.spans.SpanNearQuery;
+import org.apache.lucene.search.spans.SpanQuery;
+import org.apache.lucene.search.spans.SpanTermQuery;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,25 +50,46 @@ public class CodeQuery extends QueryBase {
      */
     @Override
     protected Query buildUserQuery() {
+        return codeQuery(searchKey);
+    }
+
+    public static Query codeQuery(String q) {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
-        QueryParser parser = new QueryParser(Constants.FIELD_SOURCE, AnalyzerFactory.getCodeAnalyzer());
-        parser.setDefaultOperator(QueryParser.Operator.AND);
-        Query q_source = null;
-        try {
-            q_source = parser.parse(searchKey);
-        } catch (ParseException e) {
-            try {
-                q_source = parser.parse(QueryParser.escape(searchKey));
-            } catch (ParseException ee) {}
+
+        String[] tokens = AnalyzerFactory.codeAnalyzer.tokens(q).stream().toArray(String[]::new);
+
+        Query fileNameQuery = createPhraseQuery(Constants.FIELD_FILE_NAME, tokens, 1);//new PhraseQuery(1, Constants.FIELD_FILE_NAME, tokens);
+        Query sourceQuery = createPhraseQuery(Constants.FIELD_SOURCE, tokens, 5);//new PhraseQuery(5, Constants.FIELD_SOURCE, tokens);
+
+        //make up query
+        builder.add(new BoostQuery(fileNameQuery, 10.0f), BooleanClause.Occur.SHOULD);
+        builder.add(sourceQuery, BooleanClause.Occur.SHOULD);
+
+        return builder.setMinimumNumberShouldMatch(1).build();
+    }
+
+    /**
+     * Combine PhraseQuery & WildcardQuery
+     * @param field
+     * @param phraseWords
+     * @param slop
+     * @return
+     */
+    private static Query createPhraseQuery(String field, String[] phraseWords, int slop) {
+        if(phraseWords.length == 1)
+            return new WildcardQuery(new Term(field, phraseWords[0]+"*"));
+
+        SpanQuery[] queryParts = new SpanQuery[phraseWords.length];
+        for (int i = 0; i < phraseWords.length; i++) {
+            if(phraseWords[i].length() == 1) {
+                queryParts[i] = new SpanTermQuery(new Term(field, phraseWords[i]));
+            }
+            else {
+                WildcardQuery wildQuery = new WildcardQuery(new Term(field, phraseWords[i] + "*"));
+                queryParts[i] = new SpanMultiTermQueryWrapper<>(wildQuery);
+            }
         }
-        builder.add(q_source, BooleanClause.Occur.SHOULD);
-
-        builder.add(new BoostQuery(new WildcardQuery(new Term(Constants.FIELD_FILE_NAME, QueryParser.escape(searchKey))), 10.f), BooleanClause.Occur.SHOULD);
-
-        //builder.add(makeBoostQuery(Constants.FIELD_FILE_NAME,  q, 10.0f), BooleanClause.Occur.SHOULD);
-        //builder.add(makeBoostQuery(Constants.FIELD_SOURCE,     q, 1.0f), BooleanClause.Occur.SHOULD);
-        builder.setMinimumNumberShouldMatch(1);
-        return builder.build();
+        return new SpanNearQuery(queryParts, slop,true);
     }
 
     /**

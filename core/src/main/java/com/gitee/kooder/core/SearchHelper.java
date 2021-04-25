@@ -16,6 +16,7 @@
 package com.gitee.kooder.core;
 
 import com.gitee.kooder.models.CodeLine;
+import com.gitee.kooder.query.CodeQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -36,6 +37,8 @@ import java.util.List;
 public class SearchHelper {
 
     private final static Logger log = LoggerFactory.getLogger(SearchHelper.class);
+
+    private final static int MAX_LINE_LENGTH = 256;
     private final static Analyzer highlight_analyzer = AnalyzerFactory.getHighlightInstance();
 
     private final static Formatter hl_fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
@@ -125,12 +128,9 @@ public class SearchHelper {
         key = QueryParser.escape(key);
 
         try {
-            QueryParser parser = new QueryParser(null, AnalyzerFactory.getCodeAnalyzer());
-            Query query = parser.parse(key);
-            QueryScorer scorer = new QueryScorer(query);
-            Highlighter hig = new Highlighter(hl_fmt, scorer);
-            TokenStream tokens = AnalyzerFactory.getCodeAnalyzer().tokenStream(null, new StringReader(text));
-            String[] fragments = hig.getBestFragments(tokens, text, hig.getMaxDocCharsToAnalyze());
+            Query query = CodeQuery.codeQuery(key);
+            Highlighter hig = new Highlighter(hl_fmt, new QueryScorer(query));
+            String[] fragments = hig.getBestFragments(AnalyzerFactory.getCodeAnalyzer(), null, text, hig.getMaxDocCharsToAnalyze());
             result = String.join( "", fragments);
         } catch (Exception e) {
             log.warn("Unabled to hightlight text("+key+"): " + text, e);
@@ -155,10 +155,8 @@ public class SearchHelper {
         key = QueryParser.escape(key);
 
         try {
-            QueryParser parser = new QueryParser(null, AnalyzerFactory.getCodeAnalyzer());
-            Query query = parser.parse(key);
-            QueryScorer scorer = new QueryScorer(query);
-            Highlighter hig = new Highlighter(hl_fmt, scorer);
+            Query query = CodeQuery.codeQuery(key);
+            Highlighter hig = new Highlighter(hl_fmt, new QueryScorer(query));
 
             String[] lines = StringUtils.split(code, "\r\n");
             for (int i = 0; i < lines.length && codeLines.size() < maxLines; i++) {
@@ -167,9 +165,8 @@ public class SearchHelper {
                 if (StringUtils.trim(lines[i]).length() < key.length())
                     continue;
 
-                line = html(lines[i]);
-                TokenStream tokens = AnalyzerFactory.getCodeAnalyzer().tokenStream(null, new StringReader(line));
-                String[] fragments = hig.getBestFragments(tokens, line, 5);
+                line = html(StringUtils.abbreviate(lines[i], MAX_LINE_LENGTH));
+                String[] fragments = hig.getBestFragments(AnalyzerFactory.getCodeAnalyzer(), null, line, 5);
                 String hl_result = String.join("", fragments);
                 if(StringUtils.isNotBlank(hl_result)) {
                     codeLines.add(new CodeLine(i+1, hl_result));
@@ -180,7 +177,7 @@ public class SearchHelper {
             if(codeLines.size() < minLines) {
                 int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
                 for (int i = lastLineNo + 1; i <= lines.length; i++) {
-                    codeLines.add(new CodeLine(i, html(lines[i-1])));
+                    codeLines.add(new CodeLine(i, html(StringUtils.abbreviate(lines[i-1], MAX_LINE_LENGTH))));
                     if(codeLines.size() >= minLines)
                         break;
                 }
