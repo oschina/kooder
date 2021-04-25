@@ -180,7 +180,7 @@ public class SearchHelper {
             if(codeLines.size() < minLines) {
                 int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
                 for (int i = lastLineNo + 1; i <= lines.length; i++) {
-                    codeLines.add(new CodeLine(i, lines[i-1]));
+                    codeLines.add(new CodeLine(i, html(lines[i-1])));
                     if(codeLines.size() >= minLines)
                         break;
                 }
