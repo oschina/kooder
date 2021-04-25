@@ -145,7 +145,7 @@ public final class SourceFile extends Searchable {
             super.addFacetToDoc(document, Constants.FIELD_CODE_OWNER,   this.codeOwner);
 
         //file info
-        document.add(new StringField(Constants.FIELD_FILE_NAME,     this.getName(),      Field.Store.YES));
+        document.add(new TextField(Constants.FIELD_FILE_NAME,     this.getName(),      Field.Store.YES));
         document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getLocation(),  Field.Store.YES));
 
         if(StringUtils.isNotBlank(this.getContents())) {
