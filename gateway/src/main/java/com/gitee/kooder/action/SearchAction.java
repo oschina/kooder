@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  */
 public class SearchAction implements SearchActionBase {
 
-    private final static int MAX_LINES = 20;    // max code lines in highlight
+    private final static int MAX_LINES = 10;    // max code lines in highlight
 
     /**
      * controller for search.vm

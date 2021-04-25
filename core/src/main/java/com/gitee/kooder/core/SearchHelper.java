@@ -175,6 +175,16 @@ public class SearchHelper {
                     codeLines.add(new CodeLine(i+1, hl_result));
                 }
             }
+            //补充点内容，免得看起来太干巴
+            if(codeLines.size() < maxLines/2) {
+                int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
+                for (int i = lastLineNo + 1; i <= lines.length; i++) {
+                    codeLines.add(new CodeLine(i, lines[i-1]));
+                    if(codeLines.size() >= maxLines / 2)
+                        break;
+                }
+            }
+
         } catch (Exception e) {
             log.warn("Failed to highlighter code line: " + line, e);
         }
