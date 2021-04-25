@@ -15,8 +15,7 @@
  */
 package com.gitee.kooder.core;
 
-import com.gitee.kooder.code.SourceCodeTokenizer;
-import com.gitee.kooder.code.TechCodeAnalyzer;
+import com.gitee.kooder.code.SourceCodeAnalyzer;
 import com.gitee.kooder.jcseg.JcsegAnalyzer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
@@ -54,12 +53,7 @@ public class AnalyzerFactory {
     private static SegmenterConfig configForSplit;
     private static StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
     //private static TechCodeAnalyzer codeAnalyzer = new TechCodeAnalyzer();
-    private static Analyzer codeAnalyzer = new Analyzer() {
-        @Override
-        protected TokenStreamComponents createComponents(String s) {
-            return new TokenStreamComponents(new SourceCodeTokenizer());
-        }
-    };
+    public static SourceCodeAnalyzer codeAnalyzer = new SourceCodeAnalyzer() ;
 
     static {
         config = new SegmenterConfig(true);
