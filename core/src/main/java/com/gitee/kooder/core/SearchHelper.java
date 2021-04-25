@@ -176,11 +176,12 @@ public class SearchHelper {
                 }
             }
             //补充点内容，免得看起来太干巴
-            if(codeLines.size() < maxLines/2) {
+            int minLines = maxLines / 2 ;
+            if(codeLines.size() < minLines) {
                 int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
                 for (int i = lastLineNo + 1; i <= lines.length; i++) {
                     codeLines.add(new CodeLine(i, lines[i-1]));
-                    if(codeLines.size() >= maxLines / 2)
+                    if(codeLines.size() >= minLines)
                         break;
                 }
             }
