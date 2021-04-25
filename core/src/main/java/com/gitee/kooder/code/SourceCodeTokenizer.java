@@ -16,6 +16,7 @@
 package com.gitee.kooder.code;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
@@ -46,7 +47,7 @@ public class SourceCodeTokenizer extends Tokenizer {
     @Override
     public void reset() throws IOException {
         super.reset();
-        String code = IOUtils.toString(input);
+        String code = StringUtils.lowerCase(IOUtils.toString(input));
         List<IWord> words = tokenizer(code);
         if(words != null)
             tokens = words.iterator();
