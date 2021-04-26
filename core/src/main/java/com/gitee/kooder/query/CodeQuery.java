@@ -56,7 +56,7 @@ public class CodeQuery extends QueryBase {
     public static Query codeQuery(String q) {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
-        String[] tokens = AnalyzerFactory.codeAnalyzer.tokens(q).stream().toArray(String[]::new);
+        String[] tokens = AnalyzerFactory.getCodeAnalyzer().tokens(q).stream().toArray(String[]::new);
 
         Query fileNameQuery = createPhraseQuery(Constants.FIELD_FILE_NAME, tokens, 1);//new PhraseQuery(1, Constants.FIELD_FILE_NAME, tokens);
         Query sourceQuery = createPhraseQuery(Constants.FIELD_SOURCE, tokens, 5);//new PhraseQuery(5, Constants.FIELD_SOURCE, tokens);

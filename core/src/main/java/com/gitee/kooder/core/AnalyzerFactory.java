@@ -51,9 +51,9 @@ public class AnalyzerFactory {
     private static ADictionary dic;
     private static SegmenterConfig config;
     private static SegmenterConfig configForSplit;
-    private static StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
+    private final static StandardAnalyzer standardAnalyzer = new StandardAnalyzer();
     //private static TechCodeAnalyzer codeAnalyzer = new TechCodeAnalyzer();
-    public static SourceCodeAnalyzer codeAnalyzer = new SourceCodeAnalyzer() ;
+    private final static SourceCodeAnalyzer codeAnalyzer = new SourceCodeAnalyzer() ;
 
     static {
         config = new SegmenterConfig(true);
@@ -91,7 +91,7 @@ public class AnalyzerFactory {
      * 代码分词器
      * @return
      */
-    public final static Analyzer getCodeAnalyzer() {
+    public final static SourceCodeAnalyzer getCodeAnalyzer() {
         return codeAnalyzer;
     }
 

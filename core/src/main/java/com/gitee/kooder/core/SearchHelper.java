@@ -16,7 +16,6 @@
 package com.gitee.kooder.core;
 
 import com.gitee.kooder.models.CodeLine;
-import com.gitee.kooder.query.CodeQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -44,10 +43,8 @@ public class SearchHelper {
     private final static Formatter hl_fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
 
     public static void main(String[] args) {
-        String text = "Gitee Search是Gitee的搜索引擎服务模块，为Gitee提供仓库、Issue、代码等搜索服务。小程序";
-        System.out.println(highlight(text, "gitee search 仓库"));
-        //splitKeywords(text).forEach(e -> System.out.println(e));
-        System.out.println(cleanupKey("小程序"));
+        String text = "SQL:SELECT * FROM osc_users WHERE gender = 'M'";
+        System.out.println("RESULT:"+hlcode(text, "SELECT *"));
     }
 
     /**
@@ -121,22 +118,11 @@ public class SearchHelper {
      * @return 返回格式化后的HTML文本
      */
     public static String hlcode(String text, String key) {
-        if (StringUtils.isBlank(key) || StringUtils.isBlank(text))
-            return text;
-
-        String result = null;
         key = QueryParser.escape(key);
-
-        try {
-            Query query = CodeQuery.codeQuery(key);
-            Highlighter hig = new Highlighter(hl_fmt, new QueryScorer(query));
-            String[] fragments = hig.getBestFragments(AnalyzerFactory.getCodeAnalyzer(), null, text, hig.getMaxDocCharsToAnalyze());
-            result = String.join( "", fragments);
-        } catch (Exception e) {
-            log.warn("Unabled to hightlight text("+key+"): " + text, e);
-        }
-
-        return StringUtils.isBlank(result) ? text : result;
+        String result = AnalyzerFactory.getCodeAnalyzer().highlight(text, key);
+        if(StringUtils.isBlank(result))
+            result = text;
+        return result;
     }
 
     /**
@@ -150,14 +136,10 @@ public class SearchHelper {
         if(StringUtils.isBlank(code) || StringUtils.isBlank(key))
             return null;
 
-        String line = null;
         List<CodeLine> codeLines = new ArrayList<>();
         key = QueryParser.escape(key);
 
         try {
-            Query query = CodeQuery.codeQuery(key);
-            Highlighter hig = new Highlighter(hl_fmt, new QueryScorer(query));
-
             String[] lines = StringUtils.split(code, "\r\n");
             for (int i = 0; i < lines.length && codeLines.size() < maxLines; i++) {
                 if (StringUtils.isBlank(lines[i]))
@@ -165,11 +147,11 @@ public class SearchHelper {
                 if (StringUtils.trim(lines[i]).length() < key.length())
                     continue;
 
-                line = html(StringUtils.abbreviate(lines[i], MAX_LINE_LENGTH));
-                String[] fragments = hig.getBestFragments(AnalyzerFactory.getCodeAnalyzer(), null, line, 5);
-                String hl_result = String.join("", fragments);
-                if(StringUtils.isNotBlank(hl_result)) {
-                    codeLines.add(new CodeLine(i+1, hl_result));
+                String line = html(StringUtils.abbreviate(lines[i], MAX_LINE_LENGTH));
+                line = AnalyzerFactory.getCodeAnalyzer().highlight(line, key);
+
+                if(StringUtils.isNotBlank(line)) {
+                    codeLines.add(new CodeLine(i+1, line));
                 }
             }
             //补充点内容，免得看起来太干巴
@@ -184,7 +166,7 @@ public class SearchHelper {
             }
 
         } catch (Exception e) {
-            log.warn("Failed to highlighter code line: " + line, e);
+            log.warn("Failed to highlighter code line", e);
         }
         return codeLines;
     }
