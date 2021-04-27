@@ -9,6 +9,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.*;
+import org.apache.lucene.search.vectorhighlight.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -21,6 +22,8 @@ import java.util.List;
  */
 public class SourceCodeAnalyzer extends Analyzer {
 
+    private final static String separatorChars = "~!@#$%^&*()-_+[]{}?/\\<>.;,'\"\r\n\t";
+    private final static String replaceChars = StringUtils.repeat(' ', separatorChars.length());
     private final static Formatter hl_fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
 
     @Override
@@ -57,25 +60,19 @@ public class SourceCodeAnalyzer extends Analyzer {
      */
     public String highlight(String code, String key) {
         try {
+            key = StringUtils.replaceChars(key, separatorChars, replaceChars);
             QueryParser parser = new QueryParser(null, this);
             Query query = parser.parse(key);
             QueryScorer scorer = new QueryScorer(query);
             Highlighter hig = new Highlighter(hl_fmt, scorer);
-            TokenStream tokens = tokenStream(null, new StringReader(code));
+            TokenStream tokens = this.tokenStream(null, new StringReader(code));
             String[] fragments = hig.getBestFragments(tokens, code, hig.getMaxDocCharsToAnalyze());
-
-            return String.join("", fragments);
+            return String.join( "", fragments);
         } catch (ParseException e) {
-            return this.highlight(code, QueryParser.escape(key));
+            return highlight(code, QueryParser.escape(key));
         } catch (IOException | InvalidTokenOffsetsException e) {
             return code;
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        String code = "Select * from osc_users where id = 12342";
-        String key = "se2lect";
-        System.out.println(new SourceCodeAnalyzer().highlight(code, key));
     }
 
 }
