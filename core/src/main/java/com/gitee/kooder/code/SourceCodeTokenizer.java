@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class SourceCodeTokenizer extends Tokenizer {
 
-    private final static String separatorChars = " ~!@#$%^&*()-_+[]{}?/\\<>.;,'\"\r\n\t";
+    private final static String separatorChars = " ~!@#$%^&*()-_+[]{}?/\\<>.:;,'\"\r\n\t";
     private final static String uselessChars = "\r\n\t "; //{}()[];,
 
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
