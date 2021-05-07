@@ -344,34 +344,39 @@ public class GitRepositoryProvider implements RepositoryProvider {
             throws IOException, GitAPIException
     {
         long ct = System.currentTimeMillis();
-        ObjectLoader loader = git.getRepository().open(objectId);
-        try(InputStream stream = loader.openStream()) {
-            List<String> codeLines = TextFileUtils.readFileLines(stream, 20000);
-            String contents = String.join("\n", codeLines);
+        try {
+            ObjectLoader loader = git.getRepository().open(objectId);
+            try (InputStream stream = loader.openStream()) {
+                List<String> codeLines = TextFileUtils.readFileLines(stream, 20000);
+                String contents = String.join("\n", codeLines);
 
-            SourceFile doc = new SourceFile(repo.getVender());
-            doc.setVender(repo.getVender());
-            doc.setEnterprise(repo.getEnterprise());
-            doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
-            doc.setBranch(git.getRepository().getBranch());
-            doc.setName(FilenameUtils.getName(path));                       //文件名
-            doc.setLocation(path);
-            doc.setLanguage(FileClassifier.languageGuess(path, contents));  //语言
-            doc.setContents(contents);                                      //源码
-            //doc.setCodeOwner(getCodeOwner(git, path));                      //开发者  TODO 如何能支持多个开发者，性能非常差
-            SlocCounter.SlocCount slocCount = slocCounter.countStats(contents, doc.getLanguage());
-            doc.setLines(slocCount.linesCount);                             //代码行统计
-            doc.setCommentLines(slocCount.commentCount);
-            doc.setBlankLines(slocCount.blankCount);
-            doc.setCodeLines(slocCount.codeCount);
-            doc.setComplexity(slocCount.complexity);
-            doc.setHash(DigestUtils.sha1Hex(contents));
-            doc.setRevision(objectId.name());
+                SourceFile doc = new SourceFile(repo.getVender());
+                doc.setVender(repo.getVender());
+                doc.setEnterprise(repo.getEnterprise());
+                doc.setRepository(new Relation(repo.getId(), repo.getName(), repo.getUrl()));
+                doc.setBranch(git.getRepository().getBranch());
+                doc.setName(FilenameUtils.getName(path));                       //文件名
+                doc.setLocation(path);
+                doc.setLanguage(FileClassifier.languageGuess(path, contents));  //语言
+                doc.setContents(contents);                                      //源码
+                //doc.setCodeOwner(getCodeOwner(git, path));                      //开发者  TODO 如何能支持多个开发者，性能非常差
+                SlocCounter.SlocCount slocCount = slocCounter.countStats(contents, doc.getLanguage());
+                doc.setLines(slocCount.linesCount);                             //代码行统计
+                doc.setCommentLines(slocCount.commentCount);
+                doc.setBlankLines(slocCount.blankCount);
+                doc.setCodeLines(slocCount.codeCount);
+                doc.setComplexity(slocCount.complexity);
+                doc.setHash(DigestUtils.sha1Hex(contents));
+                doc.setRevision(objectId.name());
 
-            doc.generateUuid(); //calculate file uuid
-            doc.generateUrl();  // calculate file url
+                doc.generateUuid(); //calculate file uuid
+                doc.generateUrl();  // calculate file url
 
-            return doc;
+                return doc;
+            }
+        } catch(MissingObjectException e) {
+            log.warn("MissingObjectException : " + objectId, e);
+            return null;
         }
     }
 
