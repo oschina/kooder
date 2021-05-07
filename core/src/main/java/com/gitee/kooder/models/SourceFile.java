@@ -76,7 +76,9 @@ public final class SourceFile extends Searchable {
         String rurl = repository.getUrl();
         if(rurl.endsWith(".git"))
             rurl = rurl.substring(0, rurl.length() - 4);
-        if(Constants.GITEA.equals(this.vender))
+        if (Constants.GITEE.equals(this.vender)) {
+            this.setUrl(rurl.replaceFirst("(?<=http(|s)://.{1,9999})/", "/enterprise/dashboard/projects/") + "/blob/" + this.getBranch() + "/" + this.getLocation());
+        } else if(Constants.GITEA.equals(this.vender))
             this.setUrl(rurl + "/src/branch/" + this.getBranch() + "/" + this.getLocation());
         else
             this.setUrl(rurl + "/tree/" + this.getBranch() + "/" + this.getLocation());
