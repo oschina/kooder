@@ -69,6 +69,9 @@ public class SourceCodeAnalyzer extends Analyzer {
             String[] fragments = hig.getBestFragments(tokens, code, hig.getMaxDocCharsToAnalyze());
             return String.join( "", fragments);
         } catch (ParseException e) {
+            String escape_key = QueryParser.escape(key);
+            if(StringUtils.equals(key, escape_key))
+                return code;
             return highlight(code, QueryParser.escape(key));
         } catch (IOException | InvalidTokenOffsetsException e) {
             return code;
