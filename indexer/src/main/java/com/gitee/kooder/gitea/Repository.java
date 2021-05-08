@@ -276,7 +276,9 @@ public class Repository {
         repo.setDescription(this.getDescription());
         repo.setUrl(this.getCloneUrl());
         repo.setOwner(new Relation(this.getOwner().getId(), this.getOwner().getLogin(), ""));
-        repo.setVisibility(this.getPrivate() ? Constants.VISIBILITY_PRIVATE : this.getInternal() ? Constants.VISIBILITY_INTERNAL : Constants.VISIBILITY_PUBLIC);
+        if (this.getPrivate() != null && this.getInternal() != null) {
+            repo.setVisibility(this.getPrivate() ? Constants.VISIBILITY_PRIVATE : this.getInternal() ? Constants.VISIBILITY_INTERNAL : Constants.VISIBILITY_PUBLIC);
+        }
         repo.setLicense(null);
         repo.setReadme(null);
         repo.setFork(0);
