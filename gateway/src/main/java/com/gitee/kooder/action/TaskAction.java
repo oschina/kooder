@@ -68,7 +68,7 @@ public class TaskAction {
         QueueTask task = new QueueTask();
         task.setType(type);
         task.setAction(action);
-        task.setObjects(body);
+        task.setJsonObjects(body);
         QueueFactory.getProvider().queue(task.getType()).push(Arrays.asList(task));
     }
 

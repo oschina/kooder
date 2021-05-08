@@ -20,7 +20,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.gitee.kooder.models.CodeRepository;
 import com.gitee.kooder.core.Constants;
@@ -30,6 +33,7 @@ import com.gitee.kooder.models.Issue;
 import com.gitee.kooder.models.Repository;
 import com.gitee.kooder.models.Searchable;
 import com.gitee.kooder.utils.JsonUtils;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.index.IndexWriter;
 import org.slf4j.Logger;
@@ -115,15 +119,32 @@ public class QueueTask implements Serializable {
         return objects;
     }
 
-    public void setObjects(List<Searchable> objects) {
-        this.objects = objects;
+
+    @JsonProperty("objects")
+    public void readObjects(Map<String,Object>[] values) throws Exception {
+        for(Map<String, Object> value : values) {
+            Searchable obj = null;
+            switch(type){
+                case Constants.TYPE_CODE:
+                    obj = new CodeRepository();
+                    break;
+                case Constants.TYPE_REPOSITORY:
+                    obj = new Repository();
+                    break;
+                case Constants.TYPE_ISSUE:
+                    obj = new Issue();
+            }
+            BeanUtils.populate(obj, value);
+            objects.add(obj);
+        }
     }
 
     public void addObject(Searchable obj) {
         objects.add(obj);
     }
 
-    public void setObjects(String json) {
+    @JsonIgnore
+    public void setJsonObjects(String json) {
         TypeReference typeRefer;
         switch(type) {
             case Constants.TYPE_CODE:
@@ -138,7 +159,7 @@ public class QueueTask implements Serializable {
             default:
                 throw new IllegalArgumentException("Illegal task type: " + type);
         }
-        this.setObjects((List<Searchable>)JsonUtils.readValue(json, typeRefer));
+        this.objects = (List<Searchable>)JsonUtils.readValue(json, typeRefer);
     }
 
     /**
@@ -181,4 +202,11 @@ public class QueueTask implements Serializable {
                 ", objects=" + objects +
                 '}';
     }
+
+    public static void main(String[] args) {
+        String json = "{\"type\":\"code\",\"action\":\"add\",\"objects\":[{\"id\":379,\"doc_id\":0,\"doc_score\":0.0,\"enterprise\":10,\"scm\":\"git\",\"vender\":\"gitea\",\"name\":\"xxxxx\",\"url\":\"http://git.xxxxxx.com:3000/xxxx/xxxxx\",\"timestamp\":0,\"document\":{\"fields\":[{\"char_sequence_value\":\"379\"},{\"char_sequence_value\":\"gitea\"},{\"char_sequence_value\":\"10\"},{\"char_sequence_value\":\"http://git.xxxxx.com:3000/xxxx/xxxxx\"},{\"char_sequence_value\":\"xxxxx\"},{\"char_sequence_value\":\"git\"},{\"char_sequence_value\":\"1620462113883\"}]},\"relative_path\":\"000/000/000/xxxxx_379\",\"id_as_string\":\"379\"}],\"code_task\":true}";
+        QueueTask task = parse(json);
+        System.out.println(task);
+    }
+
 }
