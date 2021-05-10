@@ -9,7 +9,6 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.*;
-import org.apache.lucene.search.vectorhighlight.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -72,7 +71,7 @@ public class SourceCodeAnalyzer extends Analyzer {
             String escape_key = QueryParser.escape(key);
             if(StringUtils.equals(key, escape_key))
                 return code;
-            return highlight(code, QueryParser.escape(key));
+            return highlight(code, escape_key);
         } catch (IOException | InvalidTokenOffsetsException e) {
             return code;
         }
