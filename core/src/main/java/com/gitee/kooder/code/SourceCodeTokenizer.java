@@ -40,7 +40,6 @@ public class SourceCodeTokenizer extends Tokenizer {
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
     private final OffsetAttribute offsetAtt = addAttribute(OffsetAttribute.class);
 
-    //private Iterator<IWord> tokens;
     private ReaderTokens tokens;
 
     @Override
@@ -80,8 +79,6 @@ public class SourceCodeTokenizer extends Tokenizer {
     public static class ReaderTokens {
 
         private int pos = 0;
-        private boolean match = false;
-        private boolean lastMatch = false;
         private Reader reader;
 
         private List<IWord> lastTokens = new ArrayList<>();
@@ -101,7 +98,7 @@ public class SourceCodeTokenizer extends Tokenizer {
                 if(ch == -1) // end of stream
                     break;
                 if(Character.isIdeographic(ch)) { // chinese
-                    IWord cur = new IWord(String.valueOf((char)ch), pos - 1, pos);
+                    IWord cur = new IWord((char)ch, pos - 1, pos);
                     if(word.length() == 0)
                         return cur;
                     else {
@@ -110,7 +107,7 @@ public class SourceCodeTokenizer extends Tokenizer {
                     }
                 }
                 else if(separatorChars.indexOf(ch) >= 0) { // ascii
-                    IWord cur = new IWord(String.valueOf((char)ch), pos - 1, pos);
+                    IWord cur = new IWord((char)ch, pos - 1, pos);
                     if(word.length() == 0) {
                         if (!Character.isWhitespace(ch) && uselessChars.indexOf((char)ch) < 0)
                             return cur;
