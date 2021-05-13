@@ -16,6 +16,7 @@
 package com.gitee.kooder.core;
 
 import com.gitee.kooder.models.CodeLine;
+import org.apache.commons.collections.list.SetUniqueList;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
@@ -28,6 +29,9 @@ import org.slf4j.LoggerFactory;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Search Toolbox
@@ -41,11 +45,6 @@ public class SearchHelper {
     private final static Analyzer highlight_analyzer = AnalyzerFactory.getHighlightInstance();
 
     private final static Formatter hl_fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
-
-    public static void main(String[] args) {
-        String text = "SQL:SELECT * FROM osc_users WHERE gender = 'M'";
-        System.out.println("RESULT:"+hlcode(text, "SELECT *"));
-    }
 
     /**
      * 关键字切分
@@ -127,49 +126,49 @@ public class SearchHelper {
 
     /**
      * 高亮标识出源码中的关键字
+     *
      * @param code
-     * @param key
+     * @param searchKey
      * @param maxLines
      * @return
      */
-    public static List<CodeLine> hl_lines(String code, String key, int maxLines) {
-        if(StringUtils.isBlank(code) || StringUtils.isBlank(key))
+    public static List<CodeLine> hl_lines(String code, String searchKey, int maxLines) {
+        if(StringUtils.isBlank(code) || StringUtils.isBlank(searchKey))
             return null;
 
         List<CodeLine> codeLines = new ArrayList<>();
-        key = QueryParser.escape(key);
+        List<String> keys = SetUniqueList.decorate(AnalyzerFactory.getCodeAnalyzer().tokens(searchKey));
+        Pattern pattern = Pattern.compile(keys.stream().map(k -> escapeSpecialRegexChars(k)).collect(Collectors.joining("|")));
 
-        try {
-            String[] lines = StringUtils.split(code, "\r\n");
-            for (int i = 0; i < lines.length && codeLines.size() < maxLines; i++) {
-                if (StringUtils.isBlank(lines[i]))
-                    continue;
-                if (StringUtils.trim(lines[i]).length() < key.length())
-                    continue;
+        String[] lines = StringUtils.split(code, "\r\n");
+        for (int i = 0; i < lines.length && codeLines.size() < maxLines; i++) {
+            if (StringUtils.isEmpty(lines[i]))
+                continue;
+            if (lines[i].length() < searchKey.length())
+                continue;
 
-                String line = html(StringUtils.abbreviate(lines[i], MAX_LINE_LENGTH));
-                line = AnalyzerFactory.getCodeAnalyzer().highlight(line, key);
-
-                if(StringUtils.isNotBlank(line)) {
-                    codeLines.add(new CodeLine(i+1, line));
+            Matcher matcher = pattern.matcher(lines[i]);
+            if(matcher.find()) {
+                String newLine = matcher.replaceAll("<em class='highlight'>$0</em>");
+                if(!StringUtils.equals(newLine, lines[i])) {
+                    codeLines.add(new CodeLine(i+1, newLine));
                 }
             }
-            //补充点内容，免得看起来太干巴
-            int minLines = maxLines / 2 ;
-            if(codeLines.size() < minLines) {
-                int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
-                for (int i = lastLineNo + 1; i <= lines.length; i++) {
-                    codeLines.add(new CodeLine(i, html(StringUtils.abbreviate(lines[i-1], MAX_LINE_LENGTH))));
-                    if(codeLines.size() >= minLines)
-                        break;
-                }
-            }
-
-        } catch (Exception e) {
-            log.warn("Failed to highlighter code line", e);
         }
+        //补充点内容，免得看起来太干巴
+        int minLines = maxLines / 2 ;
+        if(codeLines.size() < minLines) {
+            int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
+            for (int i = lastLineNo + 1; i <= lines.length; i++) {
+                codeLines.add(new CodeLine(i, html(StringUtils.abbreviate(lines[i-1], MAX_LINE_LENGTH))));
+                if(codeLines.size() >= minLines)
+                    break;
+            }
+        }
+
         return codeLines;
     }
+
     /**
      * 格式化HTML文本
      *
@@ -181,5 +180,10 @@ public class SearchHelper {
         content = StringUtils.replace(content, "<", "&lt;");
         content = StringUtils.replace(content, ">", "&gt;");
         return content;
+    }
+
+    private final static Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
+    public static String escapeSpecialRegexChars(String str) {
+        return SPECIAL_REGEX_CHARS.matcher(str).replaceAll("\\\\$0");
     }
 }
