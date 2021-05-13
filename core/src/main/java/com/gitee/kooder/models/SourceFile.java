@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.lucene.document.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -151,7 +152,15 @@ public final class SourceFile extends Searchable {
         document.add(new StringField(Constants.FIELD_FILE_LOCATION, this.getLocation(),  Field.Store.YES));
 
         if(StringUtils.isNotBlank(this.getContents())) {
-            document.add(new TextField(Constants.FIELD_SOURCE, StringUtils.abbreviate(this.getContents(), 32000) , Field.Store.YES));
+            byte[] bytes = this.getContents().getBytes(StandardCharsets.UTF_8);
+            String source;
+            if (bytes.length < 32766) {
+                source = StringUtils.abbreviate(this.getContents(), 32766);
+            } else {
+                source = new String(bytes, 0, 32766, StandardCharsets.UTF_8);
+                source = StringUtils.abbreviate(source, source.length() - 3);
+            }
+            document.add(new TextField(Constants.FIELD_SOURCE, source , Field.Store.YES));
             //文件属性
             document.add(new StoredField(Constants.FIELD_FILE_HASH, this.getHash()));
         }
