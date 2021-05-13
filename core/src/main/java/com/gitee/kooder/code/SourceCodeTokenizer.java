@@ -29,7 +29,6 @@ import java.util.List;
 
 /**
  * New Source code tokenizer
- * FIXME : 'stream to string' performance is too poor and it takes up too much memory
  * @author Winter Lau<javayou@gmail.com>
  */
 public class SourceCodeTokenizer extends Tokenizer {
