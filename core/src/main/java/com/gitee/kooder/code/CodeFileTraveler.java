@@ -52,15 +52,11 @@ public class CodeFileTraveler implements FileTraveler {
      */
     @Override
     public void updateDocument(SourceFile codeid) {
-        //log.info("updateDocument:" + codeid);
         try {
             Document doc = buildFacetDocument(codeid.getDocument());
             writer.updateDocument(new Term(Constants.FIELD_UUID, codeid.getUuid()), doc);
-        } catch (IllegalArgumentException e) {
-            log.error(codeid.getContents(), e);
-            throw e;
-        } catch (IOException e) {
-            log.error("Failed to update ducment<code> with uuid = " + codeid.getUuid(), e);
+        } catch (IllegalArgumentException | IOException e) {
+            log.error("Failed to update ducment<code>: file:" + codeid.getName() + " in repo:" + codeid.getRepository().getName(), e);
         }
     }
 
