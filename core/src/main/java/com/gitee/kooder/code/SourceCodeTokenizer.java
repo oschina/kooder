@@ -55,7 +55,8 @@ public class SourceCodeTokenizer extends Tokenizer {
         if(token == null)
             return false;
 
-        this.addTerm(token);
+        if(token.word.length() <= 32766)
+            this.addTerm(token);
 
         return true;
     }
