@@ -51,10 +51,10 @@ public class Gateway extends GatewayBase {
 
     @Override
     public void start() {
-        //static files
-        router.routeWithRegex(pattern_static_file).handler(new AutoContentTypeStaticHandler());
         //body parser
         router.route().handler(BodyHandler.create().setHandleFileUploads(false));
+        //static files
+        router.routeWithRegex(pattern_static_file).blockingHandler(new AutoContentTypeStaticHandler(), false);
         //action handler
         router.route().blockingHandler(context -> {
             long ct = System.currentTimeMillis();

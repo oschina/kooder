@@ -30,8 +30,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -47,13 +45,12 @@ public abstract class GatewayBase implements Daemon {
     String bind;
     int port;
     int workerPoolSize;
+    private boolean httpLog = true;
 
     Vertx vertx;
     VertxOptions vOptions;
     HttpServer server;
     Router router;
-
-    List<MessageFormat> log_patterns = new ArrayList<>();
 
     public GatewayBase() {
         this.bind = KooderConfig.getHttpBind();
@@ -65,13 +62,7 @@ public abstract class GatewayBase implements Daemon {
         this.vOptions = new VertxOptions();
         this.vOptions.setWorkerPoolSize(this.workerPoolSize);
         this.vOptions.setBlockedThreadCheckInterval(1000 * 60 * 60);
-
-        String logs_pattern = KooderConfig.getProperty("http.log.pattern");
-        if(logs_pattern != null) {
-            Arrays.stream(logs_pattern.split(",")).forEach(pattern -> {
-                log_patterns.add(new MessageFormat(StringUtils.replace(pattern, "*", "{0}")));
-            });
-        }
+        this.httpLog = !"off".equalsIgnoreCase(KooderConfig.getProperty("http.log"));
     }
 
     @Override
@@ -113,24 +104,20 @@ public abstract class GatewayBase implements Daemon {
      * @param time
      */
     protected void writeAccessLog(HttpServerRequest req, long time) {
-        String ua = req.getHeader("User-Agent");
-        if(ua == null)
-            ua = "-";
-        String msg = String.format("%s - \"%s %s\" %d %d - %dms - \"%s\"",
-                req.remoteAddress().hostAddress(),
-                req.method().name(),
-                req.uri(),
-                req.response().getStatusCode(),
-                req.response().bytesWritten(),
-                time,
-                ua);
+        if(httpLog) {
+            String ua = req.getHeader("User-Agent");
+            if (ua == null)
+                ua = "-";
+            String msg = String.format("%s - \"%s %s\" %d %d - %dms - \"%s\"",
+                    req.remoteAddress().hostAddress(),
+                    req.method().name(),
+                    req.uri(),
+                    req.response().getStatusCode(),
+                    req.response().bytesWritten(),
+                    time,
+                    ua);
 
-        for(MessageFormat fmt : log_patterns) {
-            try {
-                fmt.parse(req.path());
-                log.info(msg);
-                break;
-            } catch(ParseException e) {}
+            log.info(msg);
         }
     }
 
