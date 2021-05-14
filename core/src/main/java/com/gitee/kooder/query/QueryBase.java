@@ -33,6 +33,7 @@ import org.apache.lucene.queries.function.FunctionScoreQuery;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.similarities.Similarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +88,14 @@ public abstract class QueryBase implements IQuery {
     }
 
     /**
+     * Similarity
+     * @return
+     */
+    protected Similarity getSimilarity() {
+        return null;
+    }
+
+    /**
      * Get total records count
      *
      * @return
@@ -129,6 +138,10 @@ public abstract class QueryBase implements IQuery {
 
         try (IndexReader reader = StorageFactory.getIndexReader(this.type())) {
             IndexSearcher searcher = new IndexSearcher(reader);
+
+            if(getSimilarity() != null)
+                searcher.setSimilarity(getSimilarity());
+
             TaxonomyReader taxoReader = StorageFactory.getTaxonomyReader(this.type());
             // Aggregates the facet values
             FacetsCollector fc = new FacetsCollector(false);
