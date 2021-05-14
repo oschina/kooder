@@ -44,6 +44,7 @@ public class SearchHelper {
     private final static int MAX_LINE_LENGTH = 256;
     private final static Analyzer highlight_analyzer = AnalyzerFactory.getHighlightInstance();
 
+    private final static String PATTERN_HIGHLIGHT = "<em class='highlight'>$0</em>";
     private final static Formatter hl_fmt = new SimpleHTMLFormatter("<em class='highlight'>", "</em>");
 
     /**
@@ -110,18 +111,17 @@ public class SearchHelper {
     }
 
     /**
-     * 对一段代码执行语法高亮处理
+     * 对一行代码执行语法高亮处理
      *
      * @param text 要处理高亮的文本
      * @param key  高亮的关键字
      * @return 返回格式化后的HTML文本
      */
     public static String hlcode(String text, String key) {
-        key = QueryParser.escape(key);
-        String result = AnalyzerFactory.getCodeAnalyzer().highlight(text, key);
-        if(StringUtils.isBlank(result))
-            result = text;
-        return result;
+        List<String> keys = SetUniqueList.decorate(AnalyzerFactory.getCodeAnalyzer().tokens(key));
+        Pattern pattern = Pattern.compile(keys.stream().map(k -> escapeSpecialRegexChars(k)).collect(Collectors.joining("|")));
+        Matcher matcher = pattern.matcher(html(text));
+        return matcher.replaceAll(PATTERN_HIGHLIGHT);
     }
 
     /**
@@ -142,25 +142,20 @@ public class SearchHelper {
 
         String[] lines = StringUtils.split(code, "\r\n");
         for (int i = 0; i < lines.length && codeLines.size() < maxLines; i++) {
-            if (StringUtils.isEmpty(lines[i]))
+            if (StringUtils.isEmpty(lines[i]) || lines[i].length() < searchKey.length())
                 continue;
-            if (lines[i].length() < searchKey.length())
-                continue;
-
-            Matcher matcher = pattern.matcher(lines[i]);
+            Matcher matcher = pattern.matcher(html(StringUtils.abbreviate(lines[i], MAX_LINE_LENGTH)));
             if(matcher.find()) {
-                String newLine = matcher.replaceAll("<em class='highlight'>$0</em>");
+                String newLine = matcher.replaceAll(PATTERN_HIGHLIGHT);
                 codeLines.add(new CodeLine(i+1, newLine));
             }
         }
         //补充点内容，免得看起来太干巴
-        int minLines = maxLines / 2 ;
+        int minLines = maxLines / 3 ;
         if(codeLines.size() < minLines) {
             int lastLineNo = (codeLines.size() == 0) ? 0 : codeLines.get(codeLines.size() - 1).getLine();
-            for (int i = lastLineNo + 1; i <= lines.length; i++) {
+            for (int i = lastLineNo + 1; i <= lines.length && codeLines.size() < minLines; i++) {
                 codeLines.add(new CodeLine(i, html(StringUtils.abbreviate(lines[i-1], MAX_LINE_LENGTH))));
-                if(codeLines.size() >= minLines)
-                    break;
             }
         }
 
