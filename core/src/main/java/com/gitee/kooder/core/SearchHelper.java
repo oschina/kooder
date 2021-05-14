@@ -150,9 +150,7 @@ public class SearchHelper {
             Matcher matcher = pattern.matcher(lines[i]);
             if(matcher.find()) {
                 String newLine = matcher.replaceAll("<em class='highlight'>$0</em>");
-                if(!StringUtils.equals(newLine, lines[i])) {
-                    codeLines.add(new CodeLine(i+1, newLine));
-                }
+                codeLines.add(new CodeLine(i+1, newLine));
             }
         }
         //补充点内容，免得看起来太干巴
