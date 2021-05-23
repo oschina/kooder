@@ -22,6 +22,8 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.utils.UrlEncoder;
 
 /**
  * 代码源的定义
@@ -59,7 +61,13 @@ public class CodeRepository extends Searchable {
      * @return
      */
     public String getRelativePath() {
-        return String.format("%03d/%03d/%03d/%s_%d", id/1_000_000_000, id % 1_000_000_000 / 1_000_000, id % 1_000_000 / 1_000, name, id);
+        String pathName = null;
+        try {
+            pathName = UrlEncoder.urlEncode(name);
+        } catch (GitLabApiException e) {
+            pathName = name;
+        }
+        return String.format("%03d/%03d/%03d/%s_%d", id/1_000_000_000, id % 1_000_000_000 / 1_000_000, id % 1_000_000 / 1_000, pathName, id);
     }
 
     public String getIdAsString() {
