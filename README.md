@@ -44,7 +44,7 @@ $ cd kooder
 
 ### Configuration
 
-Config file: `core/src/main/resources/kooder.properties`
+Config file: `kooder.properties`
 
 Config kooder's url `http.url`. It will be injected into Git service as the webhook URL, must be accessible for Git service, such as:
 

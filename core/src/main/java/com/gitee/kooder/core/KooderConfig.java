@@ -33,7 +33,7 @@ public class KooderConfig {
 
     private final static Logger log = LoggerFactory.getLogger(KooderConfig.class);
 
-    private final static String CONFIG_NAME = "/kooder.properties";
+    private final static String CONFIG_NAME = "kooder.properties";
     private static Configuration config;
 
     static {

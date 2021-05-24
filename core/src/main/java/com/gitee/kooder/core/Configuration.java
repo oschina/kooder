@@ -17,9 +17,9 @@ package com.gitee.kooder.core;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
@@ -96,17 +96,25 @@ public class Configuration {
     }
 
     /**
-     * get j2cache properties stream
-     *
+     * get kooder properties stream
      * @return config stream
      */
     private static InputStream getConfigStream(String resource) throws IOException {
-        InputStream configStream = Configuration.class.getResourceAsStream(resource);
-        if (configStream == null) {
-            configStream = Configuration.class.getClassLoader().getParent().getResourceAsStream(resource);
-        }
-        if (configStream == null) {
-            throw new FileNotFoundException("Cannot find " + resource + " !!!");
+        InputStream configStream = null;
+        try {
+            //1. read kooder.properties in kooder root path
+            String propertiesFile = getKooderRootPath() + File.separator + resource;
+            configStream = new FileInputStream(propertiesFile);
+        } catch (FileNotFoundException e) {
+            //2. read kooder.properties from classpath
+            String resourceClassName = "/" + resource;
+            configStream = Configuration.class.getResourceAsStream(resourceClassName);
+            if (configStream == null) {
+                configStream = Configuration.class.getClassLoader().getParent().getResourceAsStream(resourceClassName);
+            }
+            if (configStream == null) {
+                throw new FileNotFoundException("Cannot find " + resource + " !!!");
+            }
         }
         return configStream;
     }
@@ -114,4 +122,18 @@ public class Configuration {
     private static String trim(String str) {
         return (str != null) ? str.trim() : null;
     }
+
+    /**
+     * get root path of kooder app
+     * @return
+     */
+    public static Path getKooderRootPath() {
+        String sPath = Configuration.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        File path = new File(sPath);
+        if(sPath.endsWith(".jar"))
+            return path.getParentFile().getParentFile().toPath();
+        else
+            return path.getParentFile().getParentFile().getParentFile().toPath();
+    }
+
 }
