@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   koodera:
-    build: .
+    image: registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:v1.0.0
     expose:
       - 8080
   kooderb:
@@ -13,8 +13,8 @@ services:
   haproxy:
     image: haproxy:1.6
     volumes:
-      - ./core/src/main/resources/kooder.properties:/root/core/src/main/resources/kooder.properties:ro
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./kooder.properties:/root/core/src/main/resources/kooder.properties
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
     links:
       - koodera
       - kooderb

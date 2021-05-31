@@ -2,9 +2,9 @@ version: '3.8'
 
 services:
   kooder:
-    build: .
+    image: registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:v1.0.0
     container_name: kooder
     volumes:
-      - ./core/src/main/resources/kooder.properties:/root/core/src/main/resources/kooder.properties:ro
+      - ./kooder.properties:/root/core/src/main/resources/kooder.properties
     ports:
       - 8080:8080
