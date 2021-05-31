@@ -5,6 +5,6 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/devops_hu/kooder:v1.0.0
     container_name: kooder
     volumes:
-      - ./kooder.properties:/root/core/src/main/resources/kooder.properties
+      - ./kooder.properties:/root/core/src/main/resources/kooder.properties:ro
     ports:
       - 8080:8080
