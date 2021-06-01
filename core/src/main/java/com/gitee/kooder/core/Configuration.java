@@ -15,6 +15,8 @@
  */
 package com.gitee.kooder.core;
 
+import com.sun.javafx.runtime.SystemProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.*;
@@ -102,11 +104,15 @@ public class Configuration {
     private static InputStream getConfigStream(String resource) throws IOException {
         InputStream configStream = null;
         try {
-            //1. read kooder.properties in kooder root path
-            String propertiesFile = getKooderRootPath() + File.separator + resource;
+            //1. read properties in system property
+            String propertiesFile = System.getProperty("kooder.properties");
+            if (StringUtils.isBlank(propertiesFile)) {
+                //2. read kooder.properties in kooder root path
+                propertiesFile = getKooderRootPath() + File.separator + resource;
+            }
             configStream = new FileInputStream(propertiesFile);
         } catch (FileNotFoundException e) {
-            //2. read kooder.properties from classpath
+            //3. read kooder.properties from classpath
             String resourceClassName = "/" + resource;
             configStream = Configuration.class.getResourceAsStream(resourceClassName);
             if (configStream == null) {
