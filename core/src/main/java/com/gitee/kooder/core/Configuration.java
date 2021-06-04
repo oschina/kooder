@@ -15,13 +15,11 @@
  */
 package com.gitee.kooder.core;
 
-import com.sun.javafx.runtime.SystemProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
