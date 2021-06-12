@@ -196,7 +196,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit-parent</artifactId>
-            <version>5.10.0.202012080955-r</version>
+            <version>5.11.1.202105131744-r</version>
             <type>pom</type>
         </dependency>
         <dependency>
