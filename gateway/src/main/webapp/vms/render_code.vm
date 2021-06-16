@@ -13,7 +13,9 @@
             <ol>
             #foreach($codeLine in $tool.hl_lines(${obj.contents}, $q, 10))
             <li>
-                <em class="line">${codeLine.line}</em>
+                <em class="line">
+                    <a href="${obj.url}#L${codeLine.line}" target="_blank">${codeLine.line}</a>
+                </em>
                 <em class="code">${codeLine.code}</em></li>
             #end
             </ol>
