@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 把 Gateway 底层逻辑移到 GatewayBase
@@ -108,10 +109,12 @@ public abstract class GatewayBase implements Daemon {
             String ua = req.getHeader("User-Agent");
             if (ua == null)
                 ua = "-";
-            String msg = String.format("%s - \"%s %s\" %d %d - %dms - \"%s\"",
+            String params = req.params().entries().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(","));
+            String msg = String.format("%s - \"%s %s %s\" %d %d - %dms - \"%s\"",
                     req.remoteAddress().hostAddress(),
                     req.method().name(),
                     req.uri(),
+                    params,
                     req.response().getStatusCode(),
                     req.response().bytesWritten(),
                     time,
