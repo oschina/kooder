@@ -67,7 +67,7 @@ public class Gateway extends GatewayBase {
                 if(!res.closed())
                     res.close();
             }
-            writeAccessLog(context.request(), System.currentTimeMillis() - ct);
+            writeAccessLog(context, System.currentTimeMillis() - ct);
         }, false);
 
         InetSocketAddress address = (bind==null)?new InetSocketAddress(this.port):new InetSocketAddress(this.bind, this.port);

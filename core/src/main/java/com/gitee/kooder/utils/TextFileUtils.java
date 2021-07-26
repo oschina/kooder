@@ -17,6 +17,7 @@ package com.gitee.kooder.utils;
 
 import com.glaforge.i18n.io.CharsetToolkit;
 import com.ibm.icu.text.CharsetDetector;
+import com.ibm.icu.text.CharsetMatch;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 
@@ -84,7 +85,8 @@ public class TextFileUtils {
      */
     public static List<String> readFileLines(InputStream stream, int maxFileLineDepth) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream, new CharsetDetector().setText(stream).detect().getName()))){
+        CharsetMatch charsetMatch = new CharsetDetector().setText(stream).detect();
+        try (BufferedReader reader = new BufferedReader(charsetMatch == null ? new InputStreamReader(stream) : new InputStreamReader(stream, charsetMatch.getName()))) {
             int i = 0;
             int count = 0;
             char[] buffer = new char[128];

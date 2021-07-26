@@ -23,6 +23,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.AllowForwardHeaders;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.lang3.StringUtils;
@@ -101,25 +102,26 @@ public abstract class GatewayBase implements Daemon {
 
     /**
      * 记录日志
-     * @param req
+     * @param context
      * @param time
      */
-    protected void writeAccessLog(HttpServerRequest req, long time) {
+    protected void writeAccessLog(RoutingContext context, long time) {
         if(httpLog) {
+            HttpServerRequest req = context.request();
             String ua = req.getHeader("User-Agent");
             if (ua == null)
                 ua = "-";
             String params = req.params().entries().stream().map(e -> e.getKey() + "=" + e.getValue()).collect(Collectors.joining(","));
-            String msg = String.format("%s - \"%s %s %s\" %d %d - %dms - \"%s\"",
+            String msg = String.format("%s - \"%s %s %s %s\" %d %d - %dms - \"%s\"",
                     req.remoteAddress().hostAddress(),
                     req.method().name(),
                     req.uri(),
                     params,
+                    context.getBodyAsString(),
                     req.response().getStatusCode(),
                     req.response().bytesWritten(),
                     time,
                     ua);
-
             log.info(msg);
         }
     }
