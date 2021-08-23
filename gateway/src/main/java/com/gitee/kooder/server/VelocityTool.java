@@ -123,6 +123,10 @@ public class VelocityTool {
         HttpServerRequest req = context.request();
         StringBuffer newUri = new StringBuffer();
         String path = req.path();
+	String prefix = req.getHeader("X-Forwarded-Prefix");
+	if(prefix == null) {
+	    prefix = "";
+	}
         newUri.append(path);
         req.params().forEach(e -> {
             String k = e.getKey();
@@ -138,7 +142,7 @@ public class VelocityTool {
         newUri.append(encodeURL(name));
         newUri.append('=');
         newUri.append(encodeURL(value.toString()));
-        return newUri.toString();
+        return prefix + newUri.toString();
     }
 
     /**
