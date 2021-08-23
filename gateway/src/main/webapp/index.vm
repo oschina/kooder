@@ -4,7 +4,7 @@
     <div class="column col-4 col-mx-auto">
         <div class="hero hero-lg">
             <div class="hero-body">
-                <h1><img src="/img/kooder_logo.png" height="60"/></h1>
+                <h1><img src="img/kooder_logo.png" height="60"/></h1>
                 <form class="form-group" action="search">
                     <input type="hidden" name="type" value="code"/>
                     <fieldset class="input-group">
