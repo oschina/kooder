@@ -16,6 +16,7 @@
 package com.gitee.kooder.queue;
 
 import com.gitee.kooder.core.KooderConfig;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Properties;
 
@@ -29,7 +30,7 @@ public class QueueFactory {
 
     static {
         Properties props = KooderConfig.getQueueProperties();
-        String type = props.getProperty("provider").trim();
+        String type = StringUtils.trim(props.getProperty("provider"));
         if("redis".equalsIgnoreCase(type))
             provider = new RedisQueueProvider(props);
         else if("embed".equalsIgnoreCase(type))
